@@ -1,0 +1,369 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/background_1">
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/moodNotesHeader"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/headerText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="Mood Notes"
+                android:textSize="24sp"
+                android:textColor="@color/color4"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:layout_marginTop="20dp"
+                android:padding="14dp" />
+
+            <ImageButton
+                android:id="@+id/closeButton"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:layout_margin="8dp"
+                android:background="@drawable/close"
+                android:contentDescription="Close"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"  />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:background="@color/color4"
+            android:layout_marginBottom="26dp"
+            />
+
+        <!-- Feeling Section -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="30dp"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/rounded_background"
+            android:gravity="start"
+            android:orientation="vertical"
+            android:paddingHorizontal="24dp"
+            android:paddingVertical="20dp">
+
+            <TextView
+                android:id="@+id/feelingText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="What are you feeling today?"
+                android:textColor="@color/color4"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/headerText" />
+
+            <!-- Circular Image Buttons for Symptoms -->
+            <LinearLayout
+                android:id="@+id/feelingChoices"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center"
+                android:orientation="horizontal"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/feelingText">
+
+                <ImageButton
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:layout_margin="8dp"
+                    android:background="@drawable/mood_button"
+                    android:drawable="@drawable/feeling1"
+                    android:scaleType="centerInside"
+                    android:contentDescription="Cramps" />
+
+                <ImageButton
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:layout_margin="8dp"
+                    android:background="@drawable/mood_button"
+                    android:contentDescription="Tender breasts" />
+
+                <ImageButton
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:layout_margin="8dp"
+                    android:background="@drawable/mood_button"
+                    android:contentDescription="Fatigue" />
+
+                <ImageButton
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:layout_margin="8dp"
+                    android:background="@drawable/mood_button"
+                    android:contentDescription="Bloating" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="30dp"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/rounded_background"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:paddingHorizontal="24dp"
+            android:paddingVertical="20dp"
+            android:paddingBottom="16dp">
+
+            <!-- Menstrual Flow Section -->
+            <TextView
+                android:id="@+id/menstrualFlowText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Menstrual flow"
+                android:textColor="@color/color4"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:layout_gravity="start"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:layout_marginBottom="10dp"
+                android:text="Estimate your average daily flow"
+                android:textColor="@color/color4"
+                android:textSize="14sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/feelingChoices"
+                android:layout_gravity="start"/>
+
+
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/flowChipGroup"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal"
+                app:chipSpacingVertical="0dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/menstrualFlowText"
+                app:selectionRequired="true"
+                app:singleSelection="true">
+
+                <!-- Light Flow Chip -->
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/flowLightChip"
+                    style="@style/ChipFlow"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Light"
+                    app:chipIcon="@drawable/flow_light"/>
+
+                <!-- Medium Flow Chip -->
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/flowMediumChip"
+                    style="@style/ChipFlow"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Medium"
+                    app:chipIcon="@drawable/flow_medium"/>
+
+                <!-- Heavy Flow Chip -->
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/flowHeavyChip"
+                    style="@style/ChipFlow"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Heavy"
+                    app:chipIcon="@drawable/flow_heavy"/>
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/flowBloodChip"
+                    style="@style/ChipFlow"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Blood clots"
+                    app:chipIcon="@drawable/flow_bloodclots"/>
+
+            </com.google.android.material.chip.ChipGroup>
+
+        </LinearLayout>
+
+        <!-- Mood Section -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="30dp"
+            android:background="@drawable/rounded_background"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:paddingHorizontal="20dp"
+            android:paddingVertical="20dp"
+            android:paddingBottom="16dp">
+
+            <!-- Menstrual Mood Section -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="How are you?"
+                android:textColor="@color/color4"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:layout_gravity="start"/>
+
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/moodChipGroup"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal"
+                app:chipSpacingVertical="0dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:selectionRequired="true">
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/moodCalmChip"
+                    style="@style/ChipMood"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="😌 Calm" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/moodHappyChip"
+                    style="@style/ChipMood"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="😁 Happy" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/moodEnergeticChip"
+                    style="@style/ChipMood"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🤩 Energetic"/>
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/moodSwingsChip"
+                    style="@style/ChipMood"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🥲 Mood Swings"
+                    />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/moodIrritatedChip"
+                    style="@style/ChipMood"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="😤 Irritated"
+                    />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/moodSadChip"
+                    style="@style/ChipMood"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="😭 Sad"
+                    />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/moodAnxiousChip"
+                    style="@style/ChipMood"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="😥 Anxious"
+                    />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/moodDepressedChip"
+                    style="@style/ChipMood"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🫥 Depressed"
+                    />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/moodGuiltyChip"
+                    style="@style/ChipMood"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="😟 Feeling Guilty"
+                    />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/moodObsessiveChip"
+                    style="@style/ChipMood"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🫨 Obsessive Thoughts"
+                    />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/moodApatheticChip"
+                    style="@style/ChipMood"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="😐 Apathetic"
+                    />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/moodConfusedChip"
+                    style="@style/ChipMood"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🫤 Confused"
+                    />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/moodTiredChip"
+                    style="@style/ChipMood"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🥱 Low Energy"
+                    />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/moodCriticChip"
+                    style="@style/ChipMood"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🤯 Very Self-critical"
+                    />
+
+            </com.google.android.material.chip.ChipGroup>
+
+        </LinearLayout>
+
+        <!-- Apply Button -->
+        <Button
+            android:id="@+id/applyButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="30dp"
+            android:padding="12dp"
+            android:backgroundTint="@color/color4"
+            android:text="Apply"
+            android:textSize="20sp"
+            android:textColor="@color/white" />
+
+    </LinearLayout>
+</ScrollView>

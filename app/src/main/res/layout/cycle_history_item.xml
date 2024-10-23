@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingVertical="8dp">
+
+    <!-- Cycle date range -->
+    <TextView
+        android:id="@+id/tv_cycle_date_range"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Feb 12 - Mar 14"
+        android:textSize="12sp"
+        android:textColor="#8C8385" />
+
+    <!-- Progress Bar showing cycle length -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginTop="8dp">
+
+        <!-- Pink bar inside the cycle progress -->
+        <ProgressBar
+            android:id="@+id/pb_period_length"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="0dp"
+            android:layout_height="16dp"
+            android:layout_weight="1"
+            android:progressDrawable="@drawable/progress_bar_history"
+            android:max="100"
+            android:progress="25" /> <!-- Period progress, set dynamically -->
+
+        <!-- Cycle length in days -->
+        <TextView
+            android:id="@+id/tv_cycle_length"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:text="24 Days"
+            android:textSize="14sp"
+            android:textColor="#272425" />
+    </LinearLayout>
+
+</LinearLayout>
+

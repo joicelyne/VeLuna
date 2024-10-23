@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Background track -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#F2F2F2" />
+            <corners android:radius="30dp" />
+        </shape>
+    </item>
+    <!-- Progress part -->
+    <item android:id="@android:id/progress">
+        <clip>
+            <shape android:shape="rectangle">
+                <solid android:color="@color/color4" /> <!-- Pink color for period length -->
+                <corners android:radius="30dp" />
+            </shape>
+        </clip>
+    </item>
+</layer-list>
+
