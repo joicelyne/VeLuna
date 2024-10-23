@@ -1,7 +1,14 @@
 <resources>
     <string name="app_name">Veluna</string>
-    <string name="name">Veluna123</string>
-    <string name="name1">Veluna13</string>
-    <string name="name2">VelunaName2</string>
-    <string name="name3">Veluna13</string>
+    <string name="veluna_logo">Veluna</string>
+    <string name="back_button">Back</string>
+    <string name="terms_of_use">Terms of use</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="enter_phone_number">Please enter your phone number</string>
+    <string name="enter_name">Please enter your name</string>
+    <string name="signup_success_message">Woohoo! You’ve signed up successfully! \n Let’s continue to the Home screen!</string>
+
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
