@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    id("com.google.gms.google-services") version "4.4.2"
 }
 
 android {
@@ -49,11 +50,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.livedata.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.firebase.auth.ktx)
-    implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("com.google.android.material:material:1.10.0")
-    implementation("androidx.fragment:fragment-ktx:1.3.6")
-    implementation("androidx.navigation:navigation-fragment-ktx:2.x.x")
-    implementation("androidx.navigation:navigation-ui-ktx:2.x.x")
+    implementation(libs.material.v1100)
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
     testImplementation(libs.junit)
