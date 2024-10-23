@@ -18,18 +18,17 @@
     </fragment>
 
     <fragment
-        android:id="@+id/OnBoardFragment"
-        android:name="com.example.veluna.OnBoardFragment"
-        android:label="OnBoardFragment" />
-
+        android:id="@+id/velunaOnboardFragment"
+        android:name="com.example.veluna.velunaOnboardFragment"
+        android:label="velunaOnboardFragment" />
 
     <fragment
         android:id="@+id/LoginFragment"
         android:name="com.example.veluna.LoginFragment"
         android:label="LoginFragment">
         <action
-            android:id="@+id/action_LoginFragment_to_onBoardFragment"
-            app:destination="@id/OnBoardFragment" />
+            android:id="@+id/action_LoginFragment_to_velunaOnboardFragment"
+            app:destination="@id/velunaOnboardFragment" />
         <action
             android:id="@+id/action_LoginFragment_to_SignUpFragment"
             app:destination="@id/SignUpFragment" />
@@ -43,5 +42,57 @@
             android:id="@+id/action_SignUpFragment_to_LoginFragment"
             app:destination="@id/LoginFragment" />
     </fragment>
+
+    <!-- ONBOARD VELUNA -->
+
+    <fragment
+        android:id="@+id/velunaOnboardFragment"
+        android:name="com.example.veluna.fragments.VelunaOnboardFragment"
+        android:label="VeLuna Onboard">
+        <action
+            android:id="@+id/action_to_insertLastPeriodFragment"
+            app:destination="@id/insertLastPeriodFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/insertLastPeriodFragment"
+        android:name="com.example.veluna.fragments.InsertLastPeriodFragment"
+        android:label="Insert Last Period">
+        <action
+            android:id="@+id/action_to_periodCycleFragment"
+            app:destination="@id/periodCycleFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/periodCycleFragment"
+        android:name="com.example.veluna.fragments.PeriodCycleFragment"
+        android:label="Period Cycle">
+        <action
+            android:id="@+id/action_to_birthdateFragment"
+            app:destination="@id/birthdateFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/birthdateFragment"
+        android:name="com.example.veluna.fragments.BirthdateFragment"
+        android:label="Birthdate">
+        <action
+            android:id="@+id/action_to_userInfoFragment"
+            app:destination="@id/userInfoFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/userInfoFragment"
+        android:name="com.example.veluna.fragments.UserInfoFragment"
+        android:label="User Info">
+        <action
+            android:id="@+id/action_to_onboardSuccessFragment"
+            app:destination="@id/onboardSuccessFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/onboardSuccessFragment"
+        android:name="com.example.veluna.fragments.OnboardSuccessFragment"
+        android:label="Onboard Success"/>
 
 </navigation>

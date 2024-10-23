@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    </style>
 
     <!-- Style untuk TextInput -->
     <style name="text_input" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
@@ -17,5 +19,24 @@
         <item name="android:background">@color/white</item>
     </style>
 
+    <style name="CalendarDateText" parent="TextAppearance.AppCompat">
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+
+    <style name="CalendarWeekDayText" parent="TextAppearance.AppCompat">
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+
+    <style name="CustomDatePickerStyle" parent="Theme.MaterialComponents.Light">
+        <item name="colorAccent">@color/color1</item>
+        <item name="android:datePickerMode">spinner</item>
+        <item name="android:spinnerItemStyle">@style/SpinnerItemStyle</item>
+        <item name="android:divider">@color/color1</item>
+    </style>
+
+    <style name="SpinnerItemStyle">
+        <item name="android:textColor">@color/color1</item>
+        <item name="android:textSize">18sp</item>
+    </style>
 
 </resources>

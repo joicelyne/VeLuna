@@ -9,4 +9,11 @@
     <string name="invalid_username">Not a valid username</string>
     <string name="invalid_password">Password must be >5 characters</string>
     <string name="login_failed">"Login failed"</string>
+    <string name="veluna_logo">Veluna</string>
+    <string name="back_button">Back</string>
+    <string name="terms_of_use">Terms of use</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="enter_phone_number">Please enter your phone number</string>
+    <string name="enter_name">Please enter your name</string>
+    <string name="signup_success_message">Woohoo! You’ve signed up successfully! \n Let’s continue to the Home screen!</string>
 </resources>
