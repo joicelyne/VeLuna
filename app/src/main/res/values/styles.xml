@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Style untuk TextInput -->
+    <style name="text_input" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="boxStrokeColor">@color/color3</item>
+        <item name="boxCornerRadiusTopStart">8dp</item>
+        <item name="boxCornerRadiusTopEnd">8dp</item>
+        <item name="boxCornerRadiusBottomStart">8dp</item>
+        <item name="boxCornerRadiusBottomEnd">8dp</item>
+        <item name="hintTextColor">@color/color2</item>
+        <item name="android:textColor">@color/black</item>
+    </style>
+
+    <style name="WhiteButtonText">
+        <item name="android:textColor">@color/color3</item>
+        <item name="android:background">@color/white</item>
+    </style>
+
+
+</resources>

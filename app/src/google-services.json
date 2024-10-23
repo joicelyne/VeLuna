@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "312178208135",
+    "project_id": "veluna-c6509",
+    "storage_bucket": "veluna-c6509.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:312178208135:android:1796fe101f552706ecf722",
+        "android_client_info": {
+          "package_name": "com.example.veluna"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "312178208135-5jtriuivt9fc06h0dhida6sdim6i4faf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.veluna",
+            "certificate_hash": "569395035a90fa6c5f82c2b175bf19af89d43c40"
+          }
+        },
+        {
+          "client_id": "312178208135-hicpsoe93tc3jlrhob94g7dhts7fqsm4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCCcoqN_6NmJgGiB5_xTZOR5NwFSZtXvTI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "312178208135-hicpsoe93tc3jlrhob94g7dhts7fqsm4.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
