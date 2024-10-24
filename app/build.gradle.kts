@@ -53,6 +53,9 @@ dependencies {
     implementation(libs.material.v1100)
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
+
+    implementation("com.google.firebase:firebase-firestore-ktx:24.0.0")
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

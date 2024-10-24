@@ -37,7 +37,7 @@
             android:text="Back"
             android:clickable="true"
             android:focusable="true"
-            android:textColor="@color/color1"
+            android:textColor="@color/color4"
             android:layout_marginStart="2dp"
             android:textSize="16sp" />
     </LinearLayout>
@@ -49,7 +49,7 @@
         android:fontFamily="@font/worksans_bold"
         android:text="Please insert your last period \n dates:"
         android:textSize="18sp"
-        android:textColor="@color/color1"
+        android:textColor="@color/color4"
         android:gravity="center"
         android:layout_gravity="center"
         android:layout_marginTop="17dp" />
@@ -99,7 +99,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="OK"
-            android:textColor="@color/color1"
+            android:textColor="@color/color4"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:layout_marginEnd="2dp" />
 
@@ -108,7 +108,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Cancel"
-            android:textColor="@color/color1"
+            android:textColor="@color/color4"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:layout_marginEnd="2dp" />
     </LinearLayout>
@@ -126,7 +126,7 @@
             android:layout_height="wrap_content"
             android:text="Next"
             android:textColor="@color/white"
-            android:backgroundTint="@color/color1"
+            android:backgroundTint="@color/color4"
             android:padding="12dp"
             android:layout_marginBottom="10dp" />
 

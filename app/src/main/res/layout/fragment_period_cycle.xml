@@ -35,7 +35,7 @@
             android:layout_height="wrap_content"
             android:fontFamily="@font/worksans_bold"
             android:text="Back"
-            android:textColor="@color/color1"
+            android:textColor="@color/color4"
             android:layout_marginStart="2dp"
             android:textSize="16sp" />
     </LinearLayout>
@@ -46,7 +46,7 @@
         android:layout_height="wrap_content"
         android:fontFamily="@font/worksans_bold"
         android:text="Tell us about your period cycle:"
-        android:textColor="@color/color1"
+        android:textColor="@color/color4"
         android:textSize="18sp"
         android:gravity="center"
         android:layout_gravity="center"
@@ -58,7 +58,7 @@
         android:fontFamily="@font/worksans_bold"
         android:text="Period length (days)"
         android:textColor="@color/black"
-        android:textSize="16sp"
+        android:textSize="14sp"
         android:layout_marginStart="15dp"
         android:layout_marginTop="70dp"
         android:layout_marginBottom="12dp"/>
@@ -79,7 +79,7 @@
         android:fontFamily="@font/worksans_bold"
         android:text="Cycle length (days)"
         android:textColor="@color/black"
-        android:textSize="16sp"
+        android:textSize="14sp"
         android:layout_marginStart="15dp"
         android:layout_marginTop="15dp"
         android:layout_marginBottom="12dp"/>
@@ -100,7 +100,7 @@
         android:fontFamily="@font/worksans_bold"
         android:text="Start date of last period"
         android:textColor="@color/black"
-        android:textSize="16sp"
+        android:textSize="14sp"
         android:layout_marginStart="15dp"
         android:layout_marginTop="15dp"
         android:layout_marginBottom="12dp"/>
@@ -133,7 +133,7 @@
             android:layout_height="wrap_content"
             android:text="Next"
             android:textColor="@color/white"
-            android:backgroundTint="@color/color1"
+            android:backgroundTint="@color/color4"
             android:padding="12dp"
             android:layout_marginBottom="10dp" />
 
