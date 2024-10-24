@@ -26,6 +26,7 @@ class WelcomePageFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        (activity as MainActivity).hideBottomNavigation()
 
         // Initialize Firebase Auth
         auth = FirebaseAuth.getInstance()

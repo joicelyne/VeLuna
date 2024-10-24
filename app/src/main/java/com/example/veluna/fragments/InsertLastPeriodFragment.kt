@@ -8,6 +8,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import com.example.veluna.MainActivity
 import com.example.veluna.R
 import com.example.veluna.UserInputOnboardViewModel
 import com.example.veluna.databinding.FragmentInsertLastPeriodBinding
@@ -72,6 +73,11 @@ class InsertLastPeriodFragment : Fragment() {
         return binding.root
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        (activity as MainActivity).hideBottomNavigation()
+
+    }
     // Update the displayed selected date
     private fun updateSelectedDateDisplay(selectedDate: Long) {
         val dateFormat = SimpleDateFormat("EEE, MMM d, yyyy", Locale.getDefault())

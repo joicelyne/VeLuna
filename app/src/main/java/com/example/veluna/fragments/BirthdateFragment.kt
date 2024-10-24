@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import com.example.veluna.MainActivity
 import com.example.veluna.R
 import com.example.veluna.UserInputOnboardViewModel
 import com.example.veluna.databinding.FragmentBirthdateBinding
@@ -48,6 +49,7 @@ class BirthdateFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        (activity as MainActivity).hideBottomNavigation()
 
         // Set up DatePicker
         binding.datePicker.minDate = System.currentTimeMillis() - 100L * 365 * 24 * 60 * 60 * 1000 // 100 years ago

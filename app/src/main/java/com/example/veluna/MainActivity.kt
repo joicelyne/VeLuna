@@ -15,7 +15,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.FragmentTransaction
-import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.NavDestination
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.FirebaseApp
@@ -23,7 +23,6 @@ import com.google.firebase.FirebaseApp
 class MainActivity : AppCompatActivity() {
 
     private lateinit var bottomNavigation: BottomNavigationView
-
     private lateinit var navController: NavController
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,21 +42,24 @@ class MainActivity : AppCompatActivity() {
         // Set listener untuk item klik pada BottomNavigationView
         bottomNavigation.setOnItemSelectedListener { item ->
             when (item.itemId) {
-                R.id.homeFragment -> {
+                R.id.MainPage -> {
                     // Bersihkan tumpukan navigasi dan arahkan ke HomeFragment
-                    navController.popBackStack(R.id.homeFragment, false)
+                    navController.popBackStack(R.id.MainPage, false)
                     true
                 }
+
                 R.id.profileFragment -> {
                     // Arahkan ke ProfileFragment
                     navController.navigate(R.id.profileFragment)
                     true
                 }
-                R.id.historyFragment -> {
+
+                R.id.cycleHistory -> {
                     // Arahkan ke HistoryFragment
-                    navController.navigate(R.id.historyFragment)
+                    navController.navigate(R.id.cycleHistory)
                     true
                 }
+
                 R.id.editprofileFragment -> {
                     // Arahkan ke ProfileFragment
                     navController.navigate(R.id.editprofileFragment)
@@ -71,13 +73,10 @@ class MainActivity : AppCompatActivity() {
 
         // Find the toolbar from the layout
         val toolbar: Toolbar = findViewById(R.id.toolbar)
+        toolbar.visibility = View.GONE
 
         // Set the toolbar as the ActionBar
         setSupportActionBar(toolbar)
-
-        val navHostFragment = supportFragmentManager
-            .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
-        navController = navHostFragment.navController
 
         // Set up the action bar with the NavController
         setupActionBarWithNavController(navController)

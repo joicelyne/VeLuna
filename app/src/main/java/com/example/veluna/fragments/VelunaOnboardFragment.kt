@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.example.veluna.MainActivity
 import com.example.veluna.R
 import com.example.veluna.databinding.FragmentVelunaOnboardBinding
 
@@ -25,6 +26,12 @@ class VelunaOnboardFragment : Fragment() {
         }
 
         return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        (activity as MainActivity).hideBottomNavigation()
+
     }
 
     override fun onDestroyView() {

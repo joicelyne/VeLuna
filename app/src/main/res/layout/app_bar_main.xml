@@ -8,12 +8,14 @@
     android:orientation="vertical"
     android:layout_gravity="center"
     tools:context=".MainActivity">
+
     <include
         android:id="@+id/include"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         layout="@layout/content_main"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
+
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_nav"
         android:layout_width="match_parent"
@@ -25,4 +27,5 @@
         app:itemIconTint="@color/bottom_nav_color"
         app:labelVisibilityMode="labeled"
         app:menu="@menu/bottom_nav_menu" />
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

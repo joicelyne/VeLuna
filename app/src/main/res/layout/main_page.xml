@@ -11,32 +11,254 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            tools:context=".MainPage">
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:padding="25dp">
 
-            <TextView
-                android:id="@+id/periodStartDate"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Day 1 not marked"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                android:layout_marginTop="16dp"
-                android:layout_marginStart="16dp"/>
+                android:layout_gravity="start"
+                android:orientation="vertical">
+                <!-- Welcome Text and Name -->
+                <TextView
+                    android:id="@+id/tvWelcome"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/worksans_bold"
+                    android:text="Welcome,"
+                    android:textColor="@color/color5"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
 
-            <Button
-                android:id="@+id/markDay1Button"
+                <TextView
+                    android:id="@+id/tvName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/worksans_bold"
+                    android:text="Alexandra San"
+                    android:textColor="@color/color4"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <!-- Heart Layout with Period Text and Edit Icon -->
+            <FrameLayout
+                android:layout_width="300dp"
+                android:layout_height="300dp"
+                android:layout_gravity="center">
+
+                <!-- Heart Shape (GIF) -->
+                <ImageView
+                    android:id="@+id/imgHeart"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:src="@drawable/heartgif" />
+
+                <LinearLayout
+                    android:id="@+id/tvPeriodStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="10dp"
+                    android:orientation="vertical">
+                    <!-- Period Text -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:fontFamily="@font/worksans_semi"
+                        android:gravity="center"
+                        android:text="Period"
+                        android:textColor="@color/color4"
+                        android:textSize="20sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:fontFamily="@font/worksans_bold"
+                        android:gravity="center"
+                        android:text="Not Started"
+                        android:textColor="@color/color4"
+                        android:textSize="22sp" />
+
+                </LinearLayout>
+
+                <!-- Small Edit Icon -->
+                <ImageView
+                    android:id="@+id/editDatePeriodIcon"
+                    android:layout_width="75dp"
+                    android:layout_height="75dp"
+                    android:layout_gravity="end|top"
+                    android:layout_marginTop="30dp"
+                    android:layout_marginEnd="-10dp"
+                    android:src="@drawable/veluna_editprofile" />
+            </FrameLayout>
+
+
+            <!-- Small Card with Month and Year -->
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Mark Day 1"
-                app:layout_constraintTop_toBottomOf="@+id/periodStartDate"
-                app:layout_constraintStart_toStartOf="parent"
-                android:layout_marginTop="16dp"
-                android:layout_marginStart="16dp"/>
+                android:layout_gravity="start"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/card_color1"
+                android:elevation="4dp"
+                android:padding="5dp">
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
+                <!-- Horizontal Layout for Calendar Icon and Month-Year Text -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <!-- Calendar Emoji Icon -->
+                    <ImageView
+                        android:id="@+id/imgCalendarIcon"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_marginEnd="8dp"
+                        android:src="@drawable/calendericon" />
+
+                    <!-- Month-Year Text -->
+                    <TextView
+                        android:id="@+id/tvMonthYear"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/worksans_semi"
+                        android:text="March 2024"
+                        android:textColor="@color/black"
+                        android:textSize="14sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+
+            <!-- Date Circles with Days -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <!-- Example of One Date Circle Period Before -->
+                <LinearLayout
+                    android:id="@+id/periodBef"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="4dp"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <!-- Date Circle -->
+                    <TextView
+                        android:layout_width="45dp"
+                        android:layout_height="45dp"
+                        android:background="@drawable/circle_period_bef"
+                        android:fontFamily="@font/worksans_bold"
+                        android:gravity="center"
+                        android:text="20"
+                        android:textColor="@color/color3"
+                        android:textSize="16sp" />
+
+                    <!-- Day Text -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="3dp"
+                        android:fontFamily="@font/worksans_bold"
+                        android:gravity="center"
+                        android:text="S"
+                        android:textColor="@color/black"
+                        android:textSize="14sp" />
+                </LinearLayout>
+
+                <!-- Example of One Date Circle Period Now -->
+                <LinearLayout
+                    android:id="@+id/periodNowContainer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="4dp"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <!-- FrameLayout for Date Circle and Edit Icon -->
+                    <FrameLayout
+                        android:id="@+id/periodNow"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content">
+
+                        <!-- Date Circle -->
+                        <TextView
+                            android:layout_width="45dp"
+                            android:layout_height="45dp"
+                            android:background="@drawable/circle_period_now"
+                            android:fontFamily="@font/worksans_bold"
+                            android:gravity="center"
+                            android:text="23"
+                            android:textColor="@color/white"
+                            android:textSize="16sp" />
+
+                        <!-- Edit Icon on top-right corner -->
+                        <ImageView
+                            android:id="@+id/moodEditIcon"
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:layout_gravity="end|top"
+                            android:src="@drawable/veluna_add_perioddate" />
+                    </FrameLayout>
+
+                    <!-- Day Text positioned below the circle -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="3dp"
+                        android:fontFamily="@font/worksans_bold"
+                        android:gravity="center"
+                        android:text="S"
+                        android:textColor="@color/black"
+                        android:textSize="14sp" />
+                </LinearLayout>
+
+                <!-- Example of One Date Circle Period Not -->
+                <LinearLayout
+                    android:id="@+id/periodNot"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="4dp"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <!-- Date Circle -->
+                    <TextView
+                        android:layout_width="45dp"
+                        android:layout_height="45dp"
+                        android:background="@drawable/circle_period_not"
+                        android:fontFamily="@font/worksans_bold"
+                        android:gravity="center"
+                        android:text="23"
+                        android:textColor="@color/color3"
+                        android:textSize="16sp" />
+
+                    <!-- Day Text -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="3dp"
+                        android:fontFamily="@font/worksans_bold"
+                        android:gravity="center"
+                        android:text="S"
+                        android:textColor="@color/black"
+                        android:textSize="14sp" />
+                </LinearLayout>
+
+            </LinearLayout>
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"

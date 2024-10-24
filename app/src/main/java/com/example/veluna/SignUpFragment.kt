@@ -27,11 +27,12 @@ class SignUpFragment : Fragment() {
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        (activity as MainActivity).hideBottomNavigation()
+
         val emailInput = view.findViewById<TextInputEditText>(R.id.email_input_field)
         val passwordInput = view.findViewById<TextInputEditText>(R.id.password_input_field)
         val backButton = view.findViewById<Button>(R.id.back_button)
         val btnloginhere = view.findViewById<Button>(R.id.btn_login_here)
-
 
         backButton.setOnClickListener {
             findNavController().navigateUp()
@@ -56,7 +57,7 @@ class SignUpFragment : Fragment() {
                     .addOnCompleteListener(requireActivity()) { task ->
                         if (task.isSuccessful) {
                             Log.d("Register", "RegisterWithEmail:success")
-                            findNavController().navigate(R.id.action_SignUpFragment_to_LoginFragment)
+                            findNavController().navigate(R.id.action_SignUpFragment_to_velunaOnboardFragment)
                         } else {
                             Log.w("Register", "RegisterWithEmail:failure", task.exception)
                             Toast.makeText(requireContext(), "Register Failed " +

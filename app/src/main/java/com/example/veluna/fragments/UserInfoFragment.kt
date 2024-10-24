@@ -8,6 +8,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import com.example.veluna.MainActivity
 import com.example.veluna.R
 import com.example.veluna.UserInputOnboardViewModel
 import com.example.veluna.databinding.FragmentUserInfoBinding
@@ -35,6 +36,7 @@ class UserInfoFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        (activity as MainActivity).hideBottomNavigation()
 
         // Initialize ViewModel
         viewModel = ViewModelProvider(requireActivity()).get(UserInputOnboardViewModel::class.java)
@@ -51,7 +53,7 @@ class UserInfoFragment : Fragment() {
                 saveDataToFirestore()
 
                 // Navigate to the next fragment
-                findNavController().navigate(R.id.action_to_onboardSuccessFragment)
+                findNavController().navigate(R.id.action_to_onBoardSuccessFragment)
             } else {
                 Toast.makeText(requireContext(), "Please fill out all fields", Toast.LENGTH_SHORT).show()
             }

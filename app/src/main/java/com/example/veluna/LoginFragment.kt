@@ -28,6 +28,7 @@ class LoginFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        (activity as MainActivity).hideBottomNavigation()
 
         val emailInput = view.findViewById<TextInputEditText>(R.id.email_input_field)
         val passwordInput = view.findViewById<TextInputEditText>(R.id.password_input_field)
@@ -62,8 +63,8 @@ class LoginFragment : Fragment() {
                 .addOnCompleteListener(requireActivity()) { task ->
                     if (task.isSuccessful) {
                         Log.d("Login", "signInWithEmail:success")
-                        // Jika login berhasil, navigasi ke halaman onBoardFragment
-                        findNavController().navigate(R.id.action_LoginFragment_to_velunaOnboardFragment)
+                        // Jika login berhasil, navigasi ke halaman MainPage
+                        findNavController().navigate(R.id.action_LoginFragment_to_MainPage)
                     } else {
                         Log.w("Login", "signInWithEmail:failure", task.exception)
                         Toast.makeText(requireContext(), "Email or Password Wrong", Toast.LENGTH_SHORT).show()
