@@ -25,25 +25,4 @@
         app:navGraph="@navigation/nav_graph"
         app:defaultNavHost="true" />
 
-    <!-- Button to edit period calendar -->
-    <Button
-        android:id="@+id/editPeriodButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Edit Period Calendar"
-        android:layout_marginBottom="16dp" />
-
-    <!-- Button to navigate to cycle history -->
-    <Button
-        android:id="@+id/cyclePageButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Cycle History" />
-
-    <Button
-        android:id="@+id/moodNotesButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Mood Notes" />
-
 </androidx.constraintlayout.widget.ConstraintLayout>

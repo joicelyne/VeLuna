@@ -39,7 +39,6 @@
     </fragment>
 
     <!-- ONBOARD VELUNA -->
-
     <fragment
         android:id="@+id/velunaOnboardFragment"
         android:name="com.example.veluna.fragments.VelunaOnboardFragment"
@@ -82,12 +81,14 @@
         android:label="User Info">
         <action
             android:id="@+id/action_to_onboardSuccessFragment"
-            app:destination="@id/onboardSuccessFragment" />
+            app:destination="@id/MainPage" />
     </fragment>
 
+    <!-- MAIN PAGE -->
     <fragment
-        android:id="@+id/onboardSuccessFragment"
-        android:name="com.example.veluna.fragments.OnboardSuccessFragment"
-        android:label="Onboard Success"/>
+        android:id="@+id/MainPage"
+        android:name="com.example.veluna.MainPage"
+        android:label="Main Page">
+    </fragment>
 
 </navigation>

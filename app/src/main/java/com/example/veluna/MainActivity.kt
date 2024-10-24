@@ -22,30 +22,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val editPeriodButton: Button = findViewById(R.id.editPeriodButton)
-        editPeriodButton.setOnClickListener {
-            try {
-                // Navigate to CalendarActivity
-                val intent = Intent(this, DatesEditPeriod::class.java)
-                startActivity(intent)
-            } catch (e: Exception) {
-                Log.e("MainActivity", "Error starting CalendarActivity", e)
-                Toast.makeText(this, "Error starting activity: ${e.message}", Toast.LENGTH_SHORT).show()
-            }
-        }
-
-        val cyclePageButton: Button = findViewById(R.id.cyclePageButton)
-        cyclePageButton.setOnClickListener {
-            val intent = Intent(this, CycleHistory::class.java)
-            startActivity(intent)
-        }
-
-        val moodNotesButton: Button = findViewById(R.id.moodNotesButton)
-        moodNotesButton.setOnClickListener {
-            val intent = Intent(this, MoodNotes::class.java)
-            startActivity(intent)
-        }
-
         val db = FirebaseFirestore.getInstance()
 
         // Find the toolbar from the layout
