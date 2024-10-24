@@ -34,7 +34,7 @@
             android:layout_height="wrap_content"
             android:fontFamily="@font/worksans_bold"
             android:text="Back"
-            android:textColor="@color/color1"
+            android:textColor="@color/color4"
             android:layout_marginStart="2dp"
             android:textSize="16sp" />
     </LinearLayout>
@@ -46,7 +46,7 @@
         android:fontFamily="@font/worksans_bold"
         android:text="Please, select your birth date:"
         android:textSize="18sp"
-        android:textColor="@color/color1"
+        android:textColor="@color/color4"
         android:gravity="center"
         android:layout_gravity="center"
         android:layout_marginTop="28dp" />
@@ -84,7 +84,7 @@
             android:layout_height="wrap_content"
             android:text="Next"
             android:textColor="@color/white"
-            android:backgroundTint="@color/color1"
+            android:backgroundTint="@color/color4"
             android:padding="12dp"
             android:layout_marginBottom="10dp" />
 

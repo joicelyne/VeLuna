@@ -7,6 +7,11 @@ import android.widget.Button
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.setupActionBarWithNavController
+import androidx.appcompat.widget.Toolbar
+import androidx.navigation.NavController
+import com.google.firebase.firestore.FirebaseFirestore
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 
@@ -40,6 +45,8 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, MoodNotes::class.java)
             startActivity(intent)
         }
+
+        val db = FirebaseFirestore.getInstance()
 
         // Find the toolbar from the layout
         val toolbar: Toolbar = findViewById(R.id.toolbar)

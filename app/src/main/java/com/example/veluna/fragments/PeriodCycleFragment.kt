@@ -7,13 +7,16 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.example.veluna.R
+import com.example.veluna.UserInputOnboardViewModel
 import com.example.veluna.databinding.FragmentPeriodCycleBinding
 import java.util.Calendar
 
 class PeriodCycleFragment : Fragment() {
 
+    private lateinit var viewModel: UserInputOnboardViewModel
     private var _binding: FragmentPeriodCycleBinding? = null
     private val binding get() = _binding!!
 
@@ -23,7 +26,12 @@ class PeriodCycleFragment : Fragment() {
     ): View? {
         _binding = FragmentPeriodCycleBinding.inflate(inflater, container, false)
 
+        // Get ViewModel
+        viewModel = ViewModelProvider(requireActivity()).get(UserInputOnboardViewModel::class.java)
+
+        // Set up button click listeners
         binding.nextButton.setOnClickListener {
+            saveInputData()
             findNavController().navigate(R.id.action_to_birthdateFragment)
         }
 
@@ -31,6 +39,7 @@ class PeriodCycleFragment : Fragment() {
             findNavController().navigate(R.id.action_to_birthdateFragment)
         }
 
+        // Back button and related click listeners
         binding.backContainer.setOnClickListener {
             onBackButtonClicked(it)
         }
@@ -43,11 +52,19 @@ class PeriodCycleFragment : Fragment() {
             onBackButtonClicked(it)
         }
 
+        // Start Date input with date picker
         binding.startDateInput.setOnClickListener {
             showDatePickerDialog(binding.startDateInput)
         }
 
         return binding.root
+    }
+
+    private fun saveInputData() {
+        // Save the data to the ViewModel
+        viewModel.userInput.startDate = binding.startDateInput.text.toString()
+        viewModel.userInput.periodLength = binding.periodLengthInput.text.toString().toIntOrNull()
+        viewModel.userInput.cycleLength = binding.cycleLengthInput.text.toString().toIntOrNull()
     }
 
     private fun showDatePickerDialog(editText: EditText) {
@@ -59,7 +76,7 @@ class PeriodCycleFragment : Fragment() {
         val datePickerDialog = DatePickerDialog(
             requireContext(),
             { _, selectedYear, selectedMonth, selectedDay ->
-                val selectedDate = "${selectedDay}/${selectedMonth + 1}/${selectedYear}"
+                val selectedDate = "$selectedDay/${selectedMonth + 1}/$selectedYear"
                 editText.setText(selectedDate)
             },
             year, month, day
