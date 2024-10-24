@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Veluna</string>
-    <string name="name">Veluna123</string>
-    <string name="name1">Veluna13</string>
-    <string name="name2">VelunaName2</string>
-    <string name="name3">Veluna13</string>
+    <string name="bottom_menu_history">History</string>
+    <string name="bottom_menu_home">Luna</string>
+    <string name="bottom_menu_profile">Profile</string>
+
 </resources>
