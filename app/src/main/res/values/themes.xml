@@ -6,4 +6,18 @@
     </style>
 
     <style name="Theme.Veluna" parent="Base.Theme.Veluna" />
+
+    <style name="button">
+        <item name="android:layout_margin">10dp</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:backgroundTint">@color/color4</item>
+        <item name="android:textSize">15sp</item>
+    </style>
+
+    <style name="TextInputLayoutAppearance" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense">
+        <item name="hintTextColor">@color/color3</item>
+        <item name="boxStrokeColor">@color/color3</item>
+        <item name="android:textColor">@color/black</item>
+        <item name="boxBackgroundColor">@color/white</item>
+    </style>
 </resources>

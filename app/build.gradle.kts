@@ -57,13 +57,17 @@ dependencies {
     implementation(libs.material.v1100)
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
-
     implementation("com.google.firebase:firebase-firestore-ktx:24.0.0")
-
+    implementation(libs.androidx.core)
+    implementation(libs.androidx.navigation.fragment.ktx)
+    implementation(libs.androidx.navigation.ui.ktx)
+    implementation(libs.firebase.common.ktx)
+    implementation(libs.androidx.cardview)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.firestore)
+    implementation("com.google.android.material:material:1.10.0")
 }

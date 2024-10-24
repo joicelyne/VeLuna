@@ -91,4 +91,21 @@
         android:label="Main Page">
     </fragment>
 
+    <!-- PROFILE FRAGMENT-->
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.example.veluna.ProfileFragment"
+        android:label="fragment_profile"
+        tools:layout="@layout/fragment_profile" >
+        <action
+            android:id="@+id/action_profileFragment_to_editprofileFragment"
+            app:destination="@id/editprofileFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/editprofileFragment"
+        android:name="com.example.veluna.EditProfileFragment"
+        android:label="fragment_edit_profile"
+        tools:layout="@layout/fragment_edit_profile" >
+    </fragment>
 </navigation>
