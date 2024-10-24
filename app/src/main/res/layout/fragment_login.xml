@@ -35,6 +35,7 @@
             android:textSize="24sp"
             android:textStyle="bold"
             android:textColor="@color/black"
+            android:fontFamily="@font/worksans_med"
             android:layout_marginTop="25dp"
             android:layout_marginBottom="4dp" />
 
@@ -43,6 +44,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Hello, welcome back to VeLuna"
+            android:fontFamily="@font/worksans_med"
             android:textSize="14sp"
             android:textColor="@color/black"
             android:layout_marginBottom="24dp" />
@@ -97,6 +99,7 @@
             android:layout_gravity="center"
             android:backgroundTint="@color/color4"
             android:textColor="@android:color/white"
+            android:fontFamily="@font/worksans_med"
             android:layout_marginTop="25dp"
             android:layout_marginBottom="16dp" />
 
@@ -108,6 +111,7 @@
             android:textSize="14sp"
             android:textColor="@color/black"
             android:layout_gravity="center"
+            android:fontFamily="@font/worksans_med"
             android:layout_marginTop="25dp"
             android:layout_marginBottom="25dp"/>
 
@@ -134,6 +138,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
                 android:layout_toEndOf="@id/google_icon"
+                android:fontFamily="@font/worksans_med"
                 android:text="Login with Google"
                 android:textColor="@color/black"
                 android:textSize="16sp" />
@@ -154,6 +159,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Not Registered Yet?"
+                android:fontFamily="@font/worksans_med"
                 android:textSize="14sp"
                 android:textColor="@android:color/black"/>
 
@@ -167,6 +173,7 @@
                 android:textColor="@color/color2"
                 android:clickable="true"
                 android:focusable="true"
+                android:fontFamily="@font/worksans_med"
                 android:background="@android:color/transparent"
                 android:paddingStart="4dp"/>
         </LinearLayout>
