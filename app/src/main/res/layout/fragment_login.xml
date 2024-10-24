@@ -1,0 +1,174 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:padding="16dp"
+    tools:context=".LoginFragment"
+    android:background="@color/white">
+
+    <!-- Bungkus semua elemen dalam satu LinearLayout -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="20dp"
+        android:orientation="vertical">
+
+        <!-- Back Button -->
+        <Button
+            android:id="@+id/back_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="← Back"
+            android:textSize="16sp"
+            android:textColor="@color/color3"
+            android:background="@android:color/transparent"
+            android:layout_marginTop="16dp"
+            android:layout_gravity="right"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Title -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Login Account"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="@color/black"
+            android:layout_marginTop="25dp"
+            android:layout_marginBottom="4dp" />
+
+        <!-- Subtitle -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Hello, welcome back to VeLuna"
+            android:textSize="14sp"
+            android:textColor="@color/black"
+            android:layout_marginBottom="24dp" />
+
+        <!-- Email Input -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@style/text_input"
+            android:layout_marginTop="35dp"
+            android:layout_marginBottom="16dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/email_input_field"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Email ID"
+                android:drawableStart="@drawable/ic_email"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:backgroundTint="@color/color2"
+                android:drawablePadding="8dp"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Password Input -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            style="@style/text_input"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="24dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/password_input_field"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Password"
+                android:drawableStart="@drawable/ic_password"
+                android:inputType="textPassword"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:backgroundTint="@color/color2"
+                android:drawablePadding="8dp"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Sign Up Button -->
+        <Button
+            android:id="@+id/loginButton"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:text="Login"
+            android:layout_gravity="center"
+            android:backgroundTint="@color/color4"
+            android:textColor="@android:color/white"
+            android:layout_marginTop="25dp"
+            android:layout_marginBottom="16dp" />
+
+        <!-- OR Divider -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="OR"
+            android:textSize="14sp"
+            android:textColor="@color/black"
+            android:layout_gravity="center"
+            android:layout_marginTop="25dp"
+            android:layout_marginBottom="25dp"/>
+
+        <!-- Login with Google -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/color1"
+            android:padding="12dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="16dp">
+
+            <ImageView
+                android:id="@+id/google_icon"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_alignParentStart="true"
+                android:layout_marginStart="73dp"
+                android:src="@drawable/ic_google" />
+
+            <TextView
+                android:id="@+id/google_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_toEndOf="@id/google_icon"
+                android:text="Login with Google"
+                android:textColor="@color/black"
+                android:textSize="16sp" />
+        </RelativeLayout>
+
+        <!-- Container Horizontal untuk "Already Have Account?" dan "Login Here" -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_gravity="center"
+            android:layout_marginTop="16dp">
+
+            <!-- Teks "Already Have Account?" -->
+            <TextView
+                android:id="@+id/tv_already_have_account"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Not Registered Yet?"
+                android:textSize="14sp"
+                android:textColor="@android:color/black"/>
+
+            <!-- Teks "Login Here" yang dapat diklik -->
+            <Button
+                android:id="@+id/btn_signup_here"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=" Create an Account"
+                android:textSize="14sp"
+                android:textColor="@color/color2"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="@android:color/transparent"
+                android:paddingStart="4dp"/>
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

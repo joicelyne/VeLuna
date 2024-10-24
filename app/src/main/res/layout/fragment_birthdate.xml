@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    tools:context=".fragments.BirthdateFragment"
+    android:background="@drawable/background_gradient">
+
+    <LinearLayout
+        android:id="@+id/backContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:paddingBottom="16dp">
+
+        <ImageButton
+            android:id="@+id/backButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_back_arrow"
+            android:contentDescription="@string/back_button"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="8dp" />
+
+        <TextView
+            android:id="@+id/backText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/worksans_bold"
+            android:text="Back"
+            android:textColor="@color/color1"
+            android:layout_marginStart="2dp"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/text_prompt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/worksans_bold"
+        android:text="Please, select your birth date:"
+        android:textSize="18sp"
+        android:textColor="@color/color1"
+        android:gravity="center"
+        android:layout_gravity="center"
+        android:layout_marginTop="28dp" />
+
+    <TextView
+        android:id="@+id/text_description"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="It will help us to better analyze your prognose"
+        android:textSize="16sp"
+        android:textColor="@color/black"
+        android:layout_gravity="center"
+        android:layout_marginTop="35dp" />
+
+    <DatePicker
+        android:id="@+id/date_picker"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:datePickerMode="spinner"
+        android:calendarViewShown="false"
+        android:layout_gravity="center"
+        android:layout_marginTop="35dp"
+        android:theme="@style/CustomDatePickerStyle" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:layout_marginTop="208dp">
+
+        <Button
+            android:id="@+id/nextButton"
+            android:layout_width="315dp"
+            android:layout_height="wrap_content"
+            android:text="Next"
+            android:textColor="@color/white"
+            android:backgroundTint="@color/color1"
+            android:padding="12dp"
+            android:layout_marginBottom="10dp" />
+
+        <Button
+            android:id="@+id/skipButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Skip"
+            android:textColor="@color/black"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="12dp" />
+    </LinearLayout>
+
+</LinearLayout>

@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@drawable/background_gradient"
+    tools:context=".fragments.PeriodCycleFragment">
+
+    <LinearLayout
+        android:id="@+id/backContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:paddingBottom="16dp">
+
+        <ImageButton
+            android:id="@+id/backButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_back_arrow"
+            android:contentDescription="@string/back_button"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="8dp" />
+
+        <TextView
+            android:id="@+id/backText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/worksans_bold"
+            android:text="Back"
+            android:textColor="@color/color1"
+            android:layout_marginStart="2dp"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/worksans_bold"
+        android:text="Tell us about your period cycle:"
+        android:textColor="@color/color1"
+        android:textSize="18sp"
+        android:gravity="center"
+        android:layout_gravity="center"
+        android:layout_marginTop="28dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/worksans_bold"
+        android:text="Period length (days)"
+        android:textColor="@color/black"
+        android:textSize="16sp"
+        android:layout_marginStart="15dp"
+        android:layout_marginTop="70dp"
+        android:layout_marginBottom="12dp"/>
+
+    <EditText
+        android:id="@+id/periodLengthInput"
+        android:layout_width="302dp"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:background="@drawable/edit_text_background"
+        android:padding="12dp"
+        android:layout_marginStart="15dp"
+        android:layout_marginBottom="12dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/worksans_bold"
+        android:text="Cycle length (days)"
+        android:textColor="@color/black"
+        android:textSize="16sp"
+        android:layout_marginStart="15dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginBottom="12dp"/>
+
+    <EditText
+        android:id="@+id/cycleLengthInput"
+        android:layout_width="302dp"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:background="@drawable/edit_text_background"
+        android:padding="12dp"
+        android:layout_marginStart="15dp"
+        android:layout_marginBottom="12dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/worksans_bold"
+        android:text="Start date of last period"
+        android:textColor="@color/black"
+        android:textSize="16sp"
+        android:layout_marginStart="15dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginBottom="12dp"/>
+
+    <EditText
+        android:id="@+id/startDateInput"
+        android:layout_width="302dp"
+        android:layout_height="wrap_content"
+        android:hint="Select date"
+        android:inputType="date"
+        android:background="@drawable/edit_text_background"
+        android:padding="12dp"
+        android:drawableEnd="@drawable/ic_calendar"
+        android:layout_marginStart="15dp"
+        android:layout_marginBottom="110dp"
+        android:clickable="true"
+        android:focusable="false"
+        android:cursorVisible="false"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:layout_marginTop="27dp">
+
+        <Button
+            android:id="@+id/nextButton"
+            android:layout_width="315dp"
+            android:layout_height="wrap_content"
+            android:text="Next"
+            android:textColor="@color/white"
+            android:backgroundTint="@color/color1"
+            android:padding="12dp"
+            android:layout_marginBottom="10dp" />
+
+        <Button
+            android:id="@+id/skipButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Skip"
+            android:textColor="@color/black"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="12dp" />
+    </LinearLayout>
+
+</LinearLayout>
