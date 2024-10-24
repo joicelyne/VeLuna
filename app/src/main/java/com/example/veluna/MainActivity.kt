@@ -33,5 +33,11 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+        val moodNotesButton: Button = findViewById(R.id.moodNotesButton)
+        moodNotesButton.setOnClickListener {
+            val intent = Intent(this, MoodNotes::class.java)
+            startActivity(intent)
+        }
+
     }
 }

@@ -122,6 +122,18 @@
 
         </LinearLayout>
 
+        <!-- Apply Button -->
+        <Button
+            android:id="@+id/applyButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="30dp"
+            android:padding="12dp"
+            android:backgroundTint="@color/color4"
+            android:text="Apply"
+            android:textSize="20sp"
+            android:textColor="@color/white" />
+
     </LinearLayout>
 
 </ScrollView>

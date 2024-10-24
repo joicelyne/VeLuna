@@ -24,6 +24,7 @@
 
         <activity android:name=".DatesEditPeriod" />
         <activity android:name=".CycleHistory" />
+        <activity android:name=".MoodNotes" />
 
     </application>
 

@@ -24,4 +24,10 @@
         android:layout_height="wrap_content"
         android:text="Cycle History" />
 
+    <Button
+        android:id="@+id/moodNotesButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Mood Notes" />
+
 </LinearLayout>

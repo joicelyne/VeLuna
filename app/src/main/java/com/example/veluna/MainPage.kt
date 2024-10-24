@@ -10,7 +10,7 @@ import androidx.fragment.app.Fragment
 import java.text.SimpleDateFormat
 import java.util.*
 
-class MainPageFragment : Fragment() {
+class MainPage : Fragment() {
 
     private var firstDay: Date? = null // Store the first day of the period
 
