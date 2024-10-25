@@ -16,8 +16,9 @@
         android:layout_marginTop="175dp"
         android:text="Welcome"
         android:textColor="@android:color/white"
+        android:fontFamily="@font/worksans_bold"
         android:textSize="40sp" />
-    <!--    android:fontFamily="@font/work_sans_bold"-->
+
 
 
     <ImageView
@@ -36,6 +37,7 @@
         android:backgroundTint="@color/color4"
         android:textColor="@android:color/white"
         android:layout_marginBottom="10dp"
+        android:fontFamily="@font/worksans_med"
         android:layout_marginTop="50dp"/>
 
     <Button
@@ -44,6 +46,7 @@
         android:layout_height="wrap_content"
         android:text="LOGIN"
         android:backgroundTint="@android:color/white"
+        android:fontFamily="@font/worksans_med"
         android:textColor="@color/color3"/>
 
 </LinearLayout>
