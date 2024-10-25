@@ -57,8 +57,12 @@ class InsertLastPeriodFragment : Fragment() {
 
         // Navigate to PeriodCycleFragment when next or skip button is clicked
         binding.nextButton.setOnClickListener {
-            saveSelectedDate()
-            findNavController().navigate(R.id.action_to_periodCycleFragment)
+            if (selectedDate == 0L) {
+                Toast.makeText(activity, "Please select a date before proceeding", Toast.LENGTH_SHORT).show()
+            } else {
+                saveSelectedDate()
+                findNavController().navigate(R.id.action_to_periodCycleFragment)
+            }
         }
 
         binding.skipButton.setOnClickListener {

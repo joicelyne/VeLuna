@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
@@ -32,8 +33,10 @@ class PeriodCycleFragment : Fragment() {
 
         // Set up button click listeners
         binding.nextButton.setOnClickListener {
-            saveInputData()
-            findNavController().navigate(R.id.action_to_birthdateFragment)
+            if (validateInput()) {
+                saveInputData()
+                findNavController().navigate(R.id.action_to_birthdateFragment)
+            }
         }
 
         binding.skipButton.setOnClickListener {
@@ -65,6 +68,28 @@ class PeriodCycleFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         (activity as MainActivity).hideBottomNavigation()
 
+    }
+
+    private fun validateInput(): Boolean {
+        val startDate = binding.startDateInput.text.toString()
+        val periodLength = binding.periodLengthInput.text.toString()
+        val cycleLength = binding.cycleLengthInput.text.toString()
+
+        return when {
+            startDate.isEmpty() -> {
+                Toast.makeText(activity, "Please select a start date", Toast.LENGTH_SHORT).show()
+                false
+            }
+            periodLength.isEmpty() -> {
+                Toast.makeText(activity, "Please enter the period length", Toast.LENGTH_SHORT).show()
+                false
+            }
+            cycleLength.isEmpty() -> {
+                Toast.makeText(activity, "Please enter the cycle length", Toast.LENGTH_SHORT).show()
+                false
+            }
+            else -> true
+        }
     }
 
     private fun saveInputData() {
