@@ -40,6 +40,12 @@
             android:textSize="16sp" />
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_margin="30dp">
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -54,44 +60,40 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/worksans_bold"
+            android:fontFamily="@font/worksans_med"
             android:text="How do you want VeLuna to call you?"
             android:textColor="@color/black"
             android:textSize="14sp"
-            android:layout_marginStart="15dp"
             android:layout_marginTop="50dp"
             android:layout_marginBottom="12dp"/>
 
         <EditText
             android:id="@+id/editTextName"
-            android:layout_width="302dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/enter_name"
             android:inputType="textPersonName"
             android:background="@drawable/edit_text_background"
-            android:padding="12dp"
-            android:layout_marginStart="15dp" />
+            android:padding="12dp" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/worksans_bold"
+            android:fontFamily="@font/worksans_med"
             android:text="Phone Number:"
             android:textColor="@color/black"
             android:textSize="14sp"
-            android:layout_marginStart="15dp"
             android:layout_marginTop="30dp"
             android:layout_marginBottom="12dp"/>
 
         <EditText
             android:id="@+id/editTextPhoneNumber"
-            android:layout_width="302dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/enter_phone_number"
             android:inputType="phone"
             android:background="@drawable/edit_text_background"
-            android:padding="12dp"
-            android:layout_marginStart="15dp" />
+            android:padding="12dp" />
 
         <Button
             android:id="@+id/nextButton"
@@ -105,6 +107,8 @@
             android:padding="12dp"
             android:layout_marginBottom="10dp"
             android:layout_marginTop="24dp" />
+
+    </LinearLayout>
 
 </LinearLayout>
 

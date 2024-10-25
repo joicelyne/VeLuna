@@ -107,6 +107,9 @@
         <action
             android:id="@+id/action_MainPage_to_moodNotes"
             app:destination="@id/moodNotes" />
+        <action
+            android:id="@+id/action_MainPage_to_cycleHistory"
+            app:destination="@id/cycleHistory" />
     </fragment>
 
     <activity

@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AnimationUtils
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
@@ -29,6 +30,18 @@ class MainPage : Fragment() {
         view.findViewById<ImageView>(R.id.moodEditIcon).setOnClickListener {
             findNavController().navigate(R.id.action_MainPage_to_moodNotes)
         }
+
+        view.findViewById<ImageView>(R.id.history_cycle_button).setOnClickListener {
+            findNavController().navigate(R.id.action_MainPage_to_cycleHistory)
+        }
+
+        view.findViewById<ImageView>(R.id.history_cycle_button2).setOnClickListener {
+            findNavController().navigate(R.id.action_MainPage_to_cycleHistory)
+        }
+
+        val heartImageView: ImageView = view.findViewById(R.id.imgHeart)
+        val heartbeatAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.heartbeat)
+        heartImageView.startAnimation(heartbeatAnimation)
 
         return view
     }

@@ -8,6 +8,7 @@
 
     <!-- Cycle date range -->
     <TextView
+        android:fontFamily="@font/worksans_med"
         android:id="@+id/tv_cycle_date_range"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -36,6 +37,7 @@
 
         <!-- Cycle length in days -->
         <TextView
+            android:fontFamily="@font/worksans_med"
             android:id="@+id/tv_cycle_length"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

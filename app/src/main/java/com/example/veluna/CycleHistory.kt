@@ -1,6 +1,7 @@
 package com.example.veluna
 
 import android.os.Bundle
+import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -12,6 +13,10 @@ class CycleHistory : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.cycle_history)
+
+        findViewById<ImageButton>(R.id.back_button_cycle_history).setOnClickListener {
+            finish()
+        }
 
         // Inflate the layout for this fragment
         val recyclerView: RecyclerView = findViewById(R.id.rv_cycle_history)

@@ -18,6 +18,7 @@
             android:layout_height="wrap_content">
 
             <TextView
+                android:fontFamily="@font/worksans_med"
                 android:id="@+id/headerText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -64,6 +65,7 @@
             android:paddingVertical="20dp">
 
             <TextView
+                android:fontFamily="@font/worksans_med"
                 android:id="@+id/feelingText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -102,6 +104,7 @@
                         android:layout_gravity="center" />
 
                     <TextView
+                        android:fontFamily="@font/worksans_med"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="center"
@@ -127,6 +130,7 @@
                         android:layout_gravity="center" />
 
                     <TextView
+                        android:fontFamily="@font/worksans_med"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="center"
@@ -152,6 +156,7 @@
                         android:layout_gravity="center" />
 
                     <TextView
+                        android:fontFamily="@font/worksans_med"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="center"
@@ -177,6 +182,7 @@
                         android:layout_gravity="center" />
 
                     <TextView
+                        android:fontFamily="@font/worksans_med"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="center"
@@ -206,6 +212,7 @@
 
             <!-- Menstrual Flow Section -->
             <TextView
+                android:fontFamily="@font/worksans_med"
                 android:id="@+id/menstrualFlowText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -216,6 +223,7 @@
                 android:textStyle="bold" />
 
             <TextView
+                android:fontFamily="@font/worksans_med"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="start"
@@ -246,7 +254,6 @@
                     style="@style/ChipFlow"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:checkable="true"
                     android:text="Light"
                     app:chipIcon="@drawable/flow_light" />
 
@@ -293,6 +300,7 @@
 
             <!-- Menstrual Mood Section -->
             <TextView
+                android:fontFamily="@font/worksans_med"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="How are you?"
@@ -426,6 +434,7 @@
 
         <!-- Apply Button -->
         <Button
+            android:fontFamily="@font/worksans_med"
             android:id="@+id/applyButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
