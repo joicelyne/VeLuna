@@ -1,7 +1,9 @@
 package com.example.veluna
 
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
@@ -12,6 +14,7 @@ class CycleHistory : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.cycle_history)
+
 
         // Inflate the layout for this fragment
         val recyclerView: RecyclerView = findViewById(R.id.rv_cycle_history)
@@ -28,5 +31,7 @@ class CycleHistory : AppCompatActivity() {
 
         cycleAdapter = CycleHistoryAdapter(cycleData)
         recyclerView.adapter = cycleAdapter
+
     }
+
 }

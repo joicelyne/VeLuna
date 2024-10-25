@@ -14,6 +14,7 @@ import androidx.navigation.NavController
 import com.google.firebase.firestore.FirebaseFirestore
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.isVisible
 import androidx.fragment.app.FragmentTransaction
 import androidx.navigation.NavDestination
 import androidx.navigation.ui.setupWithNavController
@@ -39,6 +40,19 @@ class MainActivity : AppCompatActivity() {
         bottomNavigation = findViewById(R.id.bottom_nav)
         bottomNavigation.setupWithNavController(navController)
 
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            when (destination.id) {
+                R.id.MainPage, R.id.profileFragment, R.id.cycleHistory, R.id.moodNotes, R.id.datesEditPeriod, R.id.editprofileFragment,    -> {
+                    // Tampilkan BottomNavigationView
+                    bottomNavigation.isVisible = true
+                }
+                else -> {
+                    // Sembunyikan BottomNavigationView
+                    bottomNavigation.isVisible = false
+                }
+            }
+        }
+
         // Set listener untuk item klik pada BottomNavigationView
         bottomNavigation.setOnItemSelectedListener { item ->
             when (item.itemId) {
@@ -60,11 +74,11 @@ class MainActivity : AppCompatActivity() {
                     true
                 }
 
-                R.id.editprofileFragment -> {
-                    // Arahkan ke ProfileFragment
-                    navController.navigate(R.id.editprofileFragment)
-                    true
-                }
+//                R.id.editprofileFragment -> {
+//                    // Arahkan ke ProfileFragment
+//                    navController.navigate(R.id.editprofileFragment)
+//                    true
+//                }
                 else -> false
             }
         }
@@ -90,4 +104,8 @@ class MainActivity : AppCompatActivity() {
     fun hideBottomNavigation() {
         bottomNavigation.visibility = View.GONE
     }
+
+//    fun showBottomNavigation() {
+//        bottomNavigation.visibility = View.VISIBLE
+//    }
 }

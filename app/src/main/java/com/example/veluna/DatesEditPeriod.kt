@@ -35,7 +35,9 @@ class DatesEditPeriod : AppCompatActivity() {
 
         setupCalendar(octoberCalendar, 31, currentMonth, currentYear) // October with 31 days
         setupCalendar(novemberCalendar, 30, currentMonth + 1, currentYear) // November with 30 days
+
     }
+
 
     private fun setupCalendar(gridLayout: GridLayout, daysInMonth: Int, month: Int, year: Int) {
         gridLayout.removeAllViews()  // Clear previous views

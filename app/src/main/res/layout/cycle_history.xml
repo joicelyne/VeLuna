@@ -17,7 +17,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="Mood Notes"
+            android:text="Cycle History"
             android:textSize="24sp"
             android:textColor="@color/color4"
             android:textStyle="bold"
