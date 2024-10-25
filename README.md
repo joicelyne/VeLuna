@@ -2,6 +2,7 @@
 
 **Kelompok MedSisters 🩺🚀🩸**
 
+
 **Chyntia Irawan  |  00000067992**
 
 **Dominique Gabriella da Silva  |  00000068298**
@@ -10,7 +11,9 @@
 
 **Stefanie Veronica Wijaya  |  00000068054**
 
+
 Welcome to our **VeLuna🌙** Application! This app is designed to be *super helpful* to women in general and ***easy to use***!
+
 
 #) ***Features*** 📃
 1. Sign Up and Login 🪧
