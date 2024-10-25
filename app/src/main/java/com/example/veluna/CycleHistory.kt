@@ -2,7 +2,9 @@ package com.example.veluna
 
 import android.os.Bundle
 import android.widget.ImageButton
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
@@ -33,5 +35,7 @@ class CycleHistory : AppCompatActivity() {
 
         cycleAdapter = CycleHistoryAdapter(cycleData)
         recyclerView.adapter = cycleAdapter
+
     }
+
 }

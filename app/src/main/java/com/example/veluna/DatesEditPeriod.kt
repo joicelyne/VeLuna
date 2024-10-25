@@ -40,6 +40,7 @@ class DatesEditPeriod : AppCompatActivity() {
         findViewById<ImageButton>(R.id.back_button_edit_perioddate).setOnClickListener {
             finish()
         }
+
     }
 
     private fun setupCalendar(gridLayout: GridLayout, daysInMonth: Int, month: Int, year: Int) {

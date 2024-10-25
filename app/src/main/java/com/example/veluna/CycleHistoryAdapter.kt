@@ -43,5 +43,8 @@ class CycleHistoryAdapter(private val cycles: List<Cycle>) : RecyclerView.Adapte
         private fun calculateProgress(periodLength: Int, cycleLength: Int): Int {
             return (periodLength.toFloat() / cycleLength * 100).toInt()
         }
+
     }
+
+
 }

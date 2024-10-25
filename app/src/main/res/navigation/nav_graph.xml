@@ -8,7 +8,8 @@
     <fragment
         android:id="@+id/WelcomePageFragment"
         android:name="com.example.veluna.WelcomePageFragment"
-        android:label="WelcomePageFragment">
+        android:label="WelcomePageFragment"
+        tools:layout="@layout/fragment_welcome_page" >
         <action
             android:id="@+id/action_WelcomePageFragment_to_LoginFragment"
             app:destination="@id/LoginFragment" />
@@ -20,7 +21,8 @@
     <fragment
         android:id="@+id/LoginFragment"
         android:name="com.example.veluna.LoginFragment"
-        android:label="LoginFragment">
+        android:label="LoginFragment"
+        tools:layout="@layout/fragment_login" >
         <action
             android:id="@+id/action_LoginFragment_to_SignUpFragment"
             app:destination="@id/SignUpFragment" />
@@ -32,7 +34,8 @@
     <fragment
         android:id="@+id/SignUpFragment"
         android:name="com.example.veluna.SignUpFragment"
-        android:label="SignUpFragment">
+        android:label="SignUpFragment"
+        tools:layout="@layout/fragment_sign_up" >
         <action
             android:id="@+id/action_SignUpFragment_to_LoginFragment"
             app:destination="@id/LoginFragment" />
@@ -45,7 +48,8 @@
     <fragment
         android:id="@+id/velunaOnboardFragment"
         android:name="com.example.veluna.fragments.VelunaOnboardFragment"
-        android:label="VeLuna Onboard">
+        android:label="VeLuna Onboard"
+        tools:layout="@layout/fragment_veluna_onboard" >
         <action
             android:id="@+id/action_to_insertLastPeriodFragment"
             app:destination="@id/insertLastPeriodFragment" />
@@ -54,7 +58,8 @@
     <fragment
         android:id="@+id/insertLastPeriodFragment"
         android:name="com.example.veluna.fragments.InsertLastPeriodFragment"
-        android:label="Insert Last Period">
+        android:label="Insert Last Period"
+        tools:layout="@layout/fragment_insert_last_period" >
         <action
             android:id="@+id/action_to_periodCycleFragment"
             app:destination="@id/periodCycleFragment" />
@@ -63,7 +68,8 @@
     <fragment
         android:id="@+id/periodCycleFragment"
         android:name="com.example.veluna.fragments.PeriodCycleFragment"
-        android:label="Period Cycle">
+        android:label="Period Cycle"
+        tools:layout="@layout/fragment_period_cycle" >
         <action
             android:id="@+id/action_to_birthdateFragment"
             app:destination="@id/birthdateFragment" />
@@ -72,7 +78,8 @@
     <fragment
         android:id="@+id/birthdateFragment"
         android:name="com.example.veluna.fragments.BirthdateFragment"
-        android:label="Birthdate">
+        android:label="Birthdate"
+        tools:layout="@layout/fragment_birthdate" >
         <action
             android:id="@+id/action_to_userInfoFragment"
             app:destination="@id/userInfoFragment" />
@@ -81,7 +88,8 @@
     <fragment
         android:id="@+id/userInfoFragment"
         android:name="com.example.veluna.fragments.UserInfoFragment"
-        android:label="User Info">
+        android:label="User Info"
+        tools:layout="@layout/fragment_user_info" >
         <action
             android:id="@+id/action_to_onBoardSuccessFragment"
             app:destination="@id/onBoardSuccessFragment" />
@@ -90,7 +98,8 @@
     <fragment
         android:id="@+id/onBoardSuccessFragment"
         android:name="com.example.veluna.fragments.OnboardSuccessFragment"
-        android:label="OnBoard Success">
+        android:label="OnBoard Success"
+        tools:layout="@layout/fragment_onboard_success" >
         <action
             android:id="@+id/action_to_MainPage"
             app:destination="@id/MainPage" />
@@ -100,7 +109,8 @@
     <fragment
         android:id="@+id/MainPage"
         android:name="com.example.veluna.MainPage"
-        android:label="Main Page">
+        android:label="Main Page"
+        tools:layout="@layout/main_page" >
         <action
             android:id="@+id/action_MainPage_to_datesEditPeriod"
             app:destination="@id/datesEditPeriod" />
@@ -115,17 +125,20 @@
     <activity
         android:id="@+id/cycleHistory"
         android:name="com.example.veluna.CycleHistory"
-        android:label="CycleHistory" />
+        android:label="CycleHistory"
+        tools:layout="@layout/cycle_history" />
 
     <activity
         android:id="@+id/datesEditPeriod"
         android:name="com.example.veluna.DatesEditPeriod"
-        android:label="DatesEditPeriod" />
+        android:label="DatesEditPeriod"
+        tools:layout="@layout/dates_edit_period" />
 
     <activity
         android:id="@+id/moodNotes"
         android:name="com.example.veluna.MoodNotes"
-        android:label="MoodNotes" />
+        android:label="MoodNotes"
+        tools:layout="@layout/mood_notes" />
 
     <!-- PROFILE FRAGMENT-->
     <fragment
