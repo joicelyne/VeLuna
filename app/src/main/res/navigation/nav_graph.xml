@@ -16,6 +16,9 @@
         <action
             android:id="@+id/action_WelcomePageFragment_to_SignUpFragment"
             app:destination="@id/SignUpFragment" />
+        <action
+            android:id="@+id/action_global_MainPageFragment"
+            app:destination="@id/MainPage" />
     </fragment>
 
     <fragment

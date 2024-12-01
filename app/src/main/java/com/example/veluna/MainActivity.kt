@@ -17,6 +17,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.FragmentTransaction
 import androidx.navigation.NavDestination
+import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.FirebaseApp
@@ -31,6 +32,9 @@ class MainActivity : AppCompatActivity() {
         FirebaseApp.initializeApp(this)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
+
+        // Periksa status login
+        checkLoginState()
 
         // Inisialisasi NavHostFragment dan NavController
         val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
@@ -108,4 +112,17 @@ class MainActivity : AppCompatActivity() {
 //    fun showBottomNavigation() {
 //        bottomNavigation.visibility = View.VISIBLE
 //    }
+
+    private fun checkLoginState() {
+        val sharedPreferences = getSharedPreferences("VelunaPrefs", 0)
+        val isLoggedIn = sharedPreferences.getBoolean("isLoggedIn", false)
+
+        val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        val navController = navHostFragment.navController
+
+        if (isLoggedIn) {
+            // Jika sudah login, langsung ke MainPageFragment
+            navController.navigate(R.id.action_global_MainPageFragment)
+        }
+    }
 }

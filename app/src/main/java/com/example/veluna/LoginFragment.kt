@@ -28,6 +28,7 @@ class LoginFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         (activity as MainActivity).hideBottomNavigation()
 
         val emailInput = view.findViewById<TextInputEditText>(R.id.email_input_field)
@@ -63,6 +64,7 @@ class LoginFragment : Fragment() {
                 .addOnCompleteListener(requireActivity()) { task ->
                     if (task.isSuccessful) {
                         Log.d("Login", "signInWithEmail:success")
+                        saveLoginState() // Simpan status login
                         // Jika login berhasil, navigasi ke halaman MainPage
                         findNavController().navigate(R.id.action_LoginFragment_to_MainPage)
                     } else {
@@ -77,6 +79,25 @@ class LoginFragment : Fragment() {
                         }
                     }
                 }
+        }
+    }
+
+    // Fungsi untuk menyimpan status login di SharedPreferences
+    private fun saveLoginState() {
+        val sharedPreferences = requireActivity().getSharedPreferences("VelunaPrefs", 0) // 0 = MODE_PRIVATE
+        val editor = sharedPreferences.edit()
+        editor.putBoolean("isLoggedIn", true) // Menyimpan status login
+        editor.apply()
+    }
+
+    // Fungsi untuk mengecek status login
+    private fun checkLoginState() {
+        val sharedPreferences = requireActivity().getSharedPreferences("VelunaPrefs", 0)
+        val isLoggedIn = sharedPreferences.getBoolean("isLoggedIn", false)
+
+        if (isLoggedIn) {
+            // Jika sudah login, langsung navigasi ke halaman utama
+            findNavController().navigate(R.id.action_LoginFragment_to_MainPage)
         }
     }
 }
