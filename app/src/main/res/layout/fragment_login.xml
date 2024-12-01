@@ -129,12 +129,16 @@
 
         <!-- Login with Google -->
         <RelativeLayout
+            android:id="@+id/google_login_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/color1"
             android:padding="12dp"
             android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="16dp">
+            android:layout_marginBottom="16dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground">
 
             <ImageView
                 android:id="@+id/google_icon"
@@ -155,6 +159,7 @@
                 android:textColor="@color/black"
                 android:textSize="16sp" />
         </RelativeLayout>
+
 
         <!-- Container Horizontal untuk "Already Have Account?" dan "Login Here" -->
         <LinearLayout
