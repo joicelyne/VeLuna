@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:padding="16dp"
     android:background="@drawable/background_gradient"
     tools:context=".EditProfileFragment"
@@ -47,23 +48,23 @@
             android:gravity="center"
             android:layout_marginTop="20dp">
             <!-- Profile Image -->
-            <ImageView
+            <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/imgProfile"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
+                android:layout_width="90dp"
+                android:layout_height="90dp"
                 android:src="@drawable/person"
-                android:background="@drawable/circle_background"
                 android:scaleType="centerCrop"
-                android:layout_gravity="center" />
+                android:layout_gravity="center"
+                app:shapeAppearanceOverlay="@style/CircleImageView"/>
 
             <!-- Profile Name -->
             <TextView
                 android:id="@+id/ProfileName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Alexandra San"
+                android:text=""
                 android:textColor="@color/black"
-                android:textSize="20sp"
+                android:textSize="18sp"
                 android:layout_marginTop="10dp"
                 android:fontFamily="@font/worksans_bold" />
 

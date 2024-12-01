@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:padding="16dp"
     android:background="@drawable/background_gradient"
     tools:context=".ProfileFragment"
@@ -32,14 +33,14 @@
             android:layout_marginTop="20dp">
 
             <!-- Profile Image -->
-            <ImageView
+            <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/imgProfile"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
+                android:layout_width="90dp"
+                android:layout_height="90dp"
                 android:src="@drawable/person"
-                android:background="@drawable/circle_background"
                 android:scaleType="centerCrop"
-                android:layout_gravity="center"/>
+                android:layout_gravity="center"
+                app:shapeAppearanceOverlay="@style/CircleImageView"/>
 
             <!-- Small Edit Icon -->
             <ImageView
@@ -58,9 +59,9 @@
             android:id="@+id/profileName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Alexandra San"
+            android:text=""
             android:textColor="@color/black"
-            android:textSize="20sp"
+            android:textSize="18sp"
             android:layout_marginTop="10dp"
             android:fontFamily="@font/worksans_bold" />
 
@@ -81,7 +82,7 @@
             android:layout_height="wrap_content"
             android:text="My Cycles"
             android:textColor="@color/black"
-            android:textSize="16sp"
+            android:textSize="15sp"
             android:fontFamily="@font/worksans_bold"
             android:layout_gravity="start"
             android:layout_marginStart="8dp"
@@ -114,17 +115,18 @@
                     android:gravity="start">
 
                     <TextView
+                        android:id="@+id/AvgPeriod"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="5 Days"
-                        android:textSize="16sp"
+                        android:textSize="15sp"
                         android:fontFamily="@font/worksans_bold" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Average period"
-                        android:textSize="14sp"
+                        android:textSize="13sp"
                         android:fontFamily="@font/worksans_semi" />
                 </LinearLayout>
 
@@ -157,14 +159,14 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="28 Days"
-                        android:textSize="16sp"
+                        android:textSize="15sp"
                         android:fontFamily="@font/worksans_bold" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Average cycle"
-                        android:textSize="14sp"
+                        android:textSize="13sp"
                         android:fontFamily="@font/worksans_semi" />
                 </LinearLayout>
 
@@ -210,7 +212,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Weight"
-                        android:textSize="16sp"
+                        android:textSize="15sp"
                         android:fontFamily="@font/worksans_bold" />
 
                     <TextView
@@ -218,7 +220,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="47.00 kg"
-                        android:textSize="18sp"
+                        android:textSize="16sp"
                         android:fontFamily="@font/worksans_semi" />
                 </LinearLayout>
             </LinearLayout>
@@ -247,7 +249,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Height"
-                        android:textSize="16sp"
+                        android:textSize="15sp"
                         android:fontFamily="@font/worksans_bold" />
 
                     <TextView
@@ -255,7 +257,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="155 cm"
-                        android:textSize="18sp"
+                        android:textSize="16sp"
                         android:fontFamily="@font/worksans_semi" />
                 </LinearLayout>
             </LinearLayout>
@@ -284,7 +286,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="BMI"
-                        android:textSize="16sp"
+                        android:textSize="15sp"
                         android:fontFamily="@font/worksans_bold" />
 
                     <TextView
@@ -292,7 +294,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="19.6"
-                        android:textSize="18sp"
+                        android:textSize="16sp"
                         android:fontFamily="@font/worksans_semi" />
                 </LinearLayout>
             </LinearLayout>

@@ -6,17 +6,15 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.example.veluna.MainActivity
 import com.example.veluna.R
-import com.example.veluna.UserInputOnboardViewModel
 import com.example.veluna.databinding.FragmentUserInfoBinding
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
 class UserInfoFragment : Fragment() {
 
-    private lateinit var viewModel: UserInputOnboardViewModel
     private var _binding: FragmentUserInfoBinding? = null
     private val binding get() = _binding!!
     private val db = FirebaseFirestore.getInstance()
@@ -27,9 +25,10 @@ class UserInfoFragment : Fragment() {
     ): View {
         _binding = FragmentUserInfoBinding.inflate(inflater, container, false)
 
-        binding.backContainer.setOnClickListener { onBackButtonClicked(it) }
-        binding.backButton.setOnClickListener { onBackButtonClicked(it) }
-        binding.backText.setOnClickListener { onBackButtonClicked(it) }
+        // Tombol back
+        binding.backContainer.setOnClickListener { onBackButtonClicked() }
+        binding.backButton.setOnClickListener { onBackButtonClicked() }
+        binding.backText.setOnClickListener { onBackButtonClicked() }
 
         return binding.root
     }
@@ -38,43 +37,45 @@ class UserInfoFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         (activity as MainActivity).hideBottomNavigation()
 
-        // Initialize ViewModel
-        viewModel = ViewModelProvider(requireActivity()).get(UserInputOnboardViewModel::class.java)
-
+        // Tombol next untuk menyimpan data dan navigasi ke fragment berikutnya
         binding.nextButton.setOnClickListener {
-            val name = binding.editTextName.text.toString()
-            val phoneNumber = binding.editTextPhoneNumber.text.toString()
-
-            if (name.isNotEmpty() && phoneNumber.isNotEmpty()) {
-                viewModel.userInput.name = name
-                viewModel.userInput.phoneNumber = phoneNumber
-
-                // Save data to Firestore
-                saveDataToFirestore()
-
-                // Navigate to the next fragment
-                findNavController().navigate(R.id.action_to_onBoardSuccessFragment)
-            } else {
-                Toast.makeText(requireContext(), "Please fill out all fields", Toast.LENGTH_SHORT).show()
-            }
+            saveDataToFirestore()
         }
     }
 
     private fun saveDataToFirestore() {
-        val userData = viewModel.userInput
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        if (userId.isNullOrEmpty()) {
+            Toast.makeText(requireContext(), "User ID tidak ditemukan", Toast.LENGTH_SHORT).show()
+            return
+        }
 
-        db.collection("users")
-            .document(userData.phoneNumber ?: "")
-            .set(userData)
+        val name = binding.editTextName.text.toString()
+        val phoneNumber = binding.editTextPhoneNumber.text.toString()
+
+        if (name.isEmpty() || phoneNumber.isEmpty()) {
+            Toast.makeText(requireContext(), "Harap isi semua data", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val userData = mapOf(
+            "userId" to userId,
+            "name" to name,
+            "phoneNumber" to phoneNumber
+        )
+
+        db.collection("users").document(userId)
+            .set(userData, com.google.firebase.firestore.SetOptions.merge()) // Merge digunakan
             .addOnSuccessListener {
-                Toast.makeText(context, "Data saved successfully", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Data berhasil disimpan", Toast.LENGTH_SHORT).show()
+                findNavController().navigate(R.id.action_to_onBoardSuccessFragment)
             }
             .addOnFailureListener { e ->
-                Toast.makeText(context, "Error saving data: ${e.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Gagal menyimpan data: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
 
-    fun onBackButtonClicked(view: View) {
+    private fun onBackButtonClicked() {
         findNavController().popBackStack()
     }
 

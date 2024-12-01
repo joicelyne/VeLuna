@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     id("com.google.gms.google-services") version "4.4.2"
+    id ("kotlin-kapt")
 }
 
 android {
@@ -63,6 +64,7 @@ dependencies {
     implementation(libs.androidx.navigation.ui.ktx)
     implementation(libs.firebase.common.ktx)
     implementation(libs.androidx.cardview)
+    implementation(libs.firebase.storage.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -70,4 +72,7 @@ dependencies {
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.firestore)
     implementation("com.google.android.material:material:1.10.0")
+    implementation ("com.google.firebase:firebase-storage-ktx")
+    implementation ("com.github.bumptech.glide:glide:4.14.2")
+    kapt ("com.github.bumptech.glide:compiler:4.14.2")
 }

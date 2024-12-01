@@ -4,21 +4,22 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.example.veluna.MainActivity
 import com.example.veluna.R
-import com.example.veluna.UserInputOnboardViewModel
 import com.example.veluna.databinding.FragmentBirthdateBinding
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.*
 
 class BirthdateFragment : Fragment() {
 
-    private lateinit var viewModel: UserInputOnboardViewModel
     private var _binding: FragmentBirthdateBinding? = null
     private val binding get() = _binding!!
+    private val db = FirebaseFirestore.getInstance()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -26,13 +27,9 @@ class BirthdateFragment : Fragment() {
     ): View {
         _binding = FragmentBirthdateBinding.inflate(inflater, container, false)
 
-        // Get ViewModel
-        viewModel = ViewModelProvider(requireActivity()).get(UserInputOnboardViewModel::class.java)
-
         // Set up navigation
         binding.nextButton.setOnClickListener {
             saveBirthdate()
-            findNavController().navigate(R.id.action_to_userInfoFragment)
         }
 
         binding.skipButton.setOnClickListener {
@@ -55,15 +52,40 @@ class BirthdateFragment : Fragment() {
         binding.datePicker.minDate = System.currentTimeMillis() - 100L * 365 * 24 * 60 * 60 * 1000 // 100 years ago
         binding.datePicker.maxDate = System.currentTimeMillis() // Today
 
-        // Optionally set the initial birthdate if already available in ViewModel
-        viewModel.userInput.birthdate?.let { birthdate ->
-            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-            val date = dateFormat.parse(birthdate)
-            date?.let { binding.datePicker.updateDate(date.year + 1900, date.month, date.date) }
-        }
+        // Load existing data
+        loadBirthdate()
     }
 
-    // Save selected date into ViewModel
+    // Load existing birthdate from Firestore
+    private fun loadBirthdate() {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        if (userId.isNullOrEmpty()) {
+            Toast.makeText(requireContext(), "User ID tidak ditemukan", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        db.collection("users").document(userId)
+            .get()
+            .addOnSuccessListener { document ->
+                if (document != null && document.exists()) {
+                    val birthdate = document.getString("birthdate")
+                    if (!birthdate.isNullOrEmpty()) {
+                        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                        val date = dateFormat.parse(birthdate)
+                        date?.let {
+                            binding.datePicker.updateDate(it.year + 1900, it.month, it.date)
+                        }
+                    }
+                } else {
+                    Toast.makeText(requireContext(), "Data tidak ditemukan", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(requireContext(), "Gagal memuat data: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+    // Save selected birthdate to Firestore
     private fun saveBirthdate() {
         val day = binding.datePicker.dayOfMonth
         val month = binding.datePicker.month
@@ -71,10 +93,30 @@ class BirthdateFragment : Fragment() {
         val calendar = Calendar.getInstance()
         calendar.set(year, month, day)
 
-        // Format selected date and save in ViewModel
         val selectedDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(calendar.time)
-        viewModel.userInput.birthdate = selectedDate
+
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        if (userId.isNullOrEmpty()) {
+            Toast.makeText(requireContext(), "User ID tidak ditemukan", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val userData = mapOf(
+            "userId" to userId,
+            "birthdate" to selectedDate
+        )
+
+        db.collection("users").document(userId)
+            .set(userData, com.google.firebase.firestore.SetOptions.merge()) // Merge digunakan
+            .addOnSuccessListener {
+                Toast.makeText(requireContext(), "Tanggal lahir berhasil disimpan", Toast.LENGTH_SHORT).show()
+                findNavController().navigate(R.id.action_to_userInfoFragment)
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(requireContext(), "Gagal menyimpan data: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
     }
+
 
     // Handle back button clicks
     fun onBackButtonClicked(view: View) {
