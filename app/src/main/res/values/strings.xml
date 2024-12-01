@@ -21,4 +21,6 @@
     <string name="bottom_menu_history">History</string>
     <string name="bottom_menu_home">Luna</string>
     <string name="bottom_menu_profile">Profile</string>
+
+    <string name="default_web_client_id">YOUR_WEB_CLIENT_ID</string>
 </resources>

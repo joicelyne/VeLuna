@@ -48,7 +48,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
-    implementation("androidx.recyclerview:recyclerview:1.2.1")
+    implementation("androidx.recyclerview:recyclerview:1.3.2")
     implementation(libs.androidx.databinding.runtime)
     implementation(libs.androidx.annotation)
     implementation(libs.androidx.lifecycle.livedata.ktx)
@@ -70,4 +70,7 @@ dependencies {
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.firestore)
     implementation("com.google.android.material:material:1.10.0")
+    implementation("com.google.firebase:firebase-auth-ktx:22.0.2")
+    implementation("com.google.android.gms:play-services-auth:21.2.0")
+
 }
