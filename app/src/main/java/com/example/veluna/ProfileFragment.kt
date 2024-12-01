@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
@@ -27,12 +28,11 @@ class ProfileFragment : Fragment() {
     private var weight: Double = 47.0
     private var height: Double = 155.0
 
-
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+
         // Inflate layout awal (fragment_profile.xml)
         val view = inflater.inflate(R.layout.fragment_profile, container, false)
 

@@ -3,339 +3,376 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="16dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@drawable/background_gradient"
     tools:context=".ProfileFragment"
     android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:gravity="center"
-        android:padding="10dp">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
         <!-- Profile Title -->
-        <TextView
-            android:id="@+id/profileTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Profile"
-            android:textColor="@color/color3"
-            android:textSize="25sp"
-            android:fontFamily="@font/worksans_bold" />
-
-        <!-- Profile Image -->
-        <FrameLayout
-            android:layout_width="135dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp">
-
-            <!-- Profile Image -->
-            <ImageView
-                android:id="@+id/imgProfile"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
-                android:src="@drawable/person"
-                android:background="@drawable/circle_background"
-                android:scaleType="centerCrop"
-                android:layout_gravity="center"/>
-
-            <!-- Small Edit Icon -->
-            <ImageView
-                android:id="@+id/imgEditIcon"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:src="@drawable/veluna_editprofile"
-                android:layout_gravity="end|top"
-                android:layout_marginEnd="-5dp"
-                android:layout_marginTop="0dp"
-                android:padding="2dp" />
-        </FrameLayout>
-
-        <!-- Profile Name -->
-        <TextView
-            android:id="@+id/profileName"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Alexandra San"
-            android:textColor="@color/black"
-            android:textSize="20sp"
-            android:layout_marginTop="10dp"
-            android:fontFamily="@font/worksans_bold" />
-
-        <!-- Sync Data Button -->
-        <Button
-            android:id="@+id/btnSyncData"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Sync Data"
-            android:textColor="@color/white"
-            style="@style/button"
-            android:layout_marginTop="10dp"
-            android:fontFamily="@font/worksans_semi" />
-
-        <!-- My Cycles Title -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="My Cycles"
-            android:textColor="@color/black"
-            android:textSize="16sp"
-            android:fontFamily="@font/worksans_bold"
-            android:layout_gravity="start"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="20dp" />
-
-        <!-- My Cycles Cards -->
-        <LinearLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/moodNotesHeader"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center"
-            android:weightSum="2">
+            android:layout_height="wrap_content">
 
-            <!-- Average Period Card -->
-            <LinearLayout
-                android:layout_width="0dp"
+            <TextView
+                android:fontFamily="@font/worksans_med"
+                android:id="@+id/headerText"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="horizontal"
-                android:padding="10dp"
-                android:background="@drawable/card_color2"
-                android:layout_margin="5dp"
-                android:gravity="center_vertical">
+                android:gravity="center"
+                android:text="Profile"
+                android:textSize="24sp"
+                android:textColor="@color/color4"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:layout_marginTop="20dp"
+                android:padding="14dp" />
 
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:gravity="start">
+            <ImageButton
+                android:id="@+id/back_button_profile"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:layout_margin="8dp"
+                android:background="@drawable/close"
+                android:contentDescription="Close"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"  />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="5 Days"
-                        android:textSize="16sp"
-                        android:fontFamily="@font/worksans_bold" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Average period"
-                        android:textSize="14sp"
-                        android:fontFamily="@font/worksans_semi" />
-                </LinearLayout>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:background="@color/color4"
+            android:layout_marginBottom="26dp"
+            />
 
-                <ImageView
-                    android:layout_width="35dp"
-                    android:layout_height="35dp"
-                    android:src="@drawable/veluna_period"
-                    android:layout_marginStart="5dp" />
-            </LinearLayout>
-
-            <!-- Average Cycle Card -->
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="horizontal"
-                android:padding="10dp"
-                android:background="@drawable/card_color2"
-                android:layout_margin="5dp"
-                android:gravity="center_vertical">
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:gravity="start">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="28 Days"
-                        android:textSize="16sp"
-                        android:fontFamily="@font/worksans_bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Average cycle"
-                        android:textSize="14sp"
-                        android:fontFamily="@font/worksans_semi" />
-                </LinearLayout>
-
-                <ImageView
-                    android:layout_width="35dp"
-                    android:layout_height="35dp"
-                    android:src="@drawable/veluna_cycle"
-                    android:layout_marginStart="5dp" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <!-- Card untuk Weight, Height, dan BMI -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="10dp"
-            android:background="@drawable/card_background"
-            android:layout_marginTop="20dp"
-            android:layout_marginBottom="20dp">
+            android:gravity="center"
+            android:paddingHorizontal="30dp">
 
-            <!-- Weight Section -->
+            <!-- Profile Image -->
+            <FrameLayout
+                android:layout_width="135dp"
+                android:layout_height="90dp">
+
+                <!-- Profile Image -->
+                <ImageView
+                    android:id="@+id/imgProfile"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:src="@drawable/person"
+                    android:background="@drawable/circle_background"
+                    android:scaleType="centerCrop"
+                    android:layout_gravity="center"/>
+
+                <!-- Small Edit Icon -->
+                <ImageView
+                    android:id="@+id/imgEditIcon"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:src="@drawable/veluna_editprofile"
+                    android:layout_gravity="end|top"
+                    android:layout_marginEnd="26dp"
+                    android:layout_marginTop="5dp"
+                    android:padding="2dp" />
+            </FrameLayout>
+
+            <!-- Profile Name -->
+            <TextView
+                android:id="@+id/profileName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Alexandra San"
+                android:textColor="@color/black"
+                android:textSize="18sp"
+                android:layout_marginTop="10dp"
+                android:fontFamily="@font/worksans_med" />
+
+            <!-- Sync Data Button -->
+            <Button
+                android:id="@+id/btnSyncData"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sync Data"
+                android:textColor="@color/white"
+                style="@style/button"
+                android:layout_marginTop="10dp"
+                android:fontFamily="@font/worksans_semi" />
+
+            <!-- My Cycles Title -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="My Cycles"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:fontFamily="@font/worksans_bold"
+                android:layout_gravity="start"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="20dp" />
+
+            <!-- My Cycles Cards -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:padding="10dp">
+                android:gravity="center"
+                android:weightSum="2">
 
-                <ImageView
-                    android:layout_width="45dp"
-                    android:layout_height="45dp"
-                    android:src="@drawable/veluna_weight" />
-
+                <!-- Average Period Card -->
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:layout_marginStart="12dp">
+                    android:orientation="horizontal"
+                    android:padding="10dp"
+                    android:background="@drawable/card_color2"
+                    android:layout_margin="5dp"
+                    android:gravity="center_vertical">
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:text="Weight"
-                        android:textSize="16sp"
-                        android:fontFamily="@font/worksans_bold" />
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="start">
 
-                    <TextView
-                        android:id="@+id/profileWeight"
-                        android:layout_width="wrap_content"
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="5 Days"
+                            android:textSize="16sp"
+                            android:fontFamily="@font/worksans_semi" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Average period"
+                            android:textSize="14sp"
+                            android:fontFamily="@font/worksans_med" />
+                    </LinearLayout>
+
+                    <ImageView
+                        android:layout_width="35dp"
+                        android:layout_height="35dp"
+                        android:src="@drawable/veluna_period"
+                        android:layout_marginStart="5dp" />
+                </LinearLayout>
+
+                <!-- Average Cycle Card -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="horizontal"
+                    android:padding="10dp"
+                    android:background="@drawable/card_color3"
+                    android:layout_margin="5dp"
+                    android:gravity="center_vertical">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:text="47.00 kg"
-                        android:textSize="18sp"
-                        android:fontFamily="@font/worksans_semi" />
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="start">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="28 Days"
+                            android:textSize="16sp"
+                            android:fontFamily="@font/worksans_semi" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Average cycle"
+                            android:textSize="14sp"
+                            android:fontFamily="@font/worksans_med" />
+
+                    </LinearLayout>
+
+                    <ImageView
+                        android:layout_width="35dp"
+                        android:layout_height="35dp"
+                        android:src="@drawable/veluna_cycle"
+                        android:layout_marginStart="5dp" />
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- Height Section -->
+            <!-- Card untuk Weight, Height, dan BMI -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:padding="10dp">
+                android:orientation="vertical"
+                android:padding="10dp"
+                android:background="@drawable/card_background"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="20dp">
 
-                <ImageView
-                    android:layout_width="45dp"
-                    android:layout_height="45dp"
-                    android:src="@drawable/veluna_height" />
-
+                <!-- Weight Section -->
                 <LinearLayout
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:layout_marginStart="12dp">
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="10dp">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Height"
-                        android:textSize="16sp"
-                        android:fontFamily="@font/worksans_bold" />
+                    <ImageView
+                        android:layout_width="45dp"
+                        android:layout_height="45dp"
+                        android:src="@drawable/veluna_weight" />
 
-                    <TextView
-                        android:id="@+id/profileHeight"
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:text="155 cm"
-                        android:textSize="18sp"
-                        android:fontFamily="@font/worksans_semi" />
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:layout_marginStart="12dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Weight"
+                            android:textSize="14sp"
+                            android:fontFamily="@font/worksans_semi" />
+
+                        <TextView
+                            android:id="@+id/profileWeight"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="47.00 kg"
+                            android:textSize="16sp"
+                            android:fontFamily="@font/worksans_med" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- Height Section -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="10dp">
+
+                    <ImageView
+                        android:layout_width="45dp"
+                        android:layout_height="45dp"
+                        android:src="@drawable/veluna_height" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:layout_marginStart="12dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Height"
+                            android:textSize="14sp"
+                            android:fontFamily="@font/worksans_semi" />
+
+                        <TextView
+                            android:id="@+id/profileHeight"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="155 cm"
+                            android:textSize="16sp"
+                            android:fontFamily="@font/worksans_med" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- BMI Section -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="10dp">
+
+                    <ImageView
+                        android:layout_width="45dp"
+                        android:layout_height="45dp"
+                        android:src="@drawable/veluna_bmi" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:layout_marginStart="12dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="BMI"
+                            android:textSize="16sp"
+                            android:fontFamily="@font/worksans_bold" />
+
+                        <TextView
+                            android:id="@+id/profileBMI"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="19.6"
+                            android:textSize="16sp"
+                            android:fontFamily="@font/worksans_med" />
+                    </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
-
-            <!-- BMI Section -->
             <LinearLayout
                 android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="80dp"
+                android:orientation="vertical">
+            <!-- Edit Weight and Height Buttons -->
+            <Button
+                android:id="@+id/btnEditWeightHeight"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:padding="10dp">
+                android:text="Edit Weight and Height"
+                android:textColor="@color/white"
+                style="@style/button"
+                android:layout_marginTop="10dp"
+                android:fontFamily="@font/worksans_med"/>
 
-                <ImageView
-                    android:layout_width="45dp"
-                    android:layout_height="45dp"
-                    android:src="@drawable/veluna_bmi" />
+            <!-- Edit Profile Button -->
+            <Button
+                android:id="@+id/btnEditProfile"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Edit Profile"
+                android:textColor="@color/white"
+                style="@style/button"
+                android:layout_marginTop="10dp"
+                android:fontFamily="@font/worksans_med" />
 
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:layout_marginStart="12dp">
+            <!-- Log Out Button -->
+            <Button
+                android:id="@+id/btnLogOut"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Log Out"
+                android:textColor="@color/white"
+                style="@style/button"
+                android:layout_marginTop="10dp"
+                android:fontFamily="@font/worksans_med"
+                android:layout_marginBottom="30dp"/>
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="BMI"
-                        android:textSize="16sp"
-                        android:fontFamily="@font/worksans_bold" />
-
-                    <TextView
-                        android:id="@+id/profileBMI"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="19.6"
-                        android:textSize="18sp"
-                        android:fontFamily="@font/worksans_semi" />
-                </LinearLayout>
             </LinearLayout>
-        </LinearLayout>
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginBottom="80dp"
-            android:orientation="vertical">
-        <!-- Edit Weight and Height Buttons -->
-        <Button
-            android:id="@+id/btnEditWeightHeight"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Edit Weight and Height"
-            android:textColor="@color/white"
-            style="@style/button"
-            android:layout_marginTop="10dp"
-            android:fontFamily="@font/worksans_med"/>
-
-        <!-- Edit Profile Button -->
-        <Button
-            android:id="@+id/btnEditProfile"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Edit Profile"
-            android:textColor="@color/white"
-            style="@style/button"
-            android:layout_marginTop="10dp"
-            android:fontFamily="@font/worksans_med" />
-
-        <!-- Log Out Button -->
-        <Button
-            android:id="@+id/btnLogOut"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Log Out"
-            android:textColor="@color/white"
-            style="@style/button"
-            android:layout_marginTop="10dp"
-            android:fontFamily="@font/worksans_med"
-            android:layout_marginBottom="30dp"/>
-
         </LinearLayout>
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>
