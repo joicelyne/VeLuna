@@ -10,8 +10,8 @@
                 android:centerY="0.5"
                 android:angle="90" />
             <corners
-                android:topLeftRadius="20dp"
-                android:topRightRadius="20dp" />
+                android:topLeftRadius="50dp"
+                android:topRightRadius="50dp" />
         </shape>
     </item>
 

@@ -49,7 +49,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
-    implementation("androidx.recyclerview:recyclerview:1.2.1")
+    implementation("androidx.recyclerview:recyclerview:1.3.2")
     implementation(libs.androidx.databinding.runtime)
     implementation(libs.androidx.annotation)
     implementation(libs.androidx.lifecycle.livedata.ktx)
@@ -75,4 +75,7 @@ dependencies {
     implementation ("com.google.firebase:firebase-storage-ktx")
     implementation ("com.github.bumptech.glide:glide:4.14.2")
     kapt ("com.github.bumptech.glide:compiler:4.14.2")
+    implementation("com.google.firebase:firebase-auth-ktx:22.0.2")
+    implementation("com.google.android.gms:play-services-auth:21.2.0")
+
 }

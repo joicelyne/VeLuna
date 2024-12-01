@@ -16,20 +16,18 @@
         android:layout_marginTop="175dp"
         android:text="Welcome"
         android:textColor="@android:color/white"
+        android:fontFamily="@font/worksans_bold"
         android:textSize="40sp" />
-    <!--    android:fontFamily="@font/work_sans_bold"-->
 
 
-    <TextView
+
+    <ImageView
         android:id="@+id/appNameText"
-        android:layout_width="wrap_content"
-        android:layout_height="96dp"
+        android:layout_width="250dp"
+        android:layout_height="80dp"
         android:layout_marginBottom="75dp"
         android:text="VeLuna"
-        android:textColor="@android:color/white"
-        android:textSize="80sp"
-        android:textStyle="bold" />
-    <!--android:fontFamily="@font/work_sans_bold"-->
+        android:src="@drawable/veluna_logo_2"/>
 
     <Button
         android:id="@+id/signUpButton"
@@ -39,6 +37,7 @@
         android:backgroundTint="@color/color4"
         android:textColor="@android:color/white"
         android:layout_marginBottom="10dp"
+        android:fontFamily="@font/worksans_med"
         android:layout_marginTop="50dp"/>
 
     <Button
@@ -47,6 +46,7 @@
         android:layout_height="wrap_content"
         android:text="LOGIN"
         android:backgroundTint="@android:color/white"
+        android:fontFamily="@font/worksans_med"
         android:textColor="@color/color3"/>
 
 </LinearLayout>

@@ -37,7 +37,7 @@ class WelcomePageFragment : Fragment() {
         // Event ketika tombol "Login" diklik
         loginButton.setOnClickListener {
             // Navigasi ke halaman Login
-            Log.d("WelcomePageFragment", "Sign Up button clicked")
+            Log.d("WelcomePageFragment", "Login button clicked")
             findNavController().navigate(R.id.action_WelcomePageFragment_to_LoginFragment)
         }
 

@@ -52,8 +52,12 @@ class InsertLastPeriodFragment : Fragment() {
 
         // Tombol Next untuk menyimpan tanggal dan navigasi ke fragment berikutnya
         binding.nextButton.setOnClickListener {
-            saveSelectedDate()
-            findNavController().navigate(R.id.action_to_periodCycleFragment)
+            if (selectedDate == 0L) {
+                Toast.makeText(activity, "Please select a date before proceeding", Toast.LENGTH_SHORT).show()
+            } else {
+                saveSelectedDate()
+                findNavController().navigate(R.id.action_to_periodCycleFragment)
+            }
         }
 
         // Tombol Skip langsung navigasi tanpa menyimpan tanggal

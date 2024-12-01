@@ -14,18 +14,30 @@
         android:padding="20dp"
         android:orientation="vertical">
 
-        <!-- Back Button -->
-        <Button
-            android:id="@+id/back_button"
+        <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="← Back"
-            android:textSize="16sp"
-            android:textColor="@color/color3"
-            android:background="@android:color/transparent"
-            android:layout_marginTop="16dp"
-            android:layout_gravity="right"
-            android:layout_marginBottom="16dp" />
+            android:layout_height="50dp"
+            android:layout_gravity="end|center"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_gravity="end|center"
+                android:layout_width="15dp"
+                android:layout_height="15dp"
+                android:layout_marginEnd="-20dp"
+                android:src="@drawable/back_button_welcome"/>
+
+            <Button
+                android:id="@+id/back_button"
+                android:layout_gravity="end|center"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:background="@android:color/transparent"
+                android:text="Back"
+                android:textColor="@color/color3"
+                android:textSize="16sp" />
+
+        </LinearLayout>
 
         <!-- Title -->
         <TextView
@@ -35,6 +47,7 @@
             android:textSize="24sp"
             android:textStyle="bold"
             android:textColor="@color/black"
+            android:fontFamily="@font/worksans_med"
             android:layout_marginTop="25dp"
             android:layout_marginBottom="4dp" />
 
@@ -43,6 +56,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Hello, welcome back to VeLuna"
+            android:fontFamily="@font/worksans_med"
             android:textSize="14sp"
             android:textColor="@color/black"
             android:layout_marginBottom="24dp" />
@@ -97,6 +111,7 @@
             android:layout_gravity="center"
             android:backgroundTint="@color/color4"
             android:textColor="@android:color/white"
+            android:fontFamily="@font/worksans_med"
             android:layout_marginTop="25dp"
             android:layout_marginBottom="16dp" />
 
@@ -108,17 +123,22 @@
             android:textSize="14sp"
             android:textColor="@color/black"
             android:layout_gravity="center"
+            android:fontFamily="@font/worksans_med"
             android:layout_marginTop="25dp"
             android:layout_marginBottom="25dp"/>
 
         <!-- Login with Google -->
         <RelativeLayout
+            android:id="@+id/google_login_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/color1"
             android:padding="12dp"
             android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="16dp">
+            android:layout_marginBottom="16dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground">
 
             <ImageView
                 android:id="@+id/google_icon"
@@ -134,10 +154,12 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
                 android:layout_toEndOf="@id/google_icon"
+                android:fontFamily="@font/worksans_med"
                 android:text="Login with Google"
                 android:textColor="@color/black"
                 android:textSize="16sp" />
         </RelativeLayout>
+
 
         <!-- Container Horizontal untuk "Already Have Account?" dan "Login Here" -->
         <LinearLayout
@@ -154,6 +176,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Not Registered Yet?"
+                android:fontFamily="@font/worksans_med"
                 android:textSize="14sp"
                 android:textColor="@android:color/black"/>
 
@@ -167,6 +190,7 @@
                 android:textColor="@color/color2"
                 android:clickable="true"
                 android:focusable="true"
+                android:fontFamily="@font/worksans_med"
                 android:background="@android:color/transparent"
                 android:paddingStart="4dp"/>
         </LinearLayout>

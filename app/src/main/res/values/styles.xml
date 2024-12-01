@@ -41,7 +41,8 @@
 
     <!-- CHIP MOOD NOTES STYLE -->
     <style name="ChipFlow" parent="Widget.MaterialComponents.Chip.Choice">
-        <item name="chipBackgroundColor">@drawable/chip_flow_button</item>
+        <item name="chipBackgroundColor">@color/chip_flow_button</item>
+        <item name="backgroundTint">@null</item>
         <item name="android:textColor">@color/black</item>
         <item name="chipIconVisible">true</item>
         <item name="checkedIconVisible">false</item>

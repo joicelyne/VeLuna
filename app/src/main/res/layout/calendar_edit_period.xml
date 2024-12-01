@@ -17,6 +17,7 @@
             android:layout_height="wrap_content">
 
             <TextView
+                android:fontFamily="@font/worksans_med"
                 android:id="@+id/headerText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -32,7 +33,8 @@
                 android:padding="14dp" />
 
             <ImageButton
-                android:id="@+id/closeButton"
+                android:fontFamily="@font/worksans_med"
+                android:id="@+id/back_button_edit_perioddate"
                 android:layout_width="35dp"
                 android:layout_height="35dp"
                 android:layout_margin="8dp"
@@ -67,6 +69,7 @@
 
                 <!-- Month Name -->
                 <TextView
+                    android:fontFamily="@font/worksans_med"
                     android:id="@+id/october_label"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -100,6 +103,7 @@
 
                 <!-- Repeat for November -->
                 <TextView
+                    android:fontFamily="@font/worksans_med"
                     android:id="@+id/november_label"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -124,6 +128,7 @@
 
         <!-- Apply Button -->
         <Button
+            android:fontFamily="@font/worksans_med"
             android:id="@+id/applyButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

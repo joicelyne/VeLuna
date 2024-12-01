@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.GridLayout
+import android.widget.ImageButton
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
@@ -36,8 +37,11 @@ class DatesEditPeriod : AppCompatActivity() {
         setupCalendar(octoberCalendar, 31, currentMonth, currentYear) // October with 31 days
         setupCalendar(novemberCalendar, 30, currentMonth + 1, currentYear) // November with 30 days
 
-    }
+        findViewById<ImageButton>(R.id.back_button_edit_perioddate).setOnClickListener {
+            finish()
+        }
 
+    }
 
     private fun setupCalendar(gridLayout: GridLayout, daysInMonth: Int, month: Int, year: Int) {
         gridLayout.removeAllViews()  // Clear previous views
