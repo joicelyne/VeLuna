@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.example.veluna" />
+                  <option name="mobileSdkAppId" value="1:312178208135:android:1796fe101f552706ecf722" />
+                  <option name="projectId" value="veluna-c6509" />
+                  <option name="projectNumber" value="312178208135" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />
