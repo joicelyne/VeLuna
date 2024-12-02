@@ -141,247 +141,243 @@
 
 
             <!-- Date Circles with Days -->
-            <LinearLayout
+            <TableLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:orientation="horizontal">
-
+                android:orientation="horizontal"
+                android:stretchColumns="0,1,2,3,4,5,6">
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
                 <!-- Example of One Date Circle Period Before -->
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="4dp"
-                    android:gravity="center"
-                    android:orientation="vertical">
-
-                    <!-- Date Circle -->
-                    <TextView
-                        android:layout_width="45dp"
-                        android:layout_height="45dp"
-                        android:background="@drawable/circle_period_bef"
-                        android:fontFamily="@font/worksans_bold"
-                        android:gravity="center"
-                        android:text="20"
-                        android:textColor="@color/color3"
-                        android:textSize="16sp" />
-
-                    <!-- Day Text -->
-                    <TextView
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="3dp"
-                        android:fontFamily="@font/worksans_bold"
                         android:gravity="center"
-                        android:text="S"
-                        android:textColor="@color/black"
-                        android:textSize="14sp" />
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="4dp"
-                    android:gravity="center"
-                    android:orientation="vertical">
-
-                    <!-- Date Circle -->
-                    <TextView
-                        android:layout_width="45dp"
-                        android:layout_height="45dp"
-                        android:background="@drawable/circle_period_bef"
-                        android:fontFamily="@font/worksans_bold"
-                        android:gravity="center"
-                        android:text="21"
-                        android:textColor="@color/color3"
-                        android:textSize="16sp" />
-
-                    <!-- Day Text -->
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="3dp"
-                        android:fontFamily="@font/worksans_bold"
-                        android:gravity="center"
-                        android:text="M"
-                        android:textColor="@color/black"
-                        android:textSize="14sp" />
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/periodBef"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="4dp"
-                    android:gravity="center"
-                    android:orientation="vertical">
-
-                    <!-- Date Circle -->
-                    <TextView
-                        android:layout_width="45dp"
-                        android:layout_height="45dp"
-                        android:background="@drawable/circle_period_bef"
-                        android:fontFamily="@font/worksans_bold"
-                        android:gravity="center"
-                        android:text="22"
-                        android:textColor="@color/color3"
-                        android:textSize="16sp" />
-
-                    <!-- Day Text -->
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="3dp"
-                        android:fontFamily="@font/worksans_bold"
-                        android:gravity="center"
-                        android:text="T"
-                        android:textColor="@color/black"
-                        android:textSize="14sp" />
-
-                </LinearLayout>
-
-                <!-- Example of One Date Circle Period Now -->
-                <LinearLayout
-                    android:id="@+id/periodNowContainer"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="4dp"
-                    android:gravity="center"
-                    android:orientation="vertical">
-
-                    <!-- FrameLayout for Date Circle and Edit Icon -->
-                    <FrameLayout
-                        android:id="@+id/periodNow"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content">
+                        android:orientation="vertical">
 
                         <!-- Date Circle -->
                         <TextView
                             android:layout_width="45dp"
                             android:layout_height="45dp"
-                            android:background="@drawable/circle_period_now"
+                            android:background="@drawable/circle_period_bef"
                             android:fontFamily="@font/worksans_bold"
                             android:gravity="center"
-                            android:text="23"
-                            android:textColor="@color/white"
+                            android:text="20"
+                            android:textColor="@color/color3"
                             android:textSize="16sp" />
 
-                        <!-- Edit Icon on top-right corner -->
-                        <ImageView
-                            android:id="@+id/moodEditIcon"
-                            android:layout_width="16dp"
-                            android:layout_height="16dp"
-                            android:layout_gravity="end|top"
-                            android:src="@drawable/veluna_add_perioddate" />
-                    </FrameLayout>
+                        <!-- Day Text -->
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="3dp"
+                            android:fontFamily="@font/worksans_bold"
+                            android:gravity="center"
+                            android:text="S"
+                            android:textColor="@color/black"
+                            android:textSize="14sp" />
 
-                    <!-- Day Text positioned below the circle -->
-                    <TextView
+                    </LinearLayout>
+
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="3dp"
-                        android:fontFamily="@font/worksans_bold"
                         android:gravity="center"
-                        android:text="W"
-                        android:textColor="@color/black"
-                        android:textSize="14sp" />
-                </LinearLayout>
+                        android:orientation="vertical">
 
-                <!-- Example of One Date Circle Period Not -->
-                <LinearLayout
-                    android:id="@+id/periodNot"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="4dp"
-                    android:gravity="center"
-                    android:orientation="vertical">
+                        <!-- Date Circle -->
+                        <TextView
+                            android:layout_width="45dp"
+                            android:layout_height="45dp"
+                            android:background="@drawable/circle_period_bef"
+                            android:fontFamily="@font/worksans_bold"
+                            android:gravity="center"
+                            android:text="21"
+                            android:textColor="@color/color3"
+                            android:textSize="16sp" />
 
-                    <!-- Date Circle -->
-                    <TextView
-                        android:layout_width="45dp"
-                        android:layout_height="45dp"
-                        android:background="@drawable/circle_period_not"
-                        android:fontFamily="@font/worksans_bold"
-                        android:gravity="center"
-                        android:text="24"
-                        android:textColor="@color/color3"
-                        android:textSize="16sp" />
+                        <!-- Day Text -->
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="3dp"
+                            android:fontFamily="@font/worksans_bold"
+                            android:gravity="center"
+                            android:text="M"
+                            android:textColor="@color/black"
+                            android:textSize="14sp" />
 
-                    <!-- Day Text -->
-                    <TextView
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/periodBef"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="3dp"
-                        android:fontFamily="@font/worksans_bold"
                         android:gravity="center"
-                        android:text="T"
-                        android:textColor="@color/black"
-                        android:textSize="14sp" />
-                </LinearLayout>
+                        android:orientation="vertical">
 
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="4dp"
-                    android:gravity="center"
-                    android:orientation="vertical">
+                        <!-- Date Circle -->
+                        <TextView
+                            android:layout_width="45dp"
+                            android:layout_height="45dp"
+                            android:background="@drawable/circle_period_bef"
+                            android:fontFamily="@font/worksans_bold"
+                            android:gravity="center"
+                            android:text="22"
+                            android:textColor="@color/color3"
+                            android:textSize="16sp" />
 
-                    <!-- Date Circle -->
-                    <TextView
-                        android:layout_width="45dp"
-                        android:layout_height="45dp"
-                        android:background="@drawable/circle_period_not"
-                        android:fontFamily="@font/worksans_bold"
-                        android:gravity="center"
-                        android:text="25"
-                        android:textColor="@color/color3"
-                        android:textSize="16sp" />
+                        <!-- Day Text -->
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="3dp"
+                            android:fontFamily="@font/worksans_bold"
+                            android:gravity="center"
+                            android:text="T"
+                            android:textColor="@color/black"
+                            android:textSize="14sp" />
 
-                    <!-- Day Text -->
-                    <TextView
+                        </LinearLayout>
+
+                        <!-- Example of One Date Circle Period Now -->
+                        <LinearLayout
+                            android:id="@+id/periodNowContainer"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:orientation="vertical">
+
+                            <!-- FrameLayout for Date Circle and Edit Icon -->
+                            <FrameLayout
+                                android:id="@+id/periodNow"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content">
+
+                                <!-- Date Circle -->
+                                <TextView
+                                    android:layout_width="45dp"
+                                    android:layout_height="45dp"
+                                    android:background="@drawable/circle_period_now"
+                                    android:fontFamily="@font/worksans_bold"
+                                    android:gravity="center"
+                                    android:text="23"
+                                    android:textColor="@color/white"
+                                    android:textSize="16sp" />
+
+                                <!-- Edit Icon on top-right corner -->
+                                <ImageView
+                                    android:id="@+id/moodEditIcon"
+                                    android:layout_width="16dp"
+                                    android:layout_height="16dp"
+                                    android:layout_gravity="end|top"
+                                    android:src="@drawable/veluna_add_perioddate" />
+                            </FrameLayout>
+
+                            <!-- Day Text positioned below the circle -->
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="3dp"
+                                android:fontFamily="@font/worksans_bold"
+                                android:gravity="center"
+                                android:text="W"
+                                android:textColor="@color/black"
+                                android:textSize="14sp" />
+                        </LinearLayout>
+
+                    <!-- Example of One Date Circle Period Not -->
+                    <LinearLayout
+                        android:id="@+id/periodNot"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="3dp"
-                        android:fontFamily="@font/worksans_bold"
                         android:gravity="center"
-                        android:text="F"
-                        android:textColor="@color/black"
-                        android:textSize="14sp" />
-                </LinearLayout>
+                        android:orientation="vertical">
 
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="4dp"
-                    android:gravity="center"
-                    android:orientation="vertical">
+                        <!-- Date Circle -->
+                        <TextView
+                            android:layout_width="45dp"
+                            android:layout_height="45dp"
+                            android:background="@drawable/circle_period_not"
+                            android:fontFamily="@font/worksans_bold"
+                            android:gravity="center"
+                            android:text="24"
+                            android:textColor="@color/color3"
+                            android:textSize="16sp" />
 
-                    <!-- Date Circle -->
-                    <TextView
-                        android:layout_width="45dp"
-                        android:layout_height="45dp"
-                        android:background="@drawable/circle_period_not"
-                        android:fontFamily="@font/worksans_bold"
-                        android:gravity="center"
-                        android:text="26"
-                        android:textColor="@color/color3"
-                        android:textSize="16sp" />
+                        <!-- Day Text -->
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="3dp"
+                            android:fontFamily="@font/worksans_bold"
+                            android:gravity="center"
+                            android:text="T"
+                            android:textColor="@color/black"
+                            android:textSize="14sp" />
+                    </LinearLayout>
 
-                    <!-- Day Text -->
-                    <TextView
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="3dp"
-                        android:fontFamily="@font/worksans_bold"
                         android:gravity="center"
-                        android:text="S"
-                        android:textColor="@color/black"
-                        android:textSize="14sp" />
-                </LinearLayout>
+                        android:orientation="vertical">
 
-            </LinearLayout>
+                        <!-- Date Circle -->
+                        <TextView
+                            android:layout_width="45dp"
+                            android:layout_height="45dp"
+                            android:background="@drawable/circle_period_not"
+                            android:fontFamily="@font/worksans_bold"
+                            android:gravity="center"
+                            android:text="25"
+                            android:textColor="@color/color3"
+                            android:textSize="16sp" />
+
+                        <!-- Day Text -->
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="3dp"
+                            android:fontFamily="@font/worksans_bold"
+                            android:gravity="center"
+                            android:text="F"
+                            android:textColor="@color/black"
+                            android:textSize="14sp" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:orientation="vertical">
+
+                        <!-- Date Circle -->
+                        <TextView
+                            android:layout_width="45dp"
+                            android:layout_height="45dp"
+                            android:background="@drawable/circle_period_not"
+                            android:fontFamily="@font/worksans_bold"
+                            android:gravity="center"
+                            android:text="26"
+                            android:textColor="@color/color3"
+                            android:textSize="16sp" />
+
+                        <!-- Day Text -->
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="3dp"
+                            android:fontFamily="@font/worksans_bold"
+                            android:gravity="center"
+                            android:text="S"
+                            android:textColor="@color/black"
+                            android:textSize="14sp" />
+                    </LinearLayout>
+                </TableRow>
+            </TableLayout>
         </LinearLayout>
 
         <LinearLayout
@@ -411,40 +407,44 @@
                 android:layout_marginBottom="24dp">
 
                 <!-- PREVIOUS CYCLE LENGTH -->
-                <LinearLayout
+                <RelativeLayout
+                    android:id="@+id/previousCycleLength"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:layout_marginVertical="4dp">
 
                     <LinearLayout
+                        android:layout_alignParentStart="true"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:layout_marginRight="80dp">
+                        android:gravity="center">
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Previous Cycle Length"
-                        android:textStyle="bold|italic"
-                        android:textColor="@color/color2"
-                        android:paddingBottom="4dp"/>
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Previous Cycle Length"
+                            android:textStyle="bold|italic"
+                            android:textColor="@color/color2"
+                            android:paddingBottom="4dp"/>
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="28 Days"
-                        android:textStyle="bold"
-                        android:textColor="@color/color4"
-                        android:paddingBottom="8dp"/>
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="28 Days"
+                            android:textStyle="bold"
+                            android:textColor="@color/color4"
+                            android:paddingBottom="8dp"/>
 
                     </LinearLayout>
 
                     <LinearLayout
-                        android:layout_width="match_parent"
+                        android:layout_alignParentEnd="true"
+                        android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:gravity="center"
+                        android:layout_gravity="end"
                         android:orientation="horizontal">
 
                         <ImageView
@@ -461,7 +461,7 @@
 
                     </LinearLayout>
 
-            </LinearLayout>
+            </RelativeLayout>
 
                 <View
                     android:layout_width="match_parent"
@@ -470,13 +470,15 @@
                     android:layout_marginBottom="10dp"/>
 
                 <!-- PREVIOUS PERIOD LENGTH -->
-                <LinearLayout
+                <RelativeLayout
+                    android:id="@+id/previousPeriodLength"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:layout_marginVertical="4dp">
 
                     <LinearLayout
+                        android:layout_alignParentStart="true"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
@@ -501,7 +503,8 @@
                     </LinearLayout>
 
                     <LinearLayout
-                        android:layout_width="match_parent"
+                        android:layout_alignParentEnd="true"
+                        android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:gravity="center"
                         android:orientation="horizontal">
@@ -521,7 +524,7 @@
 
                     </LinearLayout>
 
-                </LinearLayout>
+                </RelativeLayout>
 
                 <View
                     android:layout_width="match_parent"
@@ -530,13 +533,14 @@
                     android:layout_marginBottom="10dp"/>
 
                 <!-- CYCLE LENGTH VARIATION -->
-                <LinearLayout
+                <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:layout_marginVertical="4dp">
 
                     <LinearLayout
+                        android:layout_alignParentStart="true"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
@@ -561,7 +565,8 @@
                     </LinearLayout>
 
                     <LinearLayout
-                        android:layout_width="match_parent"
+                        android:layout_alignParentEnd="true"
+                        android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:gravity="center"
                         android:orientation="horizontal">
@@ -581,7 +586,7 @@
 
                     </LinearLayout>
 
-                </LinearLayout>
+                </RelativeLayout>
 
             </LinearLayout>
             <!-- END PREVIOUS PERIOD SHOWCASE -->
