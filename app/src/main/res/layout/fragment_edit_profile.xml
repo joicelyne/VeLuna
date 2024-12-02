@@ -31,7 +31,7 @@
                 android:layout_gravity="center"/>
 
             <ImageView
-                android:id="@+id/imgClose"
+                android:id="@+id/back_button_edit_profile"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:layout_gravity="end"
@@ -116,8 +116,11 @@
                 android:layout_height="wrap_content"
                 android:hint="Email"
                 android:padding="10dp"
-                android:fontFamily="@font/worksans_reg" />
+                android:fontFamily="@font/worksans_reg"
+                android:focusable="false"
+                android:enabled="false" />
         </com.google.android.material.textfield.TextInputLayout>
+
 
         <!-- Phone Number Input -->
         <com.google.android.material.textfield.TextInputLayout

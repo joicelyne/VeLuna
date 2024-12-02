@@ -13,10 +13,12 @@ import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
+import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import java.io.ByteArrayOutputStream
+import java.security.MessageDigest
 
 class EditProfileFragment : Fragment() {
 
@@ -29,6 +31,7 @@ class EditProfileFragment : Fragment() {
     private lateinit var btnChangeProfilePicture: Button
     private lateinit var btnUpdateProfile: Button
     private lateinit var profileName: TextView
+    private lateinit var btnBackEditProfile: ImageView
 
     // Firebase references
     private val db = FirebaseFirestore.getInstance()
@@ -48,6 +51,7 @@ class EditProfileFragment : Fragment() {
         btnChangeProfilePicture = view.findViewById(R.id.btnChangeProfilePicture)
         btnUpdateProfile = view.findViewById(R.id.btnUpdateProfile)
         profileName = view.findViewById(R.id.ProfileName)
+        btnBackEditProfile = view.findViewById(R.id.back_button_edit_profile)
 
         // Load user data from Firestore
         loadUserData()
@@ -57,7 +61,10 @@ class EditProfileFragment : Fragment() {
             openCamera()
         }
         btnUpdateProfile.setOnClickListener {
-            updateProfile()
+            reauthenticateAndUpdatePassword()
+        }
+        btnBackEditProfile.setOnClickListener {
+            findNavController().navigateUp()
         }
 
         return view
@@ -73,28 +80,23 @@ class EditProfileFragment : Fragment() {
         if (requestCode == 1 && resultCode == Activity.RESULT_OK) {
             val photo = data?.extras?.get("data") as? Bitmap
             if (photo != null) {
-                // Display captured image in ImageView
                 imgProfile.setImageBitmap(photo)
-                // Upload captured image to Firebase
                 uploadPhotoToFirebase(photo)
             } else {
-                Log.e("Camera", "Failed to capture photo")
-                Toast.makeText(requireContext(), "Failed to capture photo", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Gagal mengambil foto.", Toast.LENGTH_SHORT).show()
             }
         }
     }
 
     private fun uploadPhotoToFirebase(bitmap: Bitmap) {
-        val currentUserId = userId // Get the current userId value to avoid multiple calls to the getter
-        if (currentUserId.isNullOrEmpty()) {
-            Toast.makeText(requireContext(), "User ID not found", Toast.LENGTH_SHORT).show()
-            return
-        }
+        deleteOldPhotoFromFirebase() // Hapus foto lama
+
+        val currentUserId = userId
+        if (currentUserId.isNullOrEmpty()) return
 
         val fileName = "profile_pictures/$currentUserId.jpg"
         val photoRef = storage.child(fileName)
 
-        // Convert bitmap to byte array
         val baos = ByteArrayOutputStream()
         bitmap.compress(Bitmap.CompressFormat.JPEG, 80, baos)
         val data = baos.toByteArray()
@@ -102,73 +104,47 @@ class EditProfileFragment : Fragment() {
         photoRef.putBytes(data)
             .addOnSuccessListener {
                 photoRef.downloadUrl.addOnSuccessListener { uri ->
-                    val photoUrl = uri.toString()
+                    updatedPhotoUrl = uri.toString()
 
-                    // Save photo URL to Firestore
-                    savePhotoUrlToFirestore(currentUserId, photoUrl)
+                    // Update URL di Firestore
+                    db.collection("users").document(currentUserId)
+                        .update("photoUrl", updatedPhotoUrl)
+                        .addOnSuccessListener {
+                            // Tampilkan foto baru di imgProfile
+                            Glide.with(this)
+                                .load(updatedPhotoUrl)
+                                .placeholder(R.drawable.person)
+                                .error(R.drawable.person)
+                                .into(imgProfile)
+
+                            Toast.makeText(requireContext(), "Foto berhasil diperbarui!", Toast.LENGTH_SHORT).show()
+                        }
+                        .addOnFailureListener { e ->
+                            Log.e("EditProfileFragment", "Gagal memperbarui URL foto di Firestore: ${e.message}")
+                        }
                 }
             }
             .addOnFailureListener { e ->
-                Toast.makeText(requireContext(), "Failed to upload photo: ${e.message}", Toast.LENGTH_SHORT).show()
+                Log.e("EditProfileFragment", "Gagal mengunggah foto ke Firebase Storage: ${e.message}")
             }
     }
 
-
-    private fun savePhotoUrlToFirestore(userId: String, photoUrl: String) {
-        val updatedData = mapOf("photoUrl" to photoUrl)
-
-        db.collection("users").document(userId)
-            .set(updatedData, com.google.firebase.firestore.SetOptions.merge())
-            .addOnSuccessListener {
-                Toast.makeText(requireContext(), "Photo URL saved to Firestore!", Toast.LENGTH_SHORT).show()
-            }
-            .addOnFailureListener { e ->
-                Toast.makeText(requireContext(), "Failed to save photo URL: ${e.message}", Toast.LENGTH_SHORT).show()
-            }
-    }
-
-    private fun updateProfile() {
+    private fun deleteOldPhotoFromFirebase() {
         val currentUserId = userId
-        if (currentUserId.isNullOrEmpty()) {
-            Toast.makeText(requireContext(), "User ID not found", Toast.LENGTH_SHORT).show()
-            return
-        }
+        if (currentUserId.isNullOrEmpty()) return
 
-        val name = etUsername.text.toString().trim()
-        val phoneNumber = etPhoneNumber.text.toString().trim()
-        val birthdate = etEmail.text.toString().trim()
-        val password = etPassword.text.toString().trim()
-
-        if (name.isEmpty() || phoneNumber.isEmpty() || birthdate.isEmpty() || password.isEmpty()) {
-            Toast.makeText(requireContext(), "Please fill all fields!", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        val updatedData = hashMapOf(
-            "name" to name,
-            "phoneNumber" to phoneNumber,
-            "birthdate" to birthdate,
-            "password" to password,
-            "photoUrl" to updatedPhotoUrl
-        )
-
-        db.collection("users").document(currentUserId)
-            .set(updatedData, com.google.firebase.firestore.SetOptions.merge())
+        val oldPhotoRef = storage.child("profile_pictures/$currentUserId.jpg")
+        oldPhotoRef.delete()
             .addOnSuccessListener {
-                Toast.makeText(requireContext(), "Profile updated successfully!", Toast.LENGTH_SHORT).show()
-                findNavController().navigate(R.id.action_editprofileFragment_to_profileFragment)
+                Log.d("EditProfileFragment", "Foto lama berhasil dihapus dari Firebase Storage.")
             }
             .addOnFailureListener { e ->
-                Toast.makeText(requireContext(), "Failed to update profile: ${e.message}", Toast.LENGTH_SHORT).show()
+                Log.e("EditProfileFragment", "Gagal menghapus foto lama: ${e.message}")
             }
     }
-
 
     private fun loadUserData() {
-        if (userId.isNullOrEmpty()) {
-            Toast.makeText(requireContext(), "User ID not found", Toast.LENGTH_SHORT).show()
-            return
-        }
+        if (userId.isNullOrEmpty()) return
 
         db.collection("users").document(userId!!)
             .get()
@@ -176,31 +152,100 @@ class EditProfileFragment : Fragment() {
                 if (document != null && document.exists()) {
                     val name = document.getString("name") ?: ""
                     val phoneNumber = document.getString("phoneNumber") ?: ""
-                    val birthdate = document.getString("birthdate") ?: ""
+                    val email = document.getString("email") ?: ""
                     val photoUrl = document.getString("photoUrl") ?: ""
 
-                    // Update UI
                     etUsername.setText(name)
                     etPhoneNumber.setText(phoneNumber)
-                    etEmail.setText(birthdate)
-                    etPassword.setText("********") // Masked password
+                    etEmail.setText(email)
+                    etEmail.isEnabled = false // Disable editing for email
+                    etEmail.isFocusable = false // Prevent focus
+                    etPassword.setText("") // Empty password for security
                     profileName.text = name
 
-                    // Load image into ImageView
                     if (photoUrl.isNotEmpty()) {
                         Glide.with(this)
                             .load(photoUrl)
+                            .placeholder(R.drawable.person)
+                            .error(R.drawable.person)
                             .into(imgProfile)
                     } else {
                         imgProfile.setImageResource(R.drawable.person)
                     }
                 } else {
-                    Toast.makeText(requireContext(), "Data not found", Toast.LENGTH_SHORT).show()
+                    Log.e("EditProfileFragment", "Dokumen tidak ditemukan.")
                 }
             }
             .addOnFailureListener { e ->
-                Toast.makeText(requireContext(), "Failed to load data: ${e.message}", Toast.LENGTH_SHORT).show()
+                Log.e("EditProfileFragment", "Gagal memuat data: ${e.message}")
             }
     }
 
+    private fun reauthenticateAndUpdatePassword() {
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        val newPassword = etPassword.text.toString().trim()
+
+        if (newPassword.isEmpty()) {
+            Toast.makeText(requireContext(), "Password field cannot be empty!", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val email = currentUser?.email
+        if (email.isNullOrEmpty()) {
+            Toast.makeText(requireContext(), "Email not found!", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val currentPasswordInput = EditText(requireContext())
+        currentPasswordInput.inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
+
+        val dialog = android.app.AlertDialog.Builder(requireContext())
+            .setTitle("Reauthenticate")
+            .setMessage("Enter your current password:")
+            .setView(currentPasswordInput)
+            .setPositiveButton("Reauthenticate") { _, _ ->
+                val currentPassword = currentPasswordInput.text.toString().trim()
+                if (currentPassword.isEmpty()) {
+                    Toast.makeText(requireContext(), "Current password cannot be empty!", Toast.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
+
+                val credential = EmailAuthProvider.getCredential(email, currentPassword)
+                currentUser.reauthenticate(credential)
+                    .addOnSuccessListener {
+                        currentUser.updatePassword(newPassword)
+                            .addOnSuccessListener {
+                                updateFirestorePassword(hashPassword(newPassword))
+                            }
+                            .addOnFailureListener { e ->
+                                Log.e("EditProfileFragment", "Failed to update password: ${e.message}")
+                            }
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e("EditProfileFragment", "Reauthentication failed: ${e.message}")
+                    }
+            }
+            .setNegativeButton("Cancel", null)
+            .create()
+
+        dialog.show()
+    }
+
+    private fun updateFirestorePassword(hashedPassword: String) {
+        if (userId.isNullOrEmpty()) return
+
+        db.collection("users").document(userId!!)
+            .update("password", hashedPassword)
+            .addOnSuccessListener {
+                findNavController().navigate(R.id.action_editprofileFragment_to_profileFragment)
+            }
+            .addOnFailureListener { e ->
+                Log.e("EditProfileFragment", "Failed to update Firestore: ${e.message}")
+            }
+    }
+
+    private fun hashPassword(password: String): String {
+        val bytes = MessageDigest.getInstance("SHA-256").digest(password.toByteArray())
+        return bytes.joinToString("") { "%02x".format(it) }
+    }
 }

@@ -40,7 +40,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/worksans_bold"
-                    android:text="Alexandra San"
+                    android:text=""
                     android:textColor="@color/color4"
                     android:textSize="18sp"
                     android:textStyle="bold" />
@@ -388,12 +388,13 @@
             android:orientation="vertical">
 
             <TextView
+                android:id="@+id/cycleName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textSize="18dp"
                 android:textStyle="bold"
                 android:textColor="@color/color4"
-                android:text="Alexandria's Cycle"
+                android:text=""
                 android:layout_marginBottom="10dp"
                 android:layout_marginTop="16dp"/>
 

@@ -2,9 +2,7 @@ package com.example.veluna
 
 import android.os.Bundle
 import android.widget.ImageButton
-import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
@@ -16,15 +14,16 @@ class CycleHistory : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.cycle_history)
 
+        // Back button listener
         findViewById<ImageButton>(R.id.back_button_cycle_history).setOnClickListener {
-            finish()
+            onBackPressed() // Navigate back
         }
 
-        // Inflate the layout for this fragment
+        // Initialize RecyclerView
         val recyclerView: RecyclerView = findViewById(R.id.rv_cycle_history)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        // Dummy data
+        // Dummy data for testing
         val cycleData = listOf(
             Cycle("Feb 12 - Mar 14", 24, 6),
             Cycle("Jan 14 - Feb 12", 32, 5),
@@ -33,9 +32,8 @@ class CycleHistory : AppCompatActivity() {
             Cycle("Oct 18 - Nov 12", 24, 6)
         )
 
+        // Set up adapter
         cycleAdapter = CycleHistoryAdapter(cycleData)
         recyclerView.adapter = cycleAdapter
-
     }
-
 }

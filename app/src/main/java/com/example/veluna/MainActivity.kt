@@ -2,127 +2,120 @@ package com.example.veluna
 
 import android.os.Bundle
 import android.util.Log
-import android.widget.Button
-import android.widget.Toast
 import android.view.View
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupActionBarWithNavController
-import androidx.appcompat.widget.Toolbar
-import androidx.navigation.NavController
-import com.google.firebase.firestore.FirebaseFirestore
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.isVisible
-import androidx.fragment.app.FragmentTransaction
-import androidx.navigation.NavDestination
-import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.FirebaseApp
+import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var bottomNavigation: BottomNavigationView
-    private lateinit var navController: NavController
+    private lateinit var navController: androidx.navigation.NavController
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         FirebaseApp.initializeApp(this)
-        enableEdgeToEdge()
         setContentView(R.layout.activity_main)
+
+        // Inisialisasi BottomNavigationView
+        bottomNavigation = findViewById(R.id.bottom_nav)
 
         // Periksa status login
         checkLoginState()
 
-        // Inisialisasi NavHostFragment dan NavController
-        val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
-        val navController = navHostFragment.navController
+        val navHostFragment =
+            supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        navController = navHostFragment.navController
 
-        // Inisialisasi BottomNavigationView
-        bottomNavigation = findViewById(R.id.bottom_nav)
         bottomNavigation.setupWithNavController(navController)
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {
-                R.id.MainPage, R.id.profileFragment, R.id.cycleHistory, R.id.moodNotes, R.id.datesEditPeriod, R.id.editprofileFragment,    -> {
-                    // Tampilkan BottomNavigationView
-                    bottomNavigation.isVisible = true
+                R.id.MainPage -> {
+                    showBottomNavigation()
+                    bottomNavigation.menu.findItem(R.id.MainPage).isChecked = true
+                }
+                R.id.profileFragment -> {
+                    showBottomNavigation()
+                    bottomNavigation.menu.findItem(R.id.profileFragment).isChecked = true
+                }
+                R.id.cycleHistory -> {
+                    showBottomNavigation()
+                    bottomNavigation.menu.findItem(R.id.cycleHistory).isChecked = true
                 }
                 else -> {
-                    // Sembunyikan BottomNavigationView
-                    bottomNavigation.isVisible = false
+                    hideBottomNavigation()
                 }
             }
         }
 
-        // Set listener untuk item klik pada BottomNavigationView
         bottomNavigation.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.MainPage -> {
-                    // Bersihkan tumpukan navigasi dan arahkan ke HomeFragment
-                    navController.popBackStack(R.id.MainPage, false)
+                    navController.navigate(R.id.MainPage)
                     true
                 }
-
                 R.id.profileFragment -> {
-                    // Arahkan ke ProfileFragment
                     navController.navigate(R.id.profileFragment)
                     true
                 }
-
                 R.id.cycleHistory -> {
-                    // Arahkan ke HistoryFragment
                     navController.navigate(R.id.cycleHistory)
                     true
                 }
-
-//                R.id.editprofileFragment -> {
-//                    // Arahkan ke ProfileFragment
-//                    navController.navigate(R.id.editprofileFragment)
-//                    true
-//                }
                 else -> false
             }
         }
 
-        val db = FirebaseFirestore.getInstance()
-
-        // Find the toolbar from the layout
         val toolbar: Toolbar = findViewById(R.id.toolbar)
-        toolbar.visibility = View.GONE
-
-        // Set the toolbar as the ActionBar
+        toolbar.visibility = View.VISIBLE // Pastikan toolbar terlihat
+        toolbar.setBackgroundColor(ContextCompat.getColor(this, R.color.color3)) // Gunakan warna color3
         setSupportActionBar(toolbar)
-
-        // Set up the action bar with the NavController
         setupActionBarWithNavController(navController)
+        Log.d("ToolbarColor", "Toolbar background: ${toolbar.background}")
     }
 
     override fun onSupportNavigateUp(): Boolean {
         return navController.navigateUp() || super.onSupportNavigateUp()
     }
 
-    // Fungsi untuk menyembunyikan BottomNavigationView
     fun hideBottomNavigation() {
-        bottomNavigation.visibility = View.GONE
+        bottomNavigation.isVisible = false
+        Log.d("MainActivity", "BottomNavigationView hidden")
     }
 
-//    fun showBottomNavigation() {
-//        bottomNavigation.visibility = View.VISIBLE
-//    }
+    fun showBottomNavigation() {
+        bottomNavigation.isVisible = true
+        Log.d("MainActivity", "BottomNavigationView shown")
+    }
+
 
     private fun checkLoginState() {
         val sharedPreferences = getSharedPreferences("VelunaPrefs", 0)
         val isLoggedIn = sharedPreferences.getBoolean("isLoggedIn", false)
+        val currentUser = FirebaseAuth.getInstance().currentUser
 
-        val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        Log.d("MainActivity", "Login state: $isLoggedIn, Current user: ${currentUser?.uid}")
+
+        val navHostFragment =
+            supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         val navController = navHostFragment.navController
 
-        if (isLoggedIn) {
-            // Jika sudah login, langsung ke MainPageFragment
+        if (isLoggedIn && currentUser != null) {
             navController.navigate(R.id.action_global_MainPageFragment)
+            showBottomNavigation()
+            bottomNavigation.menu.findItem(R.id.MainPage).isChecked = true
+        } else {
+            navController.navigate(R.id.action_WelcomePageFragment_to_LoginFragment)
+            hideBottomNavigation()
         }
     }
+
 }

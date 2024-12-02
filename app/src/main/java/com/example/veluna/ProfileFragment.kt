@@ -1,6 +1,5 @@
 package com.example.veluna
 
-import android.graphics.Bitmap
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -71,16 +70,19 @@ class ProfileFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        loadUserData() // Reload user data whenever the fragment becomes active
+        // Pastikan data terbaru ditampilkan saat fragment kembali terlihat
+        loadUserData()
     }
 
     private fun loadUserData() {
         if (userId.isNullOrEmpty()) {
-            Toast.makeText(requireContext(), "User ID tidak ditemukan", Toast.LENGTH_SHORT).show()
+            Log.e("ProfileFragment", "User ID is null or empty.")
+            Toast.makeText(requireContext(), "Anda belum login. Silakan login terlebih dahulu.", Toast.LENGTH_SHORT).show()
+            findNavController().navigate(R.id.action_profileFragment_to_WelcomePageFragment)
             return
         }
 
-        // Fetch user data from Firestore
+        // Fetch user data dari Firestore
         db.collection("users").document(userId!!)
             .get()
             .addOnSuccessListener { document ->
@@ -103,7 +105,7 @@ class ProfileFragment : Fragment() {
                         imgProfile.setImageResource(R.drawable.person)
                     }
 
-                    // Optionally update BMI if weight/height are part of Firestore data
+                    // Update BMI jika Firestore memiliki data berat/tinggi
                     document.getDouble("weight")?.let { weight = it }
                     document.getDouble("height")?.let { height = it }
                     updateBMI()
@@ -118,6 +120,7 @@ class ProfileFragment : Fragment() {
     }
 
     private fun updateBMI() {
+        // Hitung BMI dan update UI
         val heightInMeters = height / 100
         val bmi = weight / (heightInMeters * heightInMeters)
         profileWeight.text = "Weight: $weight kg"
