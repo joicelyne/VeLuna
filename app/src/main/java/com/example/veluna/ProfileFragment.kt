@@ -1,36 +1,34 @@
 package com.example.veluna
 
+import android.graphics.Bitmap
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.EditText
-import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentTransaction
 import androidx.navigation.fragment.findNavController
+import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.firestore.FirebaseFirestore
 
 class ProfileFragment : Fragment() {
 
     // Variabel UI untuk layout Profile
-
-    private lateinit var auth: FirebaseAuth
-    private lateinit var database: FirebaseDatabase
+    private lateinit var profileName: TextView
     private lateinit var profileWeight: TextView
     private lateinit var profileHeight: TextView
     private lateinit var profileBMI: TextView
-    private lateinit var btnEditWeightHeight: Button
+    private lateinit var imgProfile: ImageView
+    private lateinit var btnLogOut: Button
 
-    // Variabel UI untuk layout Edit Profile
-    private lateinit var etUsername: EditText
-    private lateinit var etEmail: EditText
-    private lateinit var etPhoneNumber: EditText
-    private lateinit var etPassword: EditText
+    // Firebase references
+    private val db = FirebaseFirestore.getInstance()
+    private val userId: String? get() = FirebaseAuth.getInstance().currentUser?.uid
 
     private var weight: Double = 47.0
     private var height: Double = 155.0
@@ -39,28 +37,16 @@ class ProfileFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-
         // Inflate layout awal (fragment_profile.xml)
         val view = inflater.inflate(R.layout.fragment_profile, container, false)
 
-        auth = FirebaseAuth.getInstance()
-        database = FirebaseDatabase.getInstance()
-
         // Inisialisasi elemen UI di layout profil
+        profileName = view.findViewById(R.id.profileName)
         profileWeight = view.findViewById(R.id.profileWeight)
         profileHeight = view.findViewById(R.id.profileHeight)
         profileBMI = view.findViewById(R.id.profileBMI)
-        btnEditWeightHeight = view.findViewById(R.id.btnEditWeightHeight)
-
-        btnEditWeightHeight.setOnClickListener {
-            val transaction: FragmentTransaction = requireActivity().supportFragmentManager.beginTransaction()
-            transaction.replace(R.id.fragment_container, EditWeightHeightFragment())
-            transaction.addToBackStack(null)
-            transaction.commit()
-        }
-
-        loadUserData()
-
+        imgProfile = view.findViewById(R.id.imgProfile)
+        btnLogOut = view.findViewById(R.id.btnLogOut)
 
         // Tombol Edit Profile
         view.findViewById<Button>(R.id.btnEditProfile).setOnClickListener {
@@ -72,31 +58,78 @@ class ProfileFragment : Fragment() {
             findNavController().navigate(R.id.action_profileFragment_to_editprofileFragment)
         }
 
-        // Tombol Edit Weight & Height
-        view.findViewById<Button>(R.id.btnEditWeightHeight).setOnClickListener {
-            findNavController().navigate(R.id.action_profileFragment_to_editWeightHeightFragment)
+        // Tombol Logout
+        btnLogOut.setOnClickListener {
+            logoutUser()
         }
 
+        // Muat data pengguna dari Firestore
+        loadUserData()
 
         return view
     }
 
-    private fun loadUserData() {
-        val userId = auth.currentUser?.uid ?: return
-        val userRef = database.getReference("users").child(userId)
-        userRef.get().addOnSuccessListener { dataSnapshot ->
-            val userData = dataSnapshot.value as? Map<String, Any> ?: return@addOnSuccessListener
-            val weight = userData["weight"] as? String ?: "0"
-            val height = userData["height"] as? String ?: "0"
-            profileWeight.text = "$weight kg"
-            profileHeight.text = "$height cm"
-            updateBMI(weight.toDouble(), height.toDouble())
-        }
+    override fun onResume() {
+        super.onResume()
+        loadUserData() // Reload user data whenever the fragment becomes active
     }
 
-    private fun updateBMI(weight: Double, height: Double) {
+    private fun loadUserData() {
+        if (userId.isNullOrEmpty()) {
+            Toast.makeText(requireContext(), "User ID tidak ditemukan", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // Fetch user data from Firestore
+        db.collection("users").document(userId!!)
+            .get()
+            .addOnSuccessListener { document ->
+                if (document != null && document.exists()) {
+                    val name = document.getString("name") ?: "Nama tidak tersedia"
+                    val photoUrl = document.getString("photoUrl") ?: ""
+
+                    // Debug Log
+                    Log.d("ProfileFragment", "Nama: $name, Photo URL: $photoUrl")
+
+                    // Update UI
+                    profileName.text = name
+                    if (photoUrl.isNotEmpty()) {
+                        Glide.with(this)
+                            .load(photoUrl)
+                            .placeholder(R.drawable.person) // Placeholder saat memuat
+                            .error(R.drawable.person) // Fallback jika gagal memuat
+                            .into(imgProfile)
+                    } else {
+                        imgProfile.setImageResource(R.drawable.person)
+                    }
+
+                    // Optionally update BMI if weight/height are part of Firestore data
+                    document.getDouble("weight")?.let { weight = it }
+                    document.getDouble("height")?.let { height = it }
+                    updateBMI()
+                } else {
+                    Toast.makeText(requireContext(), "Data tidak ditemukan", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e("ProfileFragment", "Gagal memuat data: ${e.message}")
+                Toast.makeText(requireContext(), "Gagal memuat data: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+    private fun updateBMI() {
         val heightInMeters = height / 100
         val bmi = weight / (heightInMeters * heightInMeters)
+        profileWeight.text = "Weight: $weight kg"
+        profileHeight.text = "Height: $height cm"
         profileBMI.text = "BMI: %.2f".format(bmi)
+    }
+
+    private fun logoutUser() {
+        FirebaseAuth.getInstance().signOut() // Logout dari Firebase Authentication
+        Toast.makeText(requireContext(), "Berhasil keluar", Toast.LENGTH_SHORT).show()
+
+        // Navigasi ke WelcomePageFragment
+        findNavController().navigate(R.id.action_profileFragment_to_WelcomePageFragment)
     }
 }

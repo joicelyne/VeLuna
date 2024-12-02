@@ -155,6 +155,9 @@
         <action
             android:id="@+id/action_profileFragment_to_editWeightHeightFragment"
             app:destination="@id/editWeightHeightFragment" />
+        <action
+            android:id="@+id/action_profileFragment_to_WelcomePageFragment"
+            app:destination="@id/WelcomePageFragment" />
     </fragment>
 
     <fragment
@@ -162,6 +165,9 @@
         android:name="com.example.veluna.EditProfileFragment"
         android:label="fragment_edit_profile"
         tools:layout="@layout/fragment_edit_profile" >
+        <action
+            android:id="@+id/action_editprofileFragment_to_profileFragment"
+            app:destination="@id/profileFragment" />
     </fragment>
 
     <fragment

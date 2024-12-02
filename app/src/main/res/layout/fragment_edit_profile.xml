@@ -4,6 +4,7 @@
     android:layout_height="wrap_content"
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:padding="16dp"
     android:background="@drawable/background_gradient"
     tools:context=".EditProfileFragment"
     android:fillViewport="true"
@@ -13,175 +14,153 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:gravity="start">
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/moodNotesHeader"
+        android:gravity="start"
+        android:padding="10dp">
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+        <!-- Title Edit Profile -->
             <TextView
-                android:fontFamily="@font/worksans_med"
-                android:id="@+id/headerText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:gravity="center"
                 android:text="Edit Profile"
-                android:textSize="24sp"
-                android:textColor="@color/color4"
-                android:textStyle="bold"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                android:layout_marginTop="20dp"
-                android:padding="14dp" />
+                android:textColor="@color/color3"
+                android:textSize="25sp"
+                android:fontFamily="@font/worksans_bold"
+                android:layout_gravity="center"/>
 
-            <ImageButton
-                android:id="@+id/back_button_edit_profile"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:layout_margin="8dp"
-                android:background="@drawable/close"
-                android:contentDescription="Close"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"  />
+            <ImageView
+                android:id="@+id/imgClose"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_gravity="end"
+                android:src="@drawable/close"
+                android:contentDescription="Back"
+                android:padding="8dp" />
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="2dp"
-            android:background="@color/color4"
-            android:layout_marginBottom="26dp"
-            />
+        </FrameLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingHorizontal="40dp">
+            android:gravity="center"
+            android:layout_marginTop="20dp">
+            <!-- Profile Image -->
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/imgProfile"
+                android:layout_width="90dp"
+                android:layout_height="90dp"
+                android:src="@drawable/person"
+                android:scaleType="centerCrop"
+                android:layout_gravity="center"
+                app:shapeAppearanceOverlay="@style/CircleImageView"/>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:gravity="center"
-                android:layout_marginTop="20dp">
-                <!-- Profile Image -->
-                <ImageView
-                    android:id="@+id/imgProfile"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
-                    android:src="@drawable/person"
-                    android:background="@drawable/circle_background"
-                    android:scaleType="centerCrop"
-                    android:layout_gravity="center" />
-
-                <!-- Profile Name -->
-                <TextView
-                    android:id="@+id/ProfileName"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Alexandra San"
-                    android:textColor="@color/black"
-                    android:textSize="18sp"
-                    android:layout_marginTop="10dp"
-                    android:fontFamily="@font/worksans_semi" />
-
-            </LinearLayout>
-
-            <!-- Change Profile Picture Button -->
-            <Button
-                android:id="@+id/btnChangeProfilePicture"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Change Profile Picture"
-                android:textColor="@color/white"
-                style="@style/button"
-                android:layout_marginTop="10dp"
-                android:fontFamily="@font/worksans_semi" />
-
-            <!-- Username Input -->
-
+            <!-- Profile Name -->
             <TextView
+                android:id="@+id/ProfileName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="15dp"
-                android:text="Username"
-                android:fontFamily="@font/worksans_semi"/>
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                style="@style/TextInputLayoutAppearance">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etUsername"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Username"
-                    android:padding="10dp"
-                    android:fontFamily="@font/worksans_reg" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <!-- Email Input -->
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:text=""
+                android:textColor="@color/black"
+                android:textSize="18sp"
                 android:layout_marginTop="10dp"
-                style="@style/TextInputLayoutAppearance">
+                android:fontFamily="@font/worksans_bold" />
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etEmail"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Email"
-                    android:padding="10dp"
-                    android:fontFamily="@font/worksans_reg" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <!-- Phone Number Input -->
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                style="@style/TextInputLayoutAppearance">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etPhoneNumber"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Phone Number"
-                    android:padding="10dp"
-                    android:fontFamily="@font/worksans_reg" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <!-- Password Input -->
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                style="@style/TextInputLayoutAppearance">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etPassword"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Password"
-                    android:inputType="textPassword"
-                    android:padding="10dp"
-                    android:fontFamily="@font/worksans_reg" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <!-- Update Button -->
-            <Button
-                android:id="@+id/btnUpdateProfile"
-                android:layout_width="300dp"
-                android:layout_height="wrap_content"
-                android:text="Update"
-                android:textColor="@color/white"
-                style="@style/button"
-                android:layout_marginTop="20dp"
-                android:fontFamily="@font/worksans_med" />
         </LinearLayout>
+
+        <!-- Change Profile Picture Button -->
+        <Button
+            android:id="@+id/btnChangeProfilePicture"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Change Profile Picture"
+            android:textColor="@color/white"
+            style="@style/button"
+            android:layout_marginTop="10dp"
+            android:fontFamily="@font/worksans_semi" />
+
+        <!-- Username Input -->
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:text="Username"
+            android:fontFamily="@font/worksans_semi"/>
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@style/TextInputLayoutAppearance">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etUsername"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Username"
+                android:padding="10dp"
+                android:fontFamily="@font/worksans_reg" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Email Input -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            style="@style/TextInputLayoutAppearance">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etEmail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Email"
+                android:padding="10dp"
+                android:fontFamily="@font/worksans_reg" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Phone Number Input -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            style="@style/TextInputLayoutAppearance">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etPhoneNumber"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Phone Number"
+                android:padding="10dp"
+                android:fontFamily="@font/worksans_reg" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Password Input -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            style="@style/TextInputLayoutAppearance">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etPassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Password"
+                android:inputType="textPassword"
+                android:padding="10dp"
+                android:fontFamily="@font/worksans_reg" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Update Button -->
+        <Button
+            android:id="@+id/btnUpdateProfile"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:text="Update"
+            android:textColor="@color/white"
+            style="@style/button"
+            android:layout_marginTop="20dp"
+            android:fontFamily="@font/worksans_med" />
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>
