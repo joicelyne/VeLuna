@@ -144,6 +144,17 @@ class EditProfileFragment : Fragment() {
     }
 
     private fun loadUserData() {
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        if (currentUser == null) {
+            Toast.makeText(requireContext(), "User not logged in", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val email = currentUser.email ?: ""
+        etEmail.setText(email)
+        etEmail.isEnabled = false // Disable editing for email
+        etEmail.isFocusable = false // Prevent focus
+
         if (userId.isNullOrEmpty()) return
 
         db.collection("users").document(userId!!)
@@ -152,14 +163,10 @@ class EditProfileFragment : Fragment() {
                 if (document != null && document.exists()) {
                     val name = document.getString("name") ?: ""
                     val phoneNumber = document.getString("phoneNumber") ?: ""
-                    val email = document.getString("email") ?: ""
                     val photoUrl = document.getString("photoUrl") ?: ""
 
                     etUsername.setText(name)
                     etPhoneNumber.setText(phoneNumber)
-                    etEmail.setText(email)
-                    etEmail.isEnabled = false // Disable editing for email
-                    etEmail.isFocusable = false // Prevent focus
                     etPassword.setText("") // Empty password for security
                     profileName.text = name
 
@@ -180,6 +187,7 @@ class EditProfileFragment : Fragment() {
                 Log.e("EditProfileFragment", "Gagal memuat data: ${e.message}")
             }
     }
+
 
     private fun reauthenticateAndUpdatePassword() {
         val currentUser = FirebaseAuth.getInstance().currentUser
