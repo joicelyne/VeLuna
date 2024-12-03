@@ -65,7 +65,6 @@ dependencies {
     implementation(libs.firebase.common.ktx)
     implementation(libs.androidx.cardview)
     implementation(libs.firebase.storage.ktx)
-    implementation(libs.firebase.database.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -75,7 +74,6 @@ dependencies {
     implementation("com.google.android.material:material:1.10.0")
     implementation ("com.google.firebase:firebase-storage-ktx")
     implementation ("com.github.bumptech.glide:glide:4.14.2")
-    kapt ("com.github.bumptech.glide:compiler:4.14.2")
     implementation("com.google.firebase:firebase-auth-ktx:22.0.2")
     implementation("com.google.android.gms:play-services-auth:21.2.0")
 
