@@ -19,9 +19,6 @@ class ProfileFragment : Fragment() {
 
     // Variabel UI untuk layout Profile
     private lateinit var profileName: TextView
-    private lateinit var profileWeight: TextView
-    private lateinit var profileHeight: TextView
-    private lateinit var profileBMI: TextView
     private lateinit var imgProfile: ImageView
     private lateinit var btnLogOut: Button
 
@@ -29,8 +26,6 @@ class ProfileFragment : Fragment() {
     private val db = FirebaseFirestore.getInstance()
     private val userId: String? get() = FirebaseAuth.getInstance().currentUser?.uid
 
-    private var weight: Double = 47.0
-    private var height: Double = 155.0
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -41,9 +36,6 @@ class ProfileFragment : Fragment() {
 
         // Inisialisasi elemen UI di layout profil
         profileName = view.findViewById(R.id.profileName)
-        profileWeight = view.findViewById(R.id.profileWeight)
-        profileHeight = view.findViewById(R.id.profileHeight)
-        profileBMI = view.findViewById(R.id.profileBMI)
         imgProfile = view.findViewById(R.id.imgProfile)
         btnLogOut = view.findViewById(R.id.btnLogOut)
 
@@ -104,11 +96,6 @@ class ProfileFragment : Fragment() {
                     } else {
                         imgProfile.setImageResource(R.drawable.person)
                     }
-
-                    // Update BMI jika Firestore memiliki data berat/tinggi
-                    document.getDouble("weight")?.let { weight = it }
-                    document.getDouble("height")?.let { height = it }
-                    updateBMI()
                 } else {
                     Toast.makeText(requireContext(), "Data tidak ditemukan", Toast.LENGTH_SHORT).show()
                 }
@@ -119,14 +106,6 @@ class ProfileFragment : Fragment() {
             }
     }
 
-    private fun updateBMI() {
-        // Hitung BMI dan update UI
-        val heightInMeters = height / 100
-        val bmi = weight / (heightInMeters * heightInMeters)
-        profileWeight.text = "Weight: $weight kg"
-        profileHeight.text = "Height: $height cm"
-        profileBMI.text = "BMI: %.2f".format(bmi)
-    }
 
     private fun logoutUser() {
         FirebaseAuth.getInstance().signOut() // Logout dari Firebase Authentication
