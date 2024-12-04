@@ -77,123 +77,139 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/headerText" />
 
-            <!-- Circular Image Buttons for Symptoms -->
-            <LinearLayout
+
+            <!-- Circular Image Buttons for Symptoms in TableLayout -->
+            <TableLayout
                 android:id="@+id/feelingChoices"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:gravity="center"
-                android:orientation="horizontal"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/feelingText">
+                android:stretchColumns="0,1,2,3">
 
-                <LinearLayout
+                <TableRow
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:orientation="vertical">
+                    android:gravity="center">
 
-                    <ImageButton
-                        android:layout_width="64dp"
-                        android:layout_height="64dp"
-                        android:layout_margin="8dp"
-                        android:background="@drawable/feeling_cramps"
-                        android:contentDescription="Cramps"
-                        android:layout_gravity="center" />
-
-                    <TextView
-                        android:fontFamily="@font/worksans_med"
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_weight="1"
                         android:gravity="center"
-                        android:text="Cramps"
-                        android:textColor="@color/color4"
-                        android:textSize="12sp"
-                        android:textStyle="bold" />
+                        android:orientation="vertical"
+                        android:layout_margin="4dp">
 
-                </LinearLayout>
+                        <ImageButton
+                            android:id="@+id/feeling_cramps"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:layout_margin="4dp"
+                            android:background="@drawable/feeling_cramps"
+                            android:contentDescription="Cramps"
+                            android:layout_gravity="center" />
 
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:orientation="vertical">
+                        <TextView
+                            android:fontFamily="@font/worksans_med"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:text="Cramps"
+                            android:textColor="@color/color4"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
 
-                    <ImageButton
-                        android:layout_width="64dp"
-                        android:layout_height="64dp"
-                        android:layout_margin="8dp"
-                        android:background="@drawable/feeling_tender"
-                        android:contentDescription="Tender Breast"
-                        android:layout_gravity="center" />
+                    </LinearLayout>
 
-                    <TextView
-                        android:fontFamily="@font/worksans_med"
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_weight="1"
                         android:gravity="center"
-                        android:text="Tender Breast"
-                        android:textColor="@color/color4"
-                        android:textSize="12sp"
-                        android:textStyle="bold" />
+                        android:orientation="vertical">
 
-                </LinearLayout>
+                        <ImageButton
+                            android:id="@+id/feeling_tenderbreast"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:layout_margin="4dp"
+                            android:background="@drawable/feeling_tender"
+                            android:contentDescription="Tender Breast"
+                            android:layout_gravity="center" />
 
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:orientation="vertical">
+                        <TextView
+                            android:fontFamily="@font/worksans_med"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:text="Tender Breast"
+                            android:textColor="@color/color4"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
 
-                    <ImageButton
-                        android:layout_width="64dp"
-                        android:layout_height="64dp"
-                        android:layout_margin="8dp"
-                        android:background="@drawable/feeling_tired"
-                        android:contentDescription="Fatigue"
-                        android:layout_gravity="center" />
+                    </LinearLayout>
 
-                    <TextView
-                        android:fontFamily="@font/worksans_med"
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_weight="1"
                         android:gravity="center"
-                        android:text="Fatigue"
-                        android:textColor="@color/color4"
-                        android:textSize="12sp"
-                        android:textStyle="bold" />
+                        android:orientation="vertical"
+                        android:layout_margin="4dp">
 
-                </LinearLayout>
+                        <ImageButton
+                            android:id="@+id/feeling_fatigue"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:layout_margin="4dp"
+                            android:background="@drawable/feeling_tired"
+                            android:contentDescription="Fatigue"
+                            android:layout_gravity="center" />
 
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:orientation="vertical">
+                        <TextView
+                            android:fontFamily="@font/worksans_med"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:text="Fatigue"
+                            android:textColor="@color/color4"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
 
-                    <ImageButton
-                        android:layout_width="64dp"
-                        android:layout_height="64dp"
-                        android:layout_margin="8dp"
-                        android:background="@drawable/feeling_bloating"
-                        android:contentDescription="Bloating"
-                        android:layout_gravity="center" />
+                    </LinearLayout>
 
-                    <TextView
-                        android:fontFamily="@font/worksans_med"
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_weight="1"
                         android:gravity="center"
-                        android:text="Bloating"
-                        android:textColor="@color/color4"
-                        android:textSize="12sp"
-                        android:textStyle="bold" />
+                        android:orientation="vertical"
+                        android:layout_margin="4dp">
 
-                </LinearLayout>
+                        <ImageButton
+                            android:id="@+id/feeling_bloating"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:layout_margin="4dp"
+                            android:background="@drawable/feeling_bloating"
+                            android:contentDescription="Bloating"
+                            android:layout_gravity="center" />
 
-            </LinearLayout>
+                        <TextView
+                            android:fontFamily="@font/worksans_med"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:text="Bloating"
+                            android:textColor="@color/color4"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+
+                    </LinearLayout>
+
+                </TableRow>
+
+            </TableLayout>
 
         </LinearLayout>
 
