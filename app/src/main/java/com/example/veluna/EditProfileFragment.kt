@@ -39,6 +39,11 @@ class EditProfileFragment : Fragment() {
     private val userId: String? get() = FirebaseAuth.getInstance().currentUser?.uid
     private var updatedPhotoUrl: String = ""
 
+    companion object {
+        private const val CAMERA_PERMISSION_REQUEST_CODE = 100
+        private const val CAMERA_REQUEST_CODE = 1
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val view = inflater.inflate(R.layout.fragment_edit_profile, container, false)
 
@@ -58,7 +63,7 @@ class EditProfileFragment : Fragment() {
 
         // Button actions
         btnChangeProfilePicture.setOnClickListener {
-            openCamera()
+            checkAndRequestCameraPermission()
         }
         btnUpdateProfile.setOnClickListener {
             reauthenticateAndUpdatePassword()
@@ -70,14 +75,40 @@ class EditProfileFragment : Fragment() {
         return view
     }
 
+    private fun checkAndRequestCameraPermission() {
+        if (requireContext().checkSelfPermission(android.Manifest.permission.CAMERA) == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            // Izin diberikan, buka kamera
+            openCamera()
+        } else {
+            // Minta izin kamera
+            requestPermissions(arrayOf(android.Manifest.permission.CAMERA), CAMERA_PERMISSION_REQUEST_CODE)
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == CAMERA_PERMISSION_REQUEST_CODE) {
+            if (grantResults.isNotEmpty() && grantResults[0] == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                openCamera()
+            } else {
+                Toast.makeText(requireContext(), "Izin kamera diperlukan untuk mengambil foto", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
     private fun openCamera() {
-        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        startActivityForResult(intent, 1)
+        try {
+            val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+            startActivityForResult(intent, CAMERA_REQUEST_CODE)
+        } catch (e: Exception) {
+            Log.e("EditProfileFragment", "Gagal membuka kamera: ${e.message}")
+            Toast.makeText(requireContext(), "Gagal membuka kamera", Toast.LENGTH_SHORT).show()
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == 1 && resultCode == Activity.RESULT_OK) {
+        if (requestCode == CAMERA_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
             val photo = data?.extras?.get("data") as? Bitmap
             if (photo != null) {
                 imgProfile.setImageBitmap(photo)
@@ -85,6 +116,8 @@ class EditProfileFragment : Fragment() {
             } else {
                 Toast.makeText(requireContext(), "Gagal mengambil foto.", Toast.LENGTH_SHORT).show()
             }
+        } else {
+            Toast.makeText(requireContext(), "Kamera ditutup tanpa mengambil foto.", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -110,7 +143,6 @@ class EditProfileFragment : Fragment() {
                     db.collection("users").document(currentUserId)
                         .update("photoUrl", updatedPhotoUrl)
                         .addOnSuccessListener {
-                            // Tampilkan foto baru di imgProfile
                             Glide.with(this)
                                 .load(updatedPhotoUrl)
                                 .placeholder(R.drawable.person)

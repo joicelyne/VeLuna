@@ -48,6 +48,7 @@
 
             <!-- Heart Layout with Period Text and Edit Icon -->
             <FrameLayout
+                android:id="@+id/HeartNonActive"
                 android:layout_width="match_parent"
                 android:layout_height="300dp"
                 android:layout_gravity="center">
@@ -133,7 +134,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/worksans_semi"
-                        android:text="March 2024"
+                        android:text=""
                         android:textColor="@color/black"
                         android:textSize="14sp" />
                 </LinearLayout>
