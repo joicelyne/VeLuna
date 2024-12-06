@@ -32,6 +32,9 @@
         <action
             android:id="@+id/action_LoginFragment_to_MainPage"
             app:destination="@id/MainPage" />
+        <action
+            android:id="@+id/action_LoginFragment_to_velunaOnboardFragment"
+            app:destination="@id/velunaOnboardFragment" />
     </fragment>
 
     <fragment
