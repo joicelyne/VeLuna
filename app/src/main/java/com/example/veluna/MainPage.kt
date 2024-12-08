@@ -9,6 +9,7 @@ import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -26,13 +27,42 @@ class MainPage : Fragment() {
     private lateinit var cycleName: TextView
     private lateinit var tvMonthYear: TextView
 
+    // ViewModel untuk sinkronisasi data
+    private lateinit var userViewModel: UserViewModel
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        (activity as MainActivity).showBottomNavigation()
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.main_page, container, false)
+
+        // Inisialisasi ViewModel
+        userViewModel = ViewModelProvider(requireActivity()).get(UserViewModel::class.java)
+
+        // Initialize UI elements
+        tvName = view.findViewById(R.id.tvName)
+        cycleName = view.findViewById(R.id.cycleName)
+        tvMonthYear = view.findViewById(R.id.tvMonthYear)
+
+        // Heartbeat Animation
+        val heartImageView: ImageView = view.findViewById(R.id.imgHeart)
+        val heartbeatAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.heartbeat)
+        heartImageView.startAnimation(heartbeatAnimation)
+
+        // Observasi perubahan data
+        observeUserData()
+
+        // Set bulan dan tahun
+        setMonthYear()
+
+        // Load user data (jika belum ada di ViewModel)
+        loadUserData()
 
         // Navigation
         view.findViewById<ImageView>(R.id.editDatePeriodIcon).setOnClickListener {
@@ -51,28 +81,14 @@ class MainPage : Fragment() {
             findNavController().navigate(R.id.action_MainPage_to_cycleHistory)
         }
 
-        // Heartbeat Animation
-        val heartImageView: ImageView = view.findViewById(R.id.imgHeart)
-        val heartbeatAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.heartbeat)
-        heartImageView.startAnimation(heartbeatAnimation)
-
-        // Initialize UI elements
-        tvName = view.findViewById(R.id.tvName)
-        cycleName = view.findViewById(R.id.cycleName)
-        tvMonthYear = view.findViewById(R.id.tvMonthYear) // Inisialisasi bulan dan tahun
-
-        // Set bulan dan tahun
-        setMonthYear()
-
-        // Load user data
-        loadUserData()
-
         return view
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        (activity as MainActivity).showBottomNavigation()
+    private fun observeUserData() {
+        userViewModel.name.observe(viewLifecycleOwner) { name ->
+            tvName.text = name
+            cycleName.text = "$name's Cycle"
+        }
     }
 
     private fun setMonthYear() {
@@ -92,17 +108,15 @@ class MainPage : Fragment() {
             return
         }
 
-        // Fetch user data from Firestore
+        // Fetch user data dari Firestore
         db.collection("users").document(currentUserId)
             .get()
             .addOnSuccessListener { document ->
                 if (document != null && document.exists()) {
                     val name = document.getString("name") ?: "User"
-                    val cycleNameText = "$name's Cycle"
 
-                    // Update UI elements
-                    tvName.text = name
-                    cycleName.text = cycleNameText
+                    // Update ViewModel
+                    userViewModel.updateName(name)
                 } else {
                     Log.e("MainPage", "Dokumen pengguna tidak ditemukan.")
                 }

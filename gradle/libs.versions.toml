@@ -23,6 +23,7 @@ core = "1.13.1"
 firebaseCommonKtx = "21.0.0"
 cardview = "1.0.0"
 firebaseStorageKtx = "21.0.1"
+firebaseMessagingKtx = "24.1.0"
 
 [libraries]
 androidx-appcompat-v161 = { module = "androidx.appcompat:appcompat", version.ref = "appcompatVersion" }
@@ -49,6 +50,7 @@ firebase-auth-ktx = { group = "com.google.firebase", name = "firebase-auth-ktx",
 material-v1100 = { module = "com.google.android.material:material", version.ref = "googleMaterial" }
 androidx-databinding-runtime = { group = "androidx.databinding", name = "databinding-runtime", version.ref = "databindingRuntime" }
 firebase-storage-ktx = { group = "com.google.firebase", name = "firebase-storage-ktx", version.ref = "firebaseStorageKtx" }
+firebase-messaging-ktx = { group = "com.google.firebase", name = "firebase-messaging-ktx", version.ref = "firebaseMessagingKtx" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

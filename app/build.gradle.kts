@@ -65,6 +65,7 @@ dependencies {
     implementation(libs.firebase.common.ktx)
     implementation(libs.androidx.cardview)
     implementation(libs.firebase.storage.ktx)
+    implementation(libs.firebase.messaging.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
