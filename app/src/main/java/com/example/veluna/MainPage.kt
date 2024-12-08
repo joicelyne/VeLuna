@@ -11,6 +11,7 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
@@ -26,6 +27,11 @@ class MainPage : Fragment() {
     private lateinit var tvName: TextView
     private lateinit var cycleName: TextView
     private lateinit var tvMonthYear: TextView
+    private lateinit var btnLove : ImageView
+    private lateinit var tvPeriodStatusText: TextView
+    private lateinit var tvPeriodText : TextView
+
+    private var isLoved = false // status awal love butt
 
     // ViewModel untuk sinkronisasi data
     private lateinit var userViewModel: UserViewModel
@@ -39,6 +45,7 @@ class MainPage : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.main_page, container, false)
 
@@ -49,11 +56,6 @@ class MainPage : Fragment() {
         tvName = view.findViewById(R.id.tvName)
         cycleName = view.findViewById(R.id.cycleName)
         tvMonthYear = view.findViewById(R.id.tvMonthYear)
-
-        // Heartbeat Animation
-        val heartImageView: ImageView = view.findViewById(R.id.imgHeart)
-        val heartbeatAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.heartbeat)
-        heartImageView.startAnimation(heartbeatAnimation)
 
         // Observasi perubahan data
         observeUserData()
@@ -79,6 +81,33 @@ class MainPage : Fragment() {
 
         view.findViewById<ImageView>(R.id.history_cycle_button2).setOnClickListener {
             findNavController().navigate(R.id.action_MainPage_to_cycleHistory)
+        }
+
+        // Heartbeat Animation
+        btnLove = view.findViewById(R.id.imgHeart)
+        val heartbeatAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.heartbeat)
+        btnLove.startAnimation(heartbeatAnimation)
+
+
+
+        // Initialize UI elements
+        tvName = view.findViewById(R.id.tvName)
+        cycleName = view.findViewById(R.id.cycleName)
+        tvMonthYear = view.findViewById(R.id.tvMonthYear)
+        tvPeriodStatusText = view.findViewById(R.id.tvPeriodStatusText)
+        tvPeriodText = view.findViewById(R.id.tvPeriodText)
+
+        // Set bulan dan tahun
+        setMonthYear()
+
+        // Load user data
+        loadUserData()
+        loadLoveStatus()
+
+        //Handle love button click
+        btnLove.setOnClickListener{
+            isLoved = !isLoved
+            updateLoveStatus(isLoved)
         }
 
         return view
@@ -108,21 +137,84 @@ class MainPage : Fragment() {
             return
         }
 
-        // Fetch user data dari Firestore
+        // Fetch user data from Firestore
         db.collection("users").document(currentUserId)
             .get()
             .addOnSuccessListener { document ->
                 if (document != null && document.exists()) {
                     val name = document.getString("name") ?: "User"
+                    val cycleNameText = "$name's Cycle"
 
-                    // Update ViewModel
-                    userViewModel.updateName(name)
+                    // Update UI elements
+                    tvName.text = name
+                    cycleName.text = cycleNameText
                 } else {
                     Log.e("MainPage", "Dokumen pengguna tidak ditemukan.")
                 }
             }
             .addOnFailureListener { exception ->
                 Log.e("MainPage", "Gagal mengambil data: ${exception.message}")
+            }
+    }
+
+    private fun loadLoveStatus() {
+        val currentUserId = userId
+        if (currentUserId.isNullOrEmpty()) {
+            Log.e("MainPage", "User ID tidak ditemukan.")
+            return
+        }
+
+        db.collection("users")
+            .document(currentUserId)
+            .collection("period")
+            .document("loveStatus")
+            .get()
+            .addOnSuccessListener { document ->
+                if (document != null && document.exists()) {
+                    isLoved = document.getBoolean("isStart") ?: false
+                    btnLove.setImageResource(if (isLoved) R.drawable.redheart else R.drawable.heartgif)
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e("MainPage", "Gagal memuat love status: ${e.message}")
+            }
+    }
+
+    private fun updateLoveStatus(isLoved: Boolean) {
+        val timestamp = Timestamp.now()
+        val periodData = mapOf(
+            "isStart" to isLoved,
+            "periodStart" to timestamp
+        )
+
+        val currentUserId = userId
+        if (currentUserId.isNullOrEmpty()) {
+            Log.e("MainPage", "User ID tidak ditemukan.")
+            return
+        }
+
+        // Simpan ke Firebase
+        db.collection("users")
+            .document(currentUserId)
+            .collection("period")
+            .document("loveStatus")
+            .set(periodData)
+            .addOnSuccessListener {
+                // Ubah warna icon love & tulisan period started
+                if (isLoved) {
+                    btnLove.setImageResource(R.drawable.redheart)
+                    tvPeriodStatusText.text = "Started"
+                    tvPeriodStatusText.setTextColor(resources.getColor(R.color.white))
+                    tvPeriodText.setTextColor(resources.getColor(R.color.white))
+                } else {
+                    btnLove.setImageResource(R.drawable.heartgif)
+                    tvPeriodStatusText.text = "Not Started"
+                    tvPeriodStatusText.setTextColor(resources.getColor(R.color.color4))
+                    tvPeriodText.setTextColor(resources.getColor(R.color.color4))
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e("MainPage", "Gagal menyimpan love status: ${e.message}")
             }
     }
 }

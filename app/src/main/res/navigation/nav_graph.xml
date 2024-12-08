@@ -32,6 +32,9 @@
         <action
             android:id="@+id/action_LoginFragment_to_MainPage"
             app:destination="@id/MainPage" />
+        <action
+            android:id="@+id/action_LoginFragment_to_velunaOnboardFragment"
+            app:destination="@id/velunaOnboardFragment" />
     </fragment>
 
     <fragment
@@ -153,9 +156,6 @@
             android:id="@+id/action_profileFragment_to_editprofileFragment"
             app:destination="@id/editprofileFragment" />
         <action
-            android:id="@+id/action_profileFragment_to_editWeightHeightFragment"
-            app:destination="@id/editWeightHeightFragment" />
-        <action
             android:id="@+id/action_profileFragment_to_WelcomePageFragment"
             app:destination="@id/WelcomePageFragment" />
     </fragment>
@@ -168,13 +168,6 @@
         <action
             android:id="@+id/action_editprofileFragment_to_profileFragment"
             app:destination="@id/profileFragment" />
-    </fragment>
-
-    <fragment
-        android:id="@+id/editWeightHeightFragment"
-        android:name="com.example.veluna.EditWeightHeightFragment"
-        android:label="fragment_edit_profile"
-        tools:layout="@layout/fragment_edit_weight_height" >
     </fragment>
 
 </navigation>
