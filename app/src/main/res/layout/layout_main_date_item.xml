@@ -1,0 +1,47 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center">
+
+    <!-- Frame Layout for Circle and Icon -->
+    <FrameLayout
+        android:layout_width="45dp"
+        android:layout_height="45dp">
+
+        <!-- Date Circle -->
+        <TextView
+            android:id="@+id/tvDate"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/circle_period_not"
+            android:fontFamily="@font/worksans_bold"
+            android:gravity="center"
+            android:text="1"
+            android:textColor="@color/color3"
+            android:textSize="16sp" />
+
+        <!-- Mood Edit Icon -->
+        <ImageView
+            android:id="@+id/moodEditIcon"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_gravity="end|top"
+            android:src="@drawable/veluna_add_perioddate"
+            android:visibility="gone" />
+    </FrameLayout>
+
+    <!-- Day Text Positioned Below the Circle -->
+    <TextView
+        android:id="@+id/tvDay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:fontFamily="@font/worksans_bold"
+        android:gravity="center"
+        android:text="S"
+        android:textColor="@color/black"
+        android:textSize="14sp" />
+
+</LinearLayout>

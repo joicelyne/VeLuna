@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+
+    <!-- Background color circle -->
+    <solid android:color="@color/color1" />
+
+    <!-- Dashed Border (Stroke) -->
+    <stroke
+        android:width="2dp"
+        android:color="@color/color2"
+        android:dashWidth="4dp"
+        android:dashGap="4dp" />
+
+    <!-- Padding within circle -->
+    <padding
+        android:left="10dp"
+        android:top="10dp"
+        android:right="10dp"
+        android:bottom="10dp" />
+</shape>
