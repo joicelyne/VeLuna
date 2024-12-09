@@ -42,6 +42,7 @@ class MainPage : Fragment() {
     private val calendar = Calendar.getInstance()
     private var isLoved = false // Status awal love button
     private lateinit var gestureDetector: GestureDetectorCompat // Gesture detector
+    private var periodDates: List<Date> = listOf()
 
     // ViewModel untuk sinkronisasi data
     private lateinit var userViewModel: UserViewModel
@@ -155,37 +156,44 @@ class MainPage : Fragment() {
         db.collection("users")
             .document(currentUserId)
             .collection("period")
-            .orderBy("periodStart", com.google.firebase.firestore.Query.Direction.DESCENDING) // Urutkan berdasarkan periodStart terbaru
-            .limit(1) // Ambil hanya 1 data terbaru
+            .orderBy("periodStart", com.google.firebase.firestore.Query.Direction.DESCENDING)
+            .limit(1)
             .get()
             .addOnSuccessListener { querySnapshot ->
                 if (querySnapshot != null && !querySnapshot.isEmpty) {
                     val document = querySnapshot.documents.first()
-                    val periodStart = document.getTimestamp("periodStart")?.toDate() ?: return@addOnSuccessListener
-                    val maxDays = document.getLong("maxDays")?.toInt() ?: 5
-                    val currentDate = Calendar.getInstance().time
+                    val periodDatesLong = document.get("periodDates") as? List<Long> ?: listOf()
+                    val periodDates = periodDatesLong.map { Date(it) } // Konversi Long ke Date
+                    this.periodDates = periodDates // Simpan sebagai List<Date>
 
-                    // Hitung selisih hari antara periodStart dan hari ini
-                    val daysDiff = ((currentDate.time - periodStart.time) / (1000 * 60 * 60 * 24)).toInt()
+                    val currentDate = Date()
+                    isLoved = periodDates.any { it >= currentDate } // Tentukan status isLoved
 
-                    if (daysDiff <= maxDays) {
-                        // Periode masih aktif
-                        isLoved = true
+                    // Tentukan rentang periode
+                    val startPeriod = periodDates.firstOrNull()
+                    val endPeriod = periodDates.lastOrNull()
+
+                    // Update UI berdasarkan isLoved
+                    if (isLoved) {
                         btnLove.setImageResource(R.drawable.redheart)
                         tvPeriodStatusText.text = "Started"
                         tvPeriodStatusText.setTextColor(resources.getColor(R.color.white))
                         tvPeriodText.setTextColor(resources.getColor(R.color.white))
                     } else {
-                        // Periode sudah selesai, update status di Firebase
-                        document.reference.update("isStart", false)
-                        isLoved = false
                         btnLove.setImageResource(R.drawable.heartgif)
                         tvPeriodStatusText.text = "Not Started"
                         tvPeriodStatusText.setTextColor(resources.getColor(R.color.color4))
                         tvPeriodText.setTextColor(resources.getColor(R.color.color4))
                     }
+
+                    // Perbarui tampilan kalender
+                    adapter.updateDays(
+                        newDays = getWeeklyDates(),
+                        newStartPeriod = periodDates.firstOrNull(),
+                        newEndPeriod = periodDates.lastOrNull(),
+                        isLoved = isLoved
+                    )
                 } else {
-                    // Tidak ada periode aktif
                     isLoved = false
                     btnLove.setImageResource(R.drawable.heartgif)
                     tvPeriodStatusText.text = "Not Started"
@@ -198,13 +206,11 @@ class MainPage : Fragment() {
             }
     }
 
-
     private fun updateLoveStatus(isLoved: Boolean) {
         val currentUserId = userId ?: return
         val timestamp = Timestamp.now()
 
         if (isLoved) {
-            // Cek apakah ada periode aktif
             db.collection("users")
                 .document(currentUserId)
                 .collection("period")
@@ -212,41 +218,46 @@ class MainPage : Fragment() {
                 .get()
                 .addOnSuccessListener { querySnapshot ->
                     if (querySnapshot != null && querySnapshot.isEmpty) {
-                        // Tidak ada periode aktif, buat period_id baru
                         val newPeriodId = db.collection("users")
                             .document(currentUserId)
                             .collection("period")
                             .document().id
 
+                        // Generate tanggal dari start hingga end
+                        val startPeriod = timestamp.toDate()
+                        val endPeriod = Calendar.getInstance().apply {
+                            time = startPeriod
+                            add(Calendar.DATE, 4) // 5 hari default
+                        }.time
+                        val periodDates = generateDatesBetween(startPeriod, endPeriod)
+
                         val periodData = mapOf(
                             "isStart" to true,
                             "periodStart" to timestamp,
-                            "maxDays" to 5 // Default 5 hari
+                            "periodDates" to periodDates.map { it.time } // Simpan sebagai Long
                         )
 
                         db.collection("users")
-
                             .document(currentUserId)
                             .collection("period")
                             .document(newPeriodId)
                             .set(periodData)
                             .addOnSuccessListener {
-                                // Update UI saat LoveStatus diaktifkan
                                 btnLove.setImageResource(R.drawable.redheart)
                                 tvPeriodStatusText.text = "Started"
                                 tvPeriodStatusText.setTextColor(resources.getColor(R.color.white))
                                 tvPeriodText.setTextColor(resources.getColor(R.color.white))
-                                trackPeriodDays(newPeriodId, 1) // Mulai mencatat dari PeriodDay1
+
+                                adapter.updateDays(
+                                    newDays = getWeeklyDates(),
+                                    newStartPeriod = periodDates.firstOrNull(),
+                                    newEndPeriod = periodDates.lastOrNull(),
+                                    isLoved = isLoved
+                                )
                             }
-                            .addOnFailureListener { e ->
-                                Log.e("MainPage", "Gagal menyimpan period_id: ${e.message}")
-                            }
-                    } else {
-                        Log.d("MainPage", "Periode aktif sudah ada, tidak membuat ID baru.")
                     }
                 }
         } else {
-            // Jika LoveStatus dinonaktifkan sebelum 5 hari
             db.collection("users")
                 .document(currentUserId)
                 .collection("period")
@@ -254,23 +265,27 @@ class MainPage : Fragment() {
                 .get()
                 .addOnSuccessListener { querySnapshot ->
                     querySnapshot.documents.forEach { document ->
-                        val periodStart = document.getTimestamp("periodStart")?.toDate() ?: return@forEach
-                        val currentDate = Calendar.getInstance().time
+                        val periodDatesLong = document.get("periodDates") as? List<Long> ?: return@forEach
+                        val periodDates = periodDatesLong.map { Date(it) } // Konversi Long ke Date
 
-                        // Hitung durasi hari saat ini
-                        val daysDiff = ((currentDate.time - periodStart.time) / (1000 * 60 * 60 * 24)).toInt() + 1
+                        val updatedDates = periodDates.filter { it <= Date() } // Hanya ambil tanggal <= hari ini
 
-                        // Perbarui durasi sebenarnya
                         document.reference.update(
                             mapOf(
                                 "isStart" to false,
-                                "maxDays" to daysDiff
+                                "periodDates" to updatedDates.map { it.time } // Simpan kembali sebagai Long
                             )
+                        )
+
+                        adapter.updateDays(
+                            newDays = getWeeklyDates(),
+                            newStartPeriod = updatedDates.firstOrNull(),
+                            newEndPeriod = updatedDates.lastOrNull(),
+                            isLoved = isLoved
                         )
                     }
                 }
 
-            // Update UI
             btnLove.setImageResource(R.drawable.heartgif)
             tvPeriodStatusText.text = "Not Started"
             tvPeriodStatusText.setTextColor(resources.getColor(R.color.color4))
@@ -278,59 +293,28 @@ class MainPage : Fragment() {
         }
     }
 
-    private fun trackPeriodDays(periodId: String, dayNumber: Int) {
-        if (!isLoved) return // Hentikan jika LoveStatus dimatikan secara manual
+    private fun generateDatesBetween(startDate: Date, endDate: Date): List<Date> {
+        val dates = mutableListOf<Date>()
+        val calendar = Calendar.getInstance().apply { time = startDate }
 
-        if (dayNumber > 5) {
-            // Auto-hentikan setelah 5 hari
-            updateLoveStatus(false)
-            return
+        while (calendar.time <= endDate) {
+            dates.add(calendar.time)
+            calendar.add(Calendar.DATE, 1)
         }
 
-        val currentUserId = userId ?: return
-        val dayDate = Calendar.getInstance().apply {
-            add(Calendar.DATE, dayNumber - 1)
-        }.time
-
-        db.collection("users")
-            .document(currentUserId)
-            .collection("period")
-            .document(periodId)
-            .get()
-            .addOnSuccessListener { document ->
-                if (document != null && document.exists() && document.getBoolean("isStart") == true) {
-                    val periodDayData = mapOf(
-                        "PeriodDay$dayNumber" to SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault()).format(dayDate)
-                    )
-
-                    db.collection("users")
-                        .document(currentUserId)
-                        .collection("period")
-                        .document(periodId)
-                        .update(periodDayData)
-                        .addOnSuccessListener {
-                            Log.d("MainPage", "PeriodDay$dayNumber berhasil disimpan.")
-                            // Lanjutkan ke hari berikutnya jika LoveStatus masih aktif
-                            recyclerViewWeek.postDelayed({
-                                trackPeriodDays(periodId, dayNumber + 1)
-                            }, 24 * 60 * 60 * 1000) // Delay 24 jam
-                        }
-                        .addOnFailureListener { e ->
-                            Log.e("MainPage", "Gagal mencatat PeriodDay$dayNumber: ${e.message}")
-                        }
-                } else {
-                    Log.d("MainPage", "LoveStatus sudah tidak aktif. Menghentikan pencatatan.")
-                }
-            }
+        return dates
     }
 
-
     private fun setupRecyclerView() {
-        adapter = DayAdapter(getWeeklyDates()) { dayItem ->
-            if (dayItem.isToday) {
+        adapter = DayAdapter(
+            days = getWeeklyDates(),
+            isLoved = isLoved, // Pass isLoved to the adapter
+            onMoodEditClick = { dayItem ->
+                // Callback untuk edit
                 findNavController().navigate(R.id.action_MainPage_to_moodNotes)
             }
-        }
+        )
+
 
         recyclerViewWeek.layoutManager = GridLayoutManager(requireContext(), 7) // 7 items per row
         recyclerViewWeek.adapter = adapter
@@ -352,11 +336,15 @@ class MainPage : Fragment() {
         val weekDates = mutableListOf<DayItem>()
         calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY) // Start week on Sunday
 
+        val fullDateFormat = SimpleDateFormat("dd MMM yyyy", Locale.getDefault()) // Format untuk fullDate
+
         for (i in 0 until 7) { // Generate 7 days
             val date = SimpleDateFormat("dd", Locale.getDefault()).format(calendar.time)
             val dayName = SimpleDateFormat("E", Locale.getDefault()).format(calendar.time)[0].toString()
             val isToday = calendar.get(Calendar.DAY_OF_YEAR) == today.get(Calendar.DAY_OF_YEAR)
-            weekDates.add(DayItem(date, dayName, isToday))
+            val fullDate = fullDateFormat.format(calendar.time) // Generate fullDate
+
+            weekDates.add(DayItem(date, dayName, isToday, fullDate)) // Tambahkan fullDate di sini
             calendar.add(Calendar.DATE, 1)
         }
         calendar.add(Calendar.DATE, -7) // Reset calendar to start of week
@@ -386,7 +374,12 @@ class MainPage : Fragment() {
                                 .setDuration(300).withEndAction {
                                     recyclerViewWeek.translationX = -recyclerViewWeek.width.toFloat()
                                     calendar.add(Calendar.DATE, -7)
-                                    adapter.updateDays(getWeeklyDates())
+                                    adapter.updateDays(
+                                        newDays = getWeeklyDates(),
+                                        newStartPeriod = periodDates.firstOrNull(),
+                                        newEndPeriod = periodDates.lastOrNull(),
+                                        isLoved = isLoved
+                                    )
                                     recyclerViewWeek.animate().translationX(0f).setDuration(300).start()
                                     updateMonthYear()
                                 }.start()
@@ -396,7 +389,12 @@ class MainPage : Fragment() {
                                 .setDuration(300).withEndAction {
                                     recyclerViewWeek.translationX = recyclerViewWeek.width.toFloat()
                                     calendar.add(Calendar.DATE, 7)
-                                    adapter.updateDays(getWeeklyDates())
+                                    adapter.updateDays(
+                                        newDays = getWeeklyDates(),
+                                        newStartPeriod = periodDates.firstOrNull(),
+                                        newEndPeriod = periodDates.lastOrNull(),
+                                        isLoved = isLoved
+                                    )
                                     recyclerViewWeek.animate().translationX(0f).setDuration(300).start()
                                     updateMonthYear()
                                 }.start()
