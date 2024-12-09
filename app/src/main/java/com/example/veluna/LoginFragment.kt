@@ -151,7 +151,7 @@ class LoginFragment : Fragment() {
                 if (task.isSuccessful) {
                     Log.d("Login", "signInWithCredential:success")
                     saveLoginState()
-                    findNavController().navigate(R.id.action_LoginFragment_to_MainPage)
+                    findNavController().navigate(R.id.action_LoginFragment_to_velunaOnboardFragment)
                 } else {
                     Log.w("Login", "signInWithCredential:failure", task.exception)
                     Toast.makeText(requireContext(), "Authentication Failed", Toast.LENGTH_SHORT).show()

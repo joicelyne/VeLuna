@@ -15,10 +15,12 @@ import java.util.*
 
 data class Cycle(val dateRange: String, val cycleLength: Int, val periodLength: Int)
 
-class CycleHistoryAdapter(private val cycles: List<Cycle>) : RecyclerView.Adapter<CycleHistoryAdapter.CycleViewHolder>() {
+class CycleHistoryAdapter(private var cycles: List<Cycle>) :
+    RecyclerView.Adapter<CycleHistoryAdapter.CycleViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CycleViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.cycle_history_item, parent, false)
+        val view =
+            LayoutInflater.from(parent.context).inflate(R.layout.cycle_history_item, parent, false)
         return CycleViewHolder(view)
     }
 
@@ -28,6 +30,11 @@ class CycleHistoryAdapter(private val cycles: List<Cycle>) : RecyclerView.Adapte
     }
 
     override fun getItemCount(): Int = cycles.size
+
+    fun updateData(newCycles: List<Cycle>) {
+        cycles = newCycles
+        notifyDataSetChanged() // Perbarui tampilan RecyclerView
+    }
 
     inner class CycleViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val tvDateRange: TextView = itemView.findViewById(R.id.tv_cycle_date_range)
@@ -43,8 +50,5 @@ class CycleHistoryAdapter(private val cycles: List<Cycle>) : RecyclerView.Adapte
         private fun calculateProgress(periodLength: Int, cycleLength: Int): Int {
             return (periodLength.toFloat() / cycleLength * 100).toInt()
         }
-
     }
-
-
 }
