@@ -7,8 +7,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
@@ -19,6 +21,7 @@ class EditWeightHeightFragment : Fragment() {
     private lateinit var editTextWeight: EditText
     private lateinit var editTextHeight: EditText
     private lateinit var saveButton: Button
+    private lateinit var btnBackEditProfile: ImageView
 
     // Firebase references
     private val db = FirebaseFirestore.getInstance()
@@ -35,6 +38,7 @@ class EditWeightHeightFragment : Fragment() {
         editTextWeight = view.findViewById(R.id.editTextWeight)
         editTextHeight = view.findViewById(R.id.editTextHeight)
         saveButton = view.findViewById(R.id.saveButton)
+        btnBackEditProfile = view.findViewById(R.id.imgClose)
 
         saveButton.setOnClickListener {
             val weight = editTextWeight.text.toString().trim()
@@ -49,6 +53,10 @@ class EditWeightHeightFragment : Fragment() {
             } else {
                 saveUserData(weight, height)
             }
+        }
+
+        btnBackEditProfile.setOnClickListener {
+            findNavController().navigateUp()
         }
 
         return view

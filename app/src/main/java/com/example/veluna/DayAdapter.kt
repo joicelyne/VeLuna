@@ -57,7 +57,7 @@ class DayAdapter(
             // Tanggal lain dalam periode (rentang antara startPeriod dan endPeriod)
             startPeriod != null && endPeriod != null && dayDate in startPeriod!!..endPeriod!! -> {
                 holder.tvDate.setBackgroundResource(R.drawable.circle_period_next)
-                holder.tvDate.setTextColor(holder.itemView.context.getColor(R.color.white))
+                holder.tvDate.setTextColor(holder.itemView.context.getColor(R.color.color3))
             }
             // Tanggal lainnya di luar periode
             else -> {
