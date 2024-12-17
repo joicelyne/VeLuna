@@ -1,5 +1,7 @@
 package com.example.veluna
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.GestureDetector
@@ -37,6 +39,12 @@ class MainPage : Fragment() {
     private lateinit var tvPeriodText: TextView
     private lateinit var recyclerViewWeek: RecyclerView
     private lateinit var adapter: DayAdapter
+    private lateinit var imgInsight1: ImageView
+    private lateinit var txtInsight1: TextView
+    private lateinit var imgInsight2: ImageView
+    private lateinit var txtInsight2: TextView
+    private lateinit var imgInsight3: ImageView
+    private lateinit var txtInsight3: TextView
 
     // Calendar instance to track the current week
     private val calendar = Calendar.getInstance()
@@ -96,6 +104,13 @@ class MainPage : Fragment() {
             findNavController().navigate(R.id.action_MainPage_to_cycleHistory)
         }
 
+        imgInsight1 = view.findViewById(R.id.imgInsight1)
+        txtInsight1 = view.findViewById(R.id.txtInsight1)
+        imgInsight2 = view.findViewById(R.id.imgInsight2)
+        txtInsight2 = view.findViewById(R.id.txtInsight2)
+        imgInsight3 = view.findViewById(R.id.imgInsight3)
+        txtInsight3 = view.findViewById(R.id.txtInsight3)
+
         // Heartbeat Animation
         btnLove = view.findViewById(R.id.imgHeart)
         val heartbeatAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.heartbeat)
@@ -105,6 +120,31 @@ class MainPage : Fragment() {
         btnLove.setOnClickListener {
             isLoved = !isLoved
             updateLoveStatus(isLoved)
+        }
+
+        // Handle Image & Text Insights
+        imgInsight1.setOnClickListener {
+            openLink("https://www.fertile-gut.com/blogs/news/unlocking-the-secrets-of-your-menstrual-cycle?srsltid=AfmBOopS0nHNuq1ps2EUBoX0t7pQBOJ15ICkec9d_DgYcFWPT9L947BQ")
+        }
+
+        txtInsight1.setOnClickListener {
+            openLink("https://www.fertile-gut.com/blogs/news/unlocking-the-secrets-of-your-menstrual-cycle?srsltid=AfmBOopS0nHNuq1ps2EUBoX0t7pQBOJ15ICkec9d_DgYcFWPT9L947BQ")
+        }
+
+        imgInsight2.setOnClickListener {
+            openLink("https://www.rainbowhospitals.in/blog/women-mental-health")
+        }
+
+        txtInsight2.setOnClickListener {
+            openLink("https://www.rainbowhospitals.in/blog/women-mental-health")
+        }
+
+        imgInsight3.setOnClickListener {
+            openLink("https://www.invitra.com/en/sperms-journey-to-the-egg/")
+        }
+
+        txtInsight3.setOnClickListener {
+            openLink("https://www.invitra.com/en/sperms-journey-to-the-egg/")
         }
 
         return view
@@ -415,6 +455,11 @@ class MainPage : Fragment() {
         val dateFormat = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
         val monthYear = dateFormat.format(calendar.time)
         tvMonthYear.text = monthYear
+    }
+
+    private fun openLink(url: String) {
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+        startActivity(intent)
     }
 
 }
