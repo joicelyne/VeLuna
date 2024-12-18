@@ -135,16 +135,24 @@ class MainPage : Fragment() {
             .addOnSuccessListener { document ->
                 if (document != null && document.exists()) {
                     val name = document.getString("name") ?: "User"
+                    val periodLength = document.getLong("periodLength")?.toInt() ?: 5 // Default 5 hari
+                    updatePeriodDates(periodLength)
                     tvName.text = name
                     cycleName.text = "$name's Cycle"
+
+                    // Simpan periodLength untuk digunakan dalam logika lainnya
+                    updatePeriodDates(periodLength)
                 } else {
                     Log.e("MainPage", "Dokumen pengguna tidak ditemukan.")
+                    updatePeriodDates(5) // Gunakan default jika dokumen tidak ditemukan
                 }
             }
             .addOnFailureListener { exception ->
                 Log.e("MainPage", "Gagal mengambil data: ${exception.message}")
+                updatePeriodDates(5) // Gunakan default jika gagal mengambil data
             }
     }
+
 
     private fun loadLoveStatus() {
         val currentUserId = userId
@@ -210,96 +218,102 @@ class MainPage : Fragment() {
         val currentUserId = userId ?: return
         val timestamp = Timestamp.now()
 
-        if (isLoved) {
-            db.collection("users")
-                .document(currentUserId)
-                .collection("period")
-                .whereEqualTo("isStart", true)
-                .get()
-                .addOnSuccessListener { querySnapshot ->
-                    if (querySnapshot != null && querySnapshot.isEmpty) {
-                        val newPeriodId = db.collection("users")
-                            .document(currentUserId)
-                            .collection("period")
-                            .document().id
+        db.collection("users").document(currentUserId)
+            .get()
+            .addOnSuccessListener { userDocument ->
+                // Ambil nilai periodLength dari Firebase atau gunakan default 5
+                val periodLength = userDocument.getLong("periodLength")?.toInt() ?: 5
 
-                        // Generate tanggal dari start hingga end
-                        val startPeriod = timestamp.toDate()
-                        val endPeriod = Calendar.getInstance().apply {
-                            time = startPeriod
-                            add(Calendar.DATE, 4) // 5 hari default
-                        }.time
-                        val periodDates = generateDatesBetween(startPeriod, endPeriod)
+                if (isLoved) {
+                    db.collection("users")
+                        .document(currentUserId)
+                        .collection("period")
+                        .whereEqualTo("isStart", true)
+                        .get()
+                        .addOnSuccessListener { querySnapshot ->
+                            if (querySnapshot.isEmpty) {
+                                val newPeriodId = db.collection("users")
+                                    .document(currentUserId)
+                                    .collection("period")
+                                    .document().id
 
-                        val periodData = mapOf(
-                            "isStart" to true,
-                            "periodStart" to timestamp,
-                            "periodDates" to periodDates.map { it.time } // Simpan sebagai Long
-                        )
+                                val startPeriod = timestamp.toDate()
+                                val periodDates = generateDatesBetween(startPeriod, periodLength)
 
-                        db.collection("users")
-                            .document(currentUserId)
-                            .collection("period")
-                            .document(newPeriodId)
-                            .set(periodData)
-                            .addOnSuccessListener {
-                                btnLove.setImageResource(R.drawable.redheart)
-                                tvPeriodStatusText.text = "Started"
-                                tvPeriodStatusText.setTextColor(resources.getColor(R.color.white))
-                                tvPeriodText.setTextColor(resources.getColor(R.color.white))
+                                val periodData = mapOf(
+                                    "isStart" to true,
+                                    "periodStart" to timestamp,
+                                    "periodDates" to periodDates.map { it.time } // Simpan sebagai Long
+                                )
+
+                                db.collection("users")
+                                    .document(currentUserId)
+                                    .collection("period")
+                                    .document(newPeriodId)
+                                    .set(periodData)
+                                    .addOnSuccessListener {
+                                        btnLove.setImageResource(R.drawable.redheart)
+                                        tvPeriodStatusText.text = "Started"
+                                        tvPeriodStatusText.setTextColor(resources.getColor(R.color.white))
+                                        tvPeriodText.setTextColor(resources.getColor(R.color.white))
+
+                                        adapter.updateDays(
+                                            newDays = getWeeklyDates(),
+                                            newStartPeriod = periodDates.firstOrNull(),
+                                            newEndPeriod = periodDates.lastOrNull(),
+                                            isLoved = isLoved
+                                        )
+                                    }
+                            }
+                        }
+                } else {
+                    db.collection("users")
+                        .document(currentUserId)
+                        .collection("period")
+                        .whereEqualTo("isStart", true)
+                        .get()
+                        .addOnSuccessListener { querySnapshot ->
+                            querySnapshot.documents.forEach { document ->
+                                val periodDatesLong = document.get("periodDates") as? List<Long> ?: return@forEach
+                                val periodDates = periodDatesLong.map { Date(it) } // Konversi Long ke Date
+
+                                val updatedDates = periodDates.filter { it <= Date() }
+
+                                document.reference.update(
+                                    mapOf(
+                                        "isStart" to false,
+                                        "periodDates" to updatedDates.map { it.time }
+                                    )
+                                )
 
                                 adapter.updateDays(
                                     newDays = getWeeklyDates(),
-                                    newStartPeriod = periodDates.firstOrNull(),
-                                    newEndPeriod = periodDates.lastOrNull(),
-                                    isLoved = isLoved
+                                    newStartPeriod = updatedDates.firstOrNull(),
+                                    newEndPeriod = updatedDates.lastOrNull(),
+                                    isLoved = false
                                 )
                             }
-                    }
+                        }
+
+                    btnLove.setImageResource(R.drawable.heartgif)
+                    tvPeriodStatusText.text = "Not Started"
+                    tvPeriodStatusText.setTextColor(resources.getColor(R.color.color4))
+                    tvPeriodText.setTextColor(resources.getColor(R.color.color4))
                 }
-        } else {
-            db.collection("users")
-                .document(currentUserId)
-                .collection("period")
-                .whereEqualTo("isStart", true)
-                .get()
-                .addOnSuccessListener { querySnapshot ->
-                    querySnapshot.documents.forEach { document ->
-                        val periodDatesLong = document.get("periodDates") as? List<Long> ?: return@forEach
-                        val periodDates = periodDatesLong.map { Date(it) } // Konversi Long ke Date
-
-                        val updatedDates = periodDates.filter { it <= Date() } // Hanya ambil tanggal <= hari ini
-
-                        document.reference.update(
-                            mapOf(
-                                "isStart" to false,
-                                "periodDates" to updatedDates.map { it.time } // Simpan kembali sebagai Long
-                            )
-                        )
-
-                        adapter.updateDays(
-                            newDays = getWeeklyDates(),
-                            newStartPeriod = updatedDates.firstOrNull(),
-                            newEndPeriod = updatedDates.lastOrNull(),
-                            isLoved = isLoved
-                        )
-                    }
-                }
-
-            btnLove.setImageResource(R.drawable.heartgif)
-            tvPeriodStatusText.text = "Not Started"
-            tvPeriodStatusText.setTextColor(resources.getColor(R.color.color4))
-            tvPeriodText.setTextColor(resources.getColor(R.color.color4))
-        }
+            }
+            .addOnFailureListener { exception ->
+                Log.e("MainPage", "Gagal mengambil periodLength: ${exception.message}")
+            }
     }
 
-    private fun generateDatesBetween(startDate: Date, endDate: Date): List<Date> {
+    private fun generateDatesBetween(startDate: Date, periodLength: Int = 5): List<Date> {
         val dates = mutableListOf<Date>()
         val calendar = Calendar.getInstance().apply { time = startDate }
 
-        while (calendar.time <= endDate) {
+        // Tambahkan tanggal sebanyak periodLength
+        for (i in 0 until periodLength) {
             dates.add(calendar.time)
-            calendar.add(Calendar.DATE, 1)
+            calendar.add(Calendar.DATE, 1) // Tambah 1 hari
         }
 
         return dates
@@ -415,6 +429,42 @@ class MainPage : Fragment() {
         val dateFormat = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
         val monthYear = dateFormat.format(calendar.time)
         tvMonthYear.text = monthYear
+    }
+
+    private fun getUserPeriodLength(): Int? {
+        val currentUserId = userId
+        if (currentUserId.isNullOrEmpty()) return null
+
+        var periodLength: Int? = null
+
+        db.collection("users").document(currentUserId)
+            .get()
+            .addOnSuccessListener { document ->
+                periodLength = document.getLong("periodLength")?.toInt()
+            }
+            .addOnFailureListener {
+                periodLength = null
+            }
+
+        return periodLength ?: 5 // Default ke 5 jika null
+    }
+
+    private fun updatePeriodDates(periodLength: Int) {
+        if (periodDates.isEmpty()) return
+
+        val startPeriod = periodDates.first()
+
+        // Generate dates langsung berdasarkan startPeriod dan periodLength
+        val updatedPeriodDates = generateDatesBetween(startPeriod, periodLength)
+        this.periodDates = updatedPeriodDates
+
+        // Update adapter dengan tanggal baru
+        adapter.updateDays(
+            newDays = getWeeklyDates(),
+            newStartPeriod = updatedPeriodDates.firstOrNull(),
+            newEndPeriod = updatedPeriodDates.lastOrNull(),
+            isLoved = isLoved
+        )
     }
 
 }
