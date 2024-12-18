@@ -204,9 +204,10 @@
                             android:paddingBottom="4dp"/>
 
                         <TextView
+                            android:id="@+id/prevCycleLenDays"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="28 Days"
+                            android:text=""
                             android:textStyle="bold"
                             android:textColor="@color/color4"
                             android:paddingBottom="8dp"/>
@@ -267,9 +268,10 @@
                             android:paddingBottom="4dp"/>
 
                         <TextView
+                            android:id="@+id/prevPeriodLenDays"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="6 Days"
+                            android:text=""
                             android:textStyle="bold"
                             android:textColor="@color/color4"
                             android:paddingBottom="8dp"/>

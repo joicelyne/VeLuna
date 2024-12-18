@@ -38,6 +38,8 @@ class MainPage : Fragment() {
     private lateinit var tvPeriodText: TextView
     private lateinit var recyclerViewWeek: RecyclerView
     private lateinit var adapter: DayAdapter
+    private lateinit var prevCycleLenText: TextView
+    private lateinit var prevPeriodLenText: TextView
 
     // Calendar instance to track the current week
     private val calendar = Calendar.getInstance()
@@ -73,6 +75,8 @@ class MainPage : Fragment() {
         tvPeriodStatusText = view.findViewById(R.id.tvPeriodStatusText)
         tvPeriodText = view.findViewById(R.id.tvPeriodText)
         recyclerViewWeek = view.findViewById(R.id.recyclerViewWeek)
+        prevCycleLenText = view.findViewById(R.id.prevCycleLenDays)
+        prevPeriodLenText = view.findViewById(R.id.prevPeriodLenDays)
 
         // Observasi perubahan data
         observeUserData()
@@ -146,6 +150,8 @@ class MainPage : Fragment() {
                     tvName.text = name
                     cycleName.text = "$name's Cycle"
                     insightName.text = "$name's Insight"
+                    prevCycleLenText.text = "$cycleLength Days"
+                    prevPeriodLenText.text = "$periodLength Days"
 
                     // Simpan periodLength untuk digunakan dalam logika lainnya
                     updatePeriodDates(periodLength)
@@ -153,6 +159,8 @@ class MainPage : Fragment() {
                     Log.e("MainPage", "Dokumen pengguna tidak ditemukan.")
                     updatePeriodDates(5) // Gunakan default jika dokumen tidak ditemukan
                     updatePredictedDates(28, 5)
+                    prevCycleLenText.text = "-" // Default jika tidak ada data
+                    prevPeriodLenText.text = "-" // Default jika tidak ada data
                 }
             }
             .addOnFailureListener { exception ->
@@ -252,21 +260,24 @@ class MainPage : Fragment() {
         }
     }
 
-    private fun getPredictedPeriodDates(startDate: Date, cycleLength: Int, periodLength: Int): List<Date> {
+    private fun getPredictedPeriodDates(periodStart: Date, cycleLength: Int, periodLength: Int): List<Date> {
         val predictedDates = mutableListOf<Date>()
-        val calendar = Calendar.getInstance().apply { time = startDate }
+        val calendar = Calendar.getInstance().apply { time = periodStart }
 
+        // Tambahkan cycleLength dari periodStart
+        calendar.time = periodStart
         calendar.add(Calendar.DATE, cycleLength)
 
+        // Tambahkan tanggal untuk periodLength hari ke depan
         for (i in 0 until periodLength) {
             predictedDates.add(calendar.time)
-            calendar.add(Calendar.DATE, 1)
+            calendar.add(Calendar.DATE, 1) // Tambah 1 hari
         }
 
-        Log.d("Debug", "Predicted Period Start: $startDate, CycleLength: $cycleLength, PeriodLength: $periodLength, PredictedDates: $predictedDates")
-
+        Log.d("Debug", "Predicted Period Dates: $predictedDates")
         return predictedDates
     }
+
 
     private fun updateLoveStatus(isLoved: Boolean) {
         val currentUserId = userId ?: return
@@ -298,7 +309,7 @@ class MainPage : Fragment() {
 
                                 val periodData = mapOf(
                                     "isStart" to true,
-                                    "periodStart" to timestamp,
+                                    "periodStart" to startPeriod,
                                     "periodDates" to periodDates.map { it.time } // Simpan sebagai Long
                                 )
 
