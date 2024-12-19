@@ -19,9 +19,11 @@ open class BaseAuthFragment : Fragment() {
             redirectToLogin()
         }
     }
+
     private fun isUserBlocked(): Boolean {
         return false
     }
+
     private fun redirectToLogin() {
         findNavController().navigate(R.id.LoginFragment)
     }
