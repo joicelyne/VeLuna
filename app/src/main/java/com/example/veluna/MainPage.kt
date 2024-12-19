@@ -195,6 +195,7 @@ class MainPage : Fragment() {
 
                     // Simpan periodLength untuk digunakan dalam logika lainnya
                     updatePeriodDates(periodLength)
+                    updatePredictedDates(cycleLength, periodLength)
                 } else {
                     Log.e("MainPage", "Dokumen pengguna tidak ditemukan.")
                     updatePeriodDates(5) // Gunakan default jika dokumen tidak ditemukan
@@ -265,12 +266,12 @@ class MainPage : Fragment() {
     // Fungsi untuk memperbarui UI kalender
     private fun updateCalendarUI(periodDates: List<Date>, predictedDates: List<Date>) {
         val currentDate = Date()
-        isLoved = periodDates.any { it >= currentDate } // Tentukan status isLoved
+        isLoved = periodDates.any { it >= currentDate }
 
-        // Update UI berdasarkan isLoved
         if (isLoved) {
             btnLove.setImageResource(R.drawable.redheart)
-            tvPeriodStatusText.text = "Started"
+            val dayNumber = periodDates.indexOfFirst { it == currentDate } + 1
+            tvPeriodStatusText.text = "Period Day $dayNumber"
             tvPeriodStatusText.setTextColor(resources.getColor(R.color.white))
             tvPeriodText.setTextColor(resources.getColor(R.color.white))
         } else {
@@ -280,7 +281,6 @@ class MainPage : Fragment() {
             tvPeriodText.setTextColor(resources.getColor(R.color.color4))
         }
 
-        // Perbarui RecyclerView
         adapter.updateDays(
             newDays = getWeeklyDates(),
             newStartPeriod = periodDates.firstOrNull(),
@@ -308,16 +308,20 @@ class MainPage : Fragment() {
         calendar.time = periodStart
         calendar.add(Calendar.DATE, cycleLength)
 
-        // Tambahkan tanggal untuk periodLength hari ke depan
-        for (i in 0 until periodLength) {
-            predictedDates.add(calendar.time)
-            calendar.add(Calendar.DATE, 1) // Tambah 1 hari
+        // Generate dates for multiple cycles
+        for (cycle in 0 until 12) { // Generate dates for 12 cycles (1 year)
+            // Add dates for the current period
+            for (i in 0 until periodLength) {
+                predictedDates.add(calendar.time)
+                calendar.add(Calendar.DATE, 1)
+            }
+            // Move to the next cycle start date
+            calendar.add(Calendar.DATE, cycleLength - periodLength)
         }
 
         Log.d("Debug", "Predicted Period Dates: $predictedDates")
         return predictedDates
     }
-
 
     private fun updateLoveStatus(isLoved: Boolean) {
         val currentUserId = userId ?: return
@@ -326,12 +330,12 @@ class MainPage : Fragment() {
         db.collection("users").document(currentUserId)
             .get()
             .addOnSuccessListener { userDocument ->
-                // Ambil nilai periodLength dan cycleLength dari Firebase atau gunakan default
+                // Retrieve or use default periodLength and cycleLength
                 val periodLength = userDocument.getLong("periodLength")?.toInt() ?: 5
                 val cycleLength = userDocument.getLong("cycleLength")?.toInt() ?: 28
 
                 if (isLoved) {
-                    // Cek jika tidak ada periode yang sedang berjalan
+                    // Check if there's an ongoing period
                     db.collection("users")
                         .document(currentUserId)
                         .collection("period")
@@ -339,6 +343,7 @@ class MainPage : Fragment() {
                         .get()
                         .addOnSuccessListener { querySnapshot ->
                             if (querySnapshot.isEmpty) {
+                                // No ongoing period, start a new one
                                 val newPeriodId = db.collection("users")
                                     .document(currentUserId)
                                     .collection("period")
@@ -350,22 +355,21 @@ class MainPage : Fragment() {
                                 val periodData = mapOf(
                                     "isStart" to true,
                                     "periodStart" to startPeriod,
-                                    "periodDates" to periodDates.map { it.time } // Simpan sebagai Long
+                                    "periodLength" to periodLength,
+                                    "cycleLength" to cycleLength,
+                                    "periodDates" to periodDates.map { it.time } // Store as Long
                                 )
 
-                                // Simpan periode baru
                                 db.collection("users")
                                     .document(currentUserId)
                                     .collection("period")
                                     .document(newPeriodId)
                                     .set(periodData)
                                     .addOnSuccessListener {
-                                        Log.d("Debug", "Period Baru Disimpan: $periodData")
+                                        Log.d("Debug", "New Period Saved: $periodData")
 
-                                        // Ambil startDate terbaru dan hitung prediksi tanggal
+                                        // Predict upcoming dates and update UI
                                         val predictedDates = getPredictedPeriodDates(startPeriod, cycleLength, periodLength)
-
-                                        // Update UI
                                         updateCalendarUI(periodDates, predictedDates)
 
                                         btnLove.setImageResource(R.drawable.redheart)
@@ -376,57 +380,61 @@ class MainPage : Fragment() {
                                         loadLoveStatus()
                                     }
                                     .addOnFailureListener { e ->
-                                        Log.e("MainPage", "Gagal menyimpan periode baru: ${e.message}")
+                                        Log.e("MainPage", "Failed to save new period: ${e.message}")
                                     }
                             }
                         }
                         .addOnFailureListener { e ->
-                            Log.e("MainPage", "Gagal memeriksa periode berjalan: ${e.message}")
+                            Log.e("MainPage", "Failed to check ongoing period: ${e.message}")
                         }
                 } else {
-                    // Hentikan periode yang sedang berjalan
+                    // Stop the ongoing period
                     db.collection("users")
                         .document(currentUserId)
                         .collection("period")
                         .whereEqualTo("isStart", true)
                         .get()
                         .addOnSuccessListener { querySnapshot ->
-                            querySnapshot.documents.forEach { document ->
-                                val periodDatesLong = document.get("periodDates") as? List<Long> ?: return@forEach
-                                val periodDates = periodDatesLong.map { Date(it) } // Konversi Long ke Date
+                            if (!querySnapshot.isEmpty) {
+                                querySnapshot.documents.forEach { document ->
+                                    val periodDatesLong = document.get("periodDates") as? List<Long> ?: return@forEach
+                                    val periodDates = periodDatesLong.map { Date(it) } // Convert Long to Date
 
-                                val updatedDates = periodDates.filter { it <= Date() }
+                                    val updatedDates = periodDates.filter { it <= Date() }
 
-                                document.reference.update(
-                                    mapOf(
-                                        "isStart" to false,
-                                        "periodDates" to updatedDates.map { it.time }
-                                    )
-                                ).addOnSuccessListener {
-                                    Log.d("Debug", "Periode Dihentikan")
+                                    document.reference.update(
+                                        mapOf(
+                                            "isStart" to false,
+                                            "periodDates" to updatedDates.map { it.time },
+                                            "periodEnd" to timestamp
+                                        )
+                                    ).addOnSuccessListener {
+                                        Log.d("Debug", "Period Ended")
 
-                                    // Update UI setelah periode dihentikan
-                                    val predictedDates = getPredictedPeriodDates(updatedDates.lastOrNull() ?: Date(), cycleLength, periodLength)
-                                    updateCalendarUI(updatedDates, predictedDates)
+                                        // Update UI with stopped period details
+                                        val predictedDates = getPredictedPeriodDates(updatedDates.lastOrNull() ?: Date(), cycleLength, periodLength)
+                                        updateCalendarUI(updatedDates, predictedDates)
 
-                                    btnLove.setImageResource(R.drawable.heartgif)
-                                    tvPeriodStatusText.text = "Not Started"
-                                    tvPeriodStatusText.setTextColor(resources.getColor(R.color.color4))
-                                    tvPeriodText.setTextColor(resources.getColor(R.color.color4))
+                                        btnLove.setImageResource(R.drawable.heartgif)
+                                        tvPeriodStatusText.text = "Not Started"
+                                        tvPeriodStatusText.setTextColor(resources.getColor(R.color.color4))
+                                        tvPeriodText.setTextColor(resources.getColor(R.color.color4))
+                                    }
+
+                                    loadLoveStatus()
                                 }
-
-                                loadLoveStatus()
                             }
                         }
                         .addOnFailureListener { e ->
-                            Log.e("MainPage", "Gagal menghentikan periode berjalan: ${e.message}")
+                            Log.e("MainPage", "Failed to stop ongoing period: ${e.message}")
                         }
                 }
             }
             .addOnFailureListener { exception ->
-                Log.e("MainPage", "Gagal mengambil periodLength: ${exception.message}")
+                Log.e("MainPage", "Failed to retrieve user data: ${exception.message}")
             }
     }
+
 
     private fun generateDatesBetween(startDate: Date, periodLength: Int = 5): List<Date> {
         val dates = mutableListOf<Date>()
@@ -444,10 +452,12 @@ class MainPage : Fragment() {
     private fun setupRecyclerView() {
         adapter = DayAdapter(
             days = getWeeklyDates(),
-            isLoved = isLoved, // Pass isLoved to the adapter
+            isLoved = isLoved,
             onMoodEditClick = { dayItem ->
-                // Callback untuk edit
                 findNavController().navigate(R.id.action_MainPage_to_moodNotes)
+            },
+            onDateClick = { dayItem ->
+                onDateClick(dayItem)
             }
         )
 
@@ -596,6 +606,40 @@ class MainPage : Fragment() {
             isLoved = isLoved,
             predictedDates = predictedDates
         )
+    }
+
+    private fun onDateClick(dayItem: DayItem) {
+        val dateFormat = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
+        val clickedDate = dateFormat.parse(dayItem.fullDate) ?: return
+        val normalizedClickedDate = normalizeDate(clickedDate)
+
+        Log.d("MainPage", "Clicked Date: $normalizedClickedDate")
+        Log.d("MainPage", "Period Dates: ${periodDates.map { normalizeDate(it) }}")
+        Log.d("MainPage", "Predicted Dates: ${predictedDates.map { normalizeDate(it) }}")
+
+        val dayNumber = periodDates.map { normalizeDate(it) }.indexOfFirst { it == normalizedClickedDate } + 1 // Adjust index by adding 1
+        Log.d("MainPage", "Day Number: $dayNumber")
+
+        if (dayNumber > 0) {
+            tvPeriodStatusText.text = "Period Day $dayNumber"
+            btnLove.setImageResource(R.drawable.redheart)
+        } else if (predictedDates.map { normalizeDate(it) }.contains(normalizedClickedDate)) {
+            tvPeriodStatusText.text = "Predicted Period Day"
+            btnLove.setImageResource(R.drawable.heartgif)
+        } else {
+            tvPeriodStatusText.text = "Not a Period Day"
+            btnLove.setImageResource(R.drawable.heartgif)
+        }
+    }
+
+    private fun normalizeDate(date: Date): Date {
+        val calendar = Calendar.getInstance()
+        calendar.time = date
+        calendar.set(Calendar.HOUR_OF_DAY, 0)
+        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
+        return calendar.time
     }
 
 }
