@@ -6,12 +6,22 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.GridLayout
 import android.widget.TextView
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import java.util.*
 
 class CalendarAdapter(
     private val monthYearList: List<Pair<Int, Int>>
 ) : RecyclerView.Adapter<CalendarAdapter.CalendarViewHolder>() {
+
+    private val selectedDates = mutableSetOf<Date>()
+    fun getSelectedDates(): List<Date> = selectedDates.toList()
+
+    fun setSelectedDates(dates: List<Date>) {
+        selectedDates.clear()
+        selectedDates.addAll(dates.map { normalizeDate(it) }) // Normalisasi semua tanggal
+        notifyDataSetChanged()
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CalendarViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.calender_item, parent, false)
@@ -21,6 +31,9 @@ class CalendarAdapter(
     override fun onBindViewHolder(holder: CalendarViewHolder, position: Int) {
         val (month, year) = monthYearList[position]
         holder.bind(month, year)
+
+        val dayLabelsRecyclerView = holder.itemView.findViewById<RecyclerView>(R.id.day_labels_recycler)
+        setupDayLabels(dayLabelsRecyclerView)
     }
 
     override fun getItemCount(): Int = monthYearList.size
@@ -41,30 +54,25 @@ class CalendarAdapter(
         private fun setupCalendar(gridLayout: GridLayout, month: Int, year: Int) {
             gridLayout.removeAllViews()
 
-            // Tambahkan label hari (Mon, Tue, ...)
-            val dayLabels = arrayOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
-            for (label in dayLabels) {
-                val dayView = LayoutInflater.from(itemView.context)
-                    .inflate(R.layout.days_edit_period, gridLayout, false)
-                val textView = dayView.findViewById<TextView>(R.id.dayLabel)
-                textView.text = label
-                gridLayout.addView(dayView)
-            }
-
-            // Atur kalender
             val calendar = Calendar.getInstance()
             calendar.set(Calendar.MONTH, month)
             calendar.set(Calendar.YEAR, year)
             calendar.set(Calendar.DAY_OF_MONTH, 1)
 
+            // Hari pertama bulan (1 = Minggu, 7 = Sabtu, 2 = Senin, dst.)
             val firstDayOfMonth = calendar.get(Calendar.DAY_OF_WEEK)
+
+            // Jumlah hari dalam bulan
             val daysInMonth = calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
 
-            // Tambahkan ruang kosong sebelum hari pertama
+            // Ambil tanggal hari ini
+            val today = normalizeDate(Date())
+
+            // Tambahkan placeholder untuk hari kosong sebelum hari pertama
             for (i in 1 until firstDayOfMonth) {
                 val emptyView = LayoutInflater.from(itemView.context)
                     .inflate(R.layout.dates_edit_period, gridLayout, false)
-                emptyView.visibility = View.INVISIBLE
+                emptyView.visibility = View.INVISIBLE // Elemen tidak terlihat
                 gridLayout.addView(emptyView)
             }
 
@@ -77,23 +85,62 @@ class CalendarAdapter(
 
                 tvDate.text = day.toString()
 
-                // Set toggle functionality
-                btnToggle.setOnClickListener {
-                    toggleButton(btnToggle)
+                val date = Calendar.getInstance().apply {
+                    set(Calendar.DAY_OF_MONTH, day)
+                    set(Calendar.MONTH, month)
+                    set(Calendar.YEAR, year)
+                    set(Calendar.HOUR_OF_DAY, 0)
+                    set(Calendar.MINUTE, 0)
+                    set(Calendar.SECOND, 0)
+                    set(Calendar.MILLISECOND, 0)
+                }.time
+
+                // Logika untuk tanggal di periodDates tetapi belum lewat today
+                if (selectedDates.contains(date) && date.after(today)) {
+                    btnToggle.isEnabled = false // Nonaktifkan tombol
+                    btnToggle.setBackgroundResource(R.drawable.predict_date_background) // Gunakan drawable khusus
+                    tvDate.setTextColor(itemView.context.getColor(R.color.black)) // Warna teks normal
+                }
+                // Logika untuk tanggal di periodDates dan sudah lewat today
+                else if (selectedDates.contains(date) && !date.after(today)) {
+                    btnToggle.isSelected = true
+                    btnToggle.setBackgroundResource(R.drawable.selected_date_background) // Drawable periodDates
+                    tvDate.setTextColor(itemView.context.getColor(R.color.black)) // Teks normal
+                    btnToggle.setOnClickListener {
+                        toggleButton(btnToggle, date) // Masih bisa di-interaksi
+                    }
+                }
+                // Logika untuk tanggal di luar periodDates
+                else {
+                    if (date.after(today)) {
+                        btnToggle.isEnabled = false // Nonaktifkan interaksi
+                        btnToggle.setBackgroundResource(R.drawable.next_date_background) // Gunakan drawable prediksi
+                        tvDate.setTextColor(itemView.context.getColor(R.color.grey)) // Ubah warna teks menjadi abu-abu
+                    } else {
+                        btnToggle.isSelected = false
+                        btnToggle.setBackgroundResource(R.drawable.default_date_background) // Drawable default
+                        tvDate.setTextColor(itemView.context.getColor(R.color.black)) // Teks normal
+                        btnToggle.setOnClickListener {
+                            toggleButton(btnToggle, date)
+                        }
+                    }
                 }
 
                 gridLayout.addView(dateView)
             }
         }
 
-        private fun toggleButton(button: Button) {
-            // Check/uncheck toggle button
+
+
+        private fun toggleButton(button: Button, date: Date) {
             if (button.isSelected) {
                 button.isSelected = false
-                button.setBackgroundResource(R.drawable.default_date_background) // Default style
+                button.setBackgroundResource(R.drawable.default_date_background)
+                selectedDates.remove(date)
             } else {
                 button.isSelected = true
-                button.setBackgroundResource(R.drawable.date_button_selector) // Checked style
+                button.setBackgroundResource(R.drawable.selected_date_background)
+                selectedDates.add(date)
             }
         }
 
@@ -102,5 +149,22 @@ class CalendarAdapter(
             calendar.set(Calendar.MONTH, month)
             return calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.getDefault()) ?: ""
         }
+    }
+
+    private fun setupDayLabels(recyclerView: RecyclerView) {
+        val daysOfWeek = listOf("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")
+        val adapter = DaysAdapter(daysOfWeek)
+        recyclerView.layoutManager = GridLayoutManager(recyclerView.context, 7) // 7 kolom untuk 7 hari
+        recyclerView.adapter = adapter
+    }
+
+    private fun normalizeDate(date: Date): Date {
+        val calendar = Calendar.getInstance()
+        calendar.time = date
+        calendar.set(Calendar.HOUR_OF_DAY, 0)
+        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
+        return calendar.time
     }
 }
