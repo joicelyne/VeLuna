@@ -1,5 +1,7 @@
 package com.example.veluna
 
+import Cycle
+import CycleHistoryAdapter
 import android.os.Bundle
 import android.widget.ImageButton
 import android.util.Log
@@ -32,9 +34,10 @@ class CycleHistory : AppCompatActivity() {
         val recyclerView: RecyclerView = findViewById(R.id.rv_cycle_history)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        // Initialize adapter with empty list
-        cycleAdapter = CycleHistoryAdapter(emptyList())
+        // Initialize adapter without providing an empty list
+        cycleAdapter = CycleHistoryAdapter()
         recyclerView.adapter = cycleAdapter
+
 
         // Load data from Firestore
         loadCycleData()
@@ -46,7 +49,7 @@ class CycleHistory : AppCompatActivity() {
         db.collection("users")
             .document(currentUserId)
             .collection("period")
-            .orderBy("periodStart", com.google.firebase.firestore.Query.Direction.DESCENDING) // Urutkan dari terbaru ke terlama
+            .orderBy("periodStart", com.google.firebase.firestore.Query.Direction.DESCENDING)
             .get()
             .addOnSuccessListener { querySnapshot ->
                 val cycleData = querySnapshot.documents.mapNotNull { document ->
@@ -68,13 +71,17 @@ class CycleHistory : AppCompatActivity() {
                     } else null
                 }
 
-                // Update adapter with fetched data
-                cycleAdapter.updateData(cycleData)
+                // Batasi jumlah data yang dikirim ke adapter
+                val limitedCycleData = cycleData.take(12)
+
+                // Update adapter dengan data terbatas
+                cycleAdapter.submitList(limitedCycleData)
             }
             .addOnFailureListener { e ->
                 Log.e("CycleHistory", "Failed to load data: ${e.message}")
             }
     }
+
 
     private fun calculateCycleLength(startDate: Date, endDate: Date): Int {
         val diff = endDate.time - startDate.time

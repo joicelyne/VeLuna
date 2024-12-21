@@ -1,7 +1,3 @@
-package com.example.veluna
-
-import android.content.Context
-import android.content.SharedPreferences
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,13 +6,12 @@ import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import java.text.SimpleDateFormat
-import java.util.*
+import com.example.veluna.R
 
 data class Cycle(val dateRange: String, val cycleLength: Int, val periodLength: Int)
 
-class CycleHistoryAdapter(private var cycles: List<Cycle>) :
-    RecyclerView.Adapter<CycleHistoryAdapter.CycleViewHolder>() {
+class CycleHistoryAdapter :
+    ListAdapter<Cycle, CycleHistoryAdapter.CycleViewHolder>(CycleDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CycleViewHolder {
         val view =
@@ -25,18 +20,11 @@ class CycleHistoryAdapter(private var cycles: List<Cycle>) :
     }
 
     override fun onBindViewHolder(holder: CycleViewHolder, position: Int) {
-        val cycle = cycles[position]
+        val cycle = getItem(position)
         holder.bind(cycle)
     }
 
-    override fun getItemCount(): Int = cycles.size
-
-    fun updateData(newCycles: List<Cycle>) {
-        cycles = newCycles
-        notifyDataSetChanged() // Perbarui tampilan RecyclerView
-    }
-
-    inner class CycleViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    class CycleViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val tvDateRange: TextView = itemView.findViewById(R.id.tv_cycle_date_range)
         private val tvCycleLength: TextView = itemView.findViewById(R.id.tv_cycle_length)
         private val pbPeriodLength: ProgressBar = itemView.findViewById(R.id.pb_period_length)
@@ -48,7 +36,21 @@ class CycleHistoryAdapter(private var cycles: List<Cycle>) :
         }
 
         private fun calculateProgress(periodLength: Int, cycleLength: Int): Int {
-            return (periodLength.toFloat() / cycleLength * 100).toInt()
+            return if (cycleLength != 0) {
+                (periodLength.toFloat() / cycleLength * 100).toInt()
+            } else 0
+        }
+    }
+
+    class CycleDiffCallback : DiffUtil.ItemCallback<Cycle>() {
+        override fun areItemsTheSame(oldItem: Cycle, newItem: Cycle): Boolean {
+            // Compare by unique properties
+            return oldItem.dateRange == newItem.dateRange
+        }
+
+        override fun areContentsTheSame(oldItem: Cycle, newItem: Cycle): Boolean {
+            // Compare all contents
+            return oldItem == newItem
         }
     }
 }

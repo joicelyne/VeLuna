@@ -282,16 +282,15 @@ class MainPage : Fragment() {
     private fun updateLoveStatus(isLoved: Boolean) {
         val currentUserId = userId ?: return
         val timestamp = Timestamp.now()
+        val today = Calendar.getInstance().apply { time = timestamp.toDate() }
 
         db.collection("users").document(currentUserId)
             .get()
             .addOnSuccessListener { userDocument ->
-                // Ambil nilai periodLength dan cycleLength dari Firebase atau gunakan default
                 val periodLength = userDocument.getLong("periodLength")?.toInt() ?: 5
                 val cycleLength = userDocument.getLong("cycleLength")?.toInt() ?: 28
 
                 if (isLoved) {
-                    // Cek jika tidak ada periode yang sedang berjalan
                     db.collection("users")
                         .document(currentUserId)
                         .collection("period")
@@ -304,16 +303,15 @@ class MainPage : Fragment() {
                                     .collection("period")
                                     .document().id
 
-                                val startPeriod = timestamp.toDate()
+                                val startPeriod = today.time
                                 val periodDates = generateDatesBetween(startPeriod, periodLength)
 
                                 val periodData = mapOf(
                                     "isStart" to true,
                                     "periodStart" to startPeriod,
-                                    "periodDates" to periodDates.map { it.time } // Simpan sebagai Long
+                                    "periodDates" to periodDates.map { it.time }
                                 )
 
-                                // Simpan periode baru
                                 db.collection("users")
                                     .document(currentUserId)
                                     .collection("period")
@@ -322,18 +320,13 @@ class MainPage : Fragment() {
                                     .addOnSuccessListener {
                                         Log.d("Debug", "Period Baru Disimpan: $periodData")
 
-                                        // Ambil startDate terbaru dan hitung prediksi tanggal
                                         val predictedDates = getPredictedPeriodDates(startPeriod, cycleLength, periodLength)
-
-                                        // Update UI
                                         updateCalendarUI(periodDates, predictedDates)
 
                                         btnLove.setImageResource(R.drawable.redheart)
                                         tvPeriodStatusText.text = "Started"
                                         tvPeriodStatusText.setTextColor(resources.getColor(R.color.white))
                                         tvPeriodText.setTextColor(resources.getColor(R.color.white))
-
-                                        loadLoveStatus()
                                     }
                                     .addOnFailureListener { e ->
                                         Log.e("MainPage", "Gagal menyimpan periode baru: ${e.message}")
@@ -344,7 +337,6 @@ class MainPage : Fragment() {
                             Log.e("MainPage", "Gagal memeriksa periode berjalan: ${e.message}")
                         }
                 } else {
-                    // Hentikan periode yang sedang berjalan
                     db.collection("users")
                         .document(currentUserId)
                         .collection("period")
@@ -352,30 +344,57 @@ class MainPage : Fragment() {
                         .get()
                         .addOnSuccessListener { querySnapshot ->
                             querySnapshot.documents.forEach { document ->
-                                val periodDatesLong = document.get("periodDates") as? List<Long> ?: return@forEach
-                                val periodDates = periodDatesLong.map { Date(it) } // Konversi Long ke Date
+                                val periodStart = document.getTimestamp("periodStart")?.toDate()
+                                if (periodStart != null) {
+                                    val periodStartCal = Calendar.getInstance().apply { time = periodStart }
 
-                                val updatedDates = periodDates.filter { it <= Date() }
+                                    val isSameDay = today.get(Calendar.YEAR) == periodStartCal.get(Calendar.YEAR) &&
+                                            today.get(Calendar.DAY_OF_YEAR) == periodStartCal.get(Calendar.DAY_OF_YEAR)
 
-                                document.reference.update(
-                                    mapOf(
-                                        "isStart" to false,
-                                        "periodDates" to updatedDates.map { it.time }
-                                    )
-                                ).addOnSuccessListener {
-                                    Log.d("Debug", "Periode Dihentikan")
+                                    if (isSameDay) {
+                                        // Hapus data periode dan set isStart ke false
+                                        document.reference.update(
+                                            mapOf(
+                                                "isStart" to false,
+                                                "periodDates" to emptyList<Long>(), // Hapus semua tanggal
+                                                "periodStart" to null // Set periodStart ke null
+                                            )
+                                        ).addOnSuccessListener {
+                                            Log.d("Debug", "Period dihapus karena klik ulang pada hari yang sama")
 
-                                    // Update UI setelah periode dihentikan
-                                    val predictedDates = getPredictedPeriodDates(updatedDates.lastOrNull() ?: Date(), cycleLength, periodLength)
-                                    updateCalendarUI(updatedDates, predictedDates)
+                                            btnLove.setImageResource(R.drawable.heartgif)
+                                            tvPeriodStatusText.text = "Not Started"
+                                            tvPeriodStatusText.setTextColor(resources.getColor(R.color.color4))
+                                            tvPeriodText.setTextColor(resources.getColor(R.color.color4))
+                                        }.addOnFailureListener { e ->
+                                            Log.e("MainPage", "Gagal menghapus periode: ${e.message}")
+                                        }
+                                    } else {
+                                        val periodDatesLong = document.get("periodDates") as? List<Long> ?: return@forEach
+                                        val periodDates = periodDatesLong.map { Date(it) }
 
-                                    btnLove.setImageResource(R.drawable.heartgif)
-                                    tvPeriodStatusText.text = "Not Started"
-                                    tvPeriodStatusText.setTextColor(resources.getColor(R.color.color4))
-                                    tvPeriodText.setTextColor(resources.getColor(R.color.color4))
+                                        val updatedDates = periodDates.filter { it <= today.time }
+
+                                        document.reference.update(
+                                            mapOf(
+                                                "isStart" to false,
+                                                "periodDates" to updatedDates.map { it.time }
+                                            )
+                                        ).addOnSuccessListener {
+                                            Log.d("Debug", "Periode Dihentikan")
+
+                                            val predictedDates = getPredictedPeriodDates(updatedDates.lastOrNull() ?: today.time, cycleLength, periodLength)
+                                            updateCalendarUI(updatedDates, predictedDates)
+
+                                            btnLove.setImageResource(R.drawable.heartgif)
+                                            tvPeriodStatusText.text = "Not Started"
+                                            tvPeriodStatusText.setTextColor(resources.getColor(R.color.color4))
+                                            tvPeriodText.setTextColor(resources.getColor(R.color.color4))
+                                        }.addOnFailureListener { e ->
+                                            Log.e("MainPage", "Gagal menghentikan periode berjalan: ${e.message}")
+                                        }
+                                    }
                                 }
-
-                                loadLoveStatus()
                             }
                         }
                         .addOnFailureListener { e ->
@@ -387,6 +406,8 @@ class MainPage : Fragment() {
                 Log.e("MainPage", "Gagal mengambil periodLength: ${exception.message}")
             }
     }
+
+
 
     private fun generateDatesBetween(startDate: Date, periodLength: Int = 5): List<Date> {
         val dates = mutableListOf<Date>()
