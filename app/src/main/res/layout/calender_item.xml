@@ -20,6 +20,14 @@
         android:layout_marginBottom="15dp"
         android:textColor="@color/color4" />
 
+    <!-- Label Hari -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/day_labels_recycler"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="8dp" />
+
     <!-- Grid Kalender -->
     <GridLayout
         android:id="@+id/calendar_grid"

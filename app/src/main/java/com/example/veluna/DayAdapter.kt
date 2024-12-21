@@ -16,6 +16,7 @@ class DayAdapter(
     private var days: List<DayItem>, // List of DayItem
     private var isLoved: Boolean,
     private var predictedPeriodDates: List<Date> = listOf(),
+    private var periodDates: List<Date> = listOf(),
     private val onMoodEditClick: (DayItem) -> Unit // Callback for mood edit
 ) : RecyclerView.Adapter<DayAdapter.DayViewHolder>() {
 
@@ -34,7 +35,6 @@ class DayAdapter(
             .inflate(R.layout.layout_main_date_item, parent, false)
         return DayViewHolder(view)
     }
-
     override fun onBindViewHolder(holder: DayViewHolder, position: Int) {
         val dayItem = days[position]
         holder.tvDate.text = dayItem.date
@@ -48,15 +48,17 @@ class DayAdapter(
         val normalizedDayDate = normalizeDate(dayDate)
         val normalizedPredictedDates = predictedPeriodDates.map { normalizeDate(it) }
 
-        // Debugging: Log untuk memeriksa perbandingan tanggal
-        Log.d("DayAdapter", "Checking Day: $normalizedDayDate, PredictedDates: $normalizedPredictedDates")
-
         // Logika untuk menentukan status berdasarkan isToday, isLoved, dan rentang periode
         when {
             normalizedPredictedDates.contains(normalizedDayDate) -> {
                 holder.tvDate.setBackgroundResource(R.drawable.circle_period_next)
                 holder.tvDate.setTextColor(holder.itemView.context.getColor(R.color.white))
                 Log.d("DayAdapter", "Predicted Period Match: $normalizedDayDate")
+            }
+            periodDates.contains(normalizedDayDate) && normalizedDayDate.before(normalizeDate(Date())) -> { // Tanggal dari `periodDates` lainnya
+                holder.tvDate.setBackgroundResource(R.drawable.circle_period_bef)
+                holder.tvDate.setTextColor(holder.itemView.context.getColor(R.color.white))
+                Log.d("DayAdapter", "In Other Period Dates: $normalizedDayDate")
             }
             dayItem.isToday && isLoved -> {
                 holder.tvDate.setBackgroundResource(R.drawable.circle_period_now)
@@ -68,9 +70,15 @@ class DayAdapter(
                 holder.tvDate.setTextColor(holder.itemView.context.getColor(R.color.color3))
             }
             startPeriod != null && endPeriod != null && normalizedDayDate in normalizeDate(startPeriod!!)..normalizeDate(endPeriod!!) -> {
-                holder.tvDate.setBackgroundResource(R.drawable.circle_period_next)
-                holder.tvDate.setTextColor(holder.itemView.context.getColor(R.color.color3))
-                Log.d("DayAdapter", "In Current Period Range: $normalizedDayDate")
+                if (normalizedDayDate.before(normalizeDate(Date()))) {
+                    holder.tvDate.setBackgroundResource(R.drawable.circle_period_bef)
+                    holder.tvDate.setTextColor(holder.itemView.context.getColor(R.color.black))
+                    Log.d("DayAdapter", "Before Today in Period Range: $normalizedDayDate")
+                } else {
+                    holder.tvDate.setBackgroundResource(R.drawable.circle_period_next)
+                    holder.tvDate.setTextColor(holder.itemView.context.getColor(R.color.color3))
+                    Log.d("DayAdapter", "In Current Period Range: $normalizedDayDate")
+                }
             }
             else -> {
                 holder.tvDate.setBackgroundResource(R.drawable.circle_period_not)
@@ -87,19 +95,21 @@ class DayAdapter(
         }
     }
 
+
     override fun getItemCount(): Int = days.size
 
     // Perbarui daftar hari dan rentang periode
-    fun updateDays(newDays: List<DayItem>, newStartPeriod: Date?, newEndPeriod: Date?, isLoved: Boolean, predictedDates: List<Date> = listOf()) {
+    fun updateDays(newDays: List<DayItem>, newStartPeriod: Date?, newEndPeriod: Date?, isLoved: Boolean, predictedDates: List<Date> = listOf(), periodDates: List<Date> = listOf()) {
         this.days = newDays
         this.startPeriod = newStartPeriod
         this.endPeriod = newEndPeriod
         this.isLoved = isLoved
-        this.predictedPeriodDates = predictedDates.map { normalizeDate(it) } // Pastikan semua tanggal dinormalisasi
+        this.predictedPeriodDates = predictedDates.map { normalizeDate(it) }
+        this.periodDates = periodDates.map { normalizeDate(it) }
         notifyDataSetChanged()
 
         // Debugging: Log untuk memeriksa predictedDates yang diperbarui
-        Log.d("DayAdapter", "Updated Predicted Dates: $predictedPeriodDates")
+        Log.d("DayAdapterUpd", "Updated Predicted Dates: $predictedPeriodDates")
     }
 
     // Fungsi untuk menormalkan waktu ke 00:00:00 agar perbandingan hanya pada tanggal

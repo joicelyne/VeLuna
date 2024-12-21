@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.*
@@ -179,46 +180,91 @@ class MainPage : Fragment() {
 
         val userDocRef = db.collection("users").document(currentUserId)
 
-        // Ambil data period terbaru
+        // Ambil seluruh data periode dari koleksi `period`
         userDocRef.collection("period")
             .orderBy("periodStart", com.google.firebase.firestore.Query.Direction.DESCENDING)
-            .limit(1)
             .get()
             .addOnSuccessListener { querySnapshot ->
                 if (querySnapshot != null && !querySnapshot.isEmpty) {
-                    // Ambil startDate dari period terbaru
-                    val document = querySnapshot.documents.first()
-                    val periodDatesLong = document.get("periodDates") as? List<Long> ?: listOf()
-                    val periodDates = periodDatesLong.map { Date(it) }
-                    this.periodDates = periodDates
+                    val allPeriodDates = mutableListOf<Date>()
+                    var latestStartDate: Date? = null
+                    var latestPeriodLength = 5 // Default periodLength
+                    var latestCycleLength = 28 // Default cycleLength
+                    var latestPeriodId: String? = null // Tambahkan untuk menyimpan periodId terbaru
 
-                    val startDate = periodDates.firstOrNull() ?: Date() // StartDate dari period terbaru
-                    val periodLength = document.getLong("periodLength")?.toInt() ?: 5
-                    val cycleLength = document.getLong("cycleLength")?.toInt() ?: 28
+                    // Proses semua dokumen dalam koleksi `period`
+                    querySnapshot.forEach { document ->
+                        val periodDatesLong = document.get("periodDates") as? List<Long> ?: listOf()
+                        val periodDates = periodDatesLong.map { normalizeDate(Date(it)) }
+                        allPeriodDates.addAll(periodDates)
 
-                    val predictedDates = getPredictedPeriodDates(startDate, cycleLength, periodLength)
-                    updateCalendarUI(periodDates, predictedDates)
+                        // Jika ini periode terbaru (`isStart = true`), simpan informasinya
+                        if (document.getBoolean("isStart") == true) {
+                            latestStartDate = document.getDate("periodStart")
+                            latestPeriodLength = document.getLong("periodLength")?.toInt() ?: 5
+                            latestCycleLength = document.getLong("cycleLength")?.toInt() ?: 28
+                            latestPeriodId = document.id // Simpan periodId terbaru
+                        }
+                    }
+
+                    // Hapus duplikat tanggal dari `allPeriodDates`
+                    val uniquePeriodDates = allPeriodDates.distinct()
+
+                    // Log periodId terbaru
+                    Log.d("Debug", "Latest Period ID: $latestPeriodId")
+
+                    // Hitung tanggal prediksi berdasarkan `latestStartDate`
+                    val predictedDates = if (latestStartDate != null) {
+                        getPredictedPeriodDates(latestStartDate!!, latestCycleLength, latestPeriodLength)
+                    } else {
+                        listOf()
+                    }
+
+                    // Log prediksi
+                    Log.d("Debug", "Predicted Dates from Latest PeriodStart: $predictedDates")
+
+                    // Perbarui UI dengan semua tanggal periode dan tanggal prediksi
+                    updateCalendarUI(uniquePeriodDates, predictedDates)
                 } else {
-                    // Jika collection 'period' kosong, ambil startDate dari root user document
-                    userDocRef.get()
-                        .addOnSuccessListener { userDocument ->
-                            val startDateString = userDocument.getString("startDate") ?: ""
-                            val startDate = parseDate(startDateString) ?: Date() // Default ke hari ini
-                            val periodLength = userDocument.getLong("periodLength")?.toInt() ?: 5
-                            val cycleLength = userDocument.getLong("cycleLength")?.toInt() ?: 28
-
-                            val predictedDates = getPredictedPeriodDates(startDate, cycleLength, periodLength)
-                            this.predictedDates = predictedDates
-                            updateCalendarUI(periodDates, predictedDates)
-
-                        }
-                        .addOnFailureListener { e ->
-                            Log.e("MainPage", "Gagal mengambil startDate dari user document: ${e.message}")
-                        }
+                    Log.e("MainPage", "Koleksi `period` kosong, memuat default data.")
+                    loadDefaultPeriodData(userDocRef)
                 }
             }
             .addOnFailureListener { e ->
-                Log.e("MainPage", "Gagal memuat period: ${e.message}")
+                Log.e("MainPage", "Gagal memuat data `period`: ${e.message}")
+                updateCalendarUI(listOf(), listOf()) // Tidak ada prediksi jika gagal
+            }
+    }
+
+    // Fungsi untuk memuat data default jika koleksi `period` kosong
+    private fun loadDefaultPeriodData(userDocRef: DocumentReference) {
+        userDocRef.get()
+            .addOnSuccessListener { userDocument ->
+                val startDateString = userDocument.getString("startDate")
+
+                // Jika `startDate` tidak ada, langsung perbarui UI tanpa prediksi
+                if (startDateString.isNullOrEmpty()) {
+                    Log.e("MainPage", "startDate tidak ditemukan pada dokumen pengguna.")
+                    updateCalendarUI(listOf(), listOf()) // Tidak ada prediksi
+                    return@addOnSuccessListener
+                }
+
+                // Jika `startDate` ada, hitung prediksi
+                val startDate = parseDate(startDateString) ?: return@addOnSuccessListener
+                val periodLength = userDocument.getLong("periodLength")?.toInt() ?: 5
+                val cycleLength = userDocument.getLong("cycleLength")?.toInt() ?: 28
+
+                // Hitung *predictedDates* berdasarkan `startDate`
+                val predictedDates = getPredictedPeriodDates(startDate, cycleLength, periodLength)
+
+                // Log prediksi dari `startDate`
+                Log.d("Debug", "Predicted Dates from StartDate: $predictedDates")
+
+                updateCalendarUI(listOf(), predictedDates)
+            }
+            .addOnFailureListener { e ->
+                Log.e("MainPage", "Gagal memuat data default dari dokumen pengguna: ${e.message}")
+                updateCalendarUI(listOf(), listOf()) // Tidak ada prediksi jika gagal
             }
     }
 
@@ -240,13 +286,18 @@ class MainPage : Fragment() {
             tvPeriodText.setTextColor(resources.getColor(R.color.color4))
         }
 
+        // Kombinasikan tanggal dari periode sebelumnya dengan periode baru
+        val allPeriodDates = (this.periodDates + periodDates).distinctBy { normalizeDate(it) }
+        this.periodDates = allPeriodDates // Simpan semua tanggal untuk referensi berikutnya
+
         // Perbarui RecyclerView
         adapter.updateDays(
             newDays = getWeeklyDates(),
-            newStartPeriod = periodDates.firstOrNull(),
-            newEndPeriod = periodDates.lastOrNull(),
+            newStartPeriod = allPeriodDates.firstOrNull(),
+            newEndPeriod = allPeriodDates.lastOrNull(),
             isLoved = isLoved,
-            predictedDates = predictedDates
+            predictedDates = predictedDates,
+            periodDates = periodDates
         )
     }
 
@@ -426,6 +477,7 @@ class MainPage : Fragment() {
         adapter = DayAdapter(
             days = getWeeklyDates(),
             isLoved = isLoved, // Pass isLoved to the adapter
+            periodDates = periodDates,
             onMoodEditClick = { dayItem ->
                 // Callback untuk edit
                 findNavController().navigate(R.id.action_MainPage_to_moodNotes)
@@ -496,7 +548,8 @@ class MainPage : Fragment() {
                                         newStartPeriod = periodDates.firstOrNull(),
                                         newEndPeriod = periodDates.lastOrNull(),
                                         isLoved = isLoved,
-                                        predictedDates = predictedDates
+                                        predictedDates = predictedDates,
+                                        periodDates = periodDates
                                     )
                                     recyclerViewWeek.animate().translationX(0f).setDuration(300).start()
                                     updateMonthYear()
@@ -512,7 +565,8 @@ class MainPage : Fragment() {
                                         newStartPeriod = periodDates.firstOrNull(),
                                         newEndPeriod = periodDates.lastOrNull(),
                                         isLoved = isLoved,
-                                        predictedDates = predictedDates
+                                        predictedDates = predictedDates,
+                                        periodDates = periodDates
                                     )
                                     recyclerViewWeek.animate().translationX(0f).setDuration(300).start()
                                     updateMonthYear()
@@ -551,7 +605,8 @@ class MainPage : Fragment() {
             newStartPeriod = updatedPeriodDates.firstOrNull(),
             newEndPeriod = updatedPeriodDates.lastOrNull(),
             isLoved = isLoved,
-            predictedDates = predictedDates
+            predictedDates = predictedDates,
+            periodDates = periodDates
         )
     }
 
@@ -570,8 +625,18 @@ class MainPage : Fragment() {
             newStartPeriod = periodDates.firstOrNull(),
             newEndPeriod = periodDates.lastOrNull(),
             isLoved = isLoved,
-            predictedDates = predictedDates
+            predictedDates = predictedDates,
+            periodDates = periodDates
         )
     }
 
+    private fun normalizeDate(date: Date): Date {
+        val calendar = Calendar.getInstance()
+        calendar.time = date
+        calendar.set(Calendar.HOUR_OF_DAY, 0)
+        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
+        return calendar.time
+    }
 }
