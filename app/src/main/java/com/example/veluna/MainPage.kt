@@ -48,6 +48,8 @@ class MainPage : Fragment() {
     private lateinit var txtInsight3: TextView
     private lateinit var prevCycleLenText: TextView
     private lateinit var prevPeriodLenText: TextView
+    private lateinit var tvNextPeriodStatus: TextView
+
 
     // Calendar instance to track the current week
     private val calendar = Calendar.getInstance()
@@ -85,6 +87,7 @@ class MainPage : Fragment() {
         recyclerViewWeek = view.findViewById(R.id.recyclerViewWeek)
         prevCycleLenText = view.findViewById(R.id.prevCycleLenDays)
         prevPeriodLenText = view.findViewById(R.id.prevPeriodLenDays)
+        tvNextPeriodStatus = view.findViewById(R.id.tvNextPeriodStatus)
 
         // Observasi perubahan data
         observeUserData()
@@ -128,6 +131,7 @@ class MainPage : Fragment() {
             isLoved = !isLoved
             updateLoveStatus(isLoved)
         }
+
 
         // Handle Image & Text Insights
         imgInsight1.setOnClickListener {
@@ -266,12 +270,17 @@ class MainPage : Fragment() {
     // Fungsi untuk memperbarui UI kalender
     private fun updateCalendarUI(periodDates: List<Date>, predictedDates: List<Date>) {
         val currentDate = Date()
-        isLoved = periodDates.any { it >= currentDate }
+        val normalizedCurrentDate = normalizeDate(currentDate)
+        val normalizedPeriodDates = periodDates.map { normalizeDate(it) }
+
+        isLoved = normalizedPeriodDates.any { it >= normalizedCurrentDate }
 
         if (isLoved) {
             btnLove.setImageResource(R.drawable.redheart)
-            val dayNumber = periodDates.indexOfFirst { it == currentDate } + 1
-            tvPeriodStatusText.text = "Period Day $dayNumber"
+
+            // Find the normalized period day index
+            val periodDayIndex = normalizedPeriodDates.indexOfFirst { it == normalizedCurrentDate } + 1
+            tvPeriodStatusText.text = "Day $periodDayIndex"
             tvPeriodStatusText.setTextColor(resources.getColor(R.color.white))
             tvPeriodText.setTextColor(resources.getColor(R.color.white))
         } else {
@@ -302,26 +311,29 @@ class MainPage : Fragment() {
 
     private fun getPredictedPeriodDates(periodStart: Date, cycleLength: Int, periodLength: Int): List<Date> {
         val predictedDates = mutableListOf<Date>()
-        val calendar = Calendar.getInstance().apply { time = periodStart }
+        val calendar = Calendar.getInstance().apply {
+            time = periodStart
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
 
-        // Tambahkan cycleLength dari periodStart
-        calendar.time = periodStart
-        calendar.add(Calendar.DATE, cycleLength)
-
-        // Generate dates for multiple cycles
-        for (cycle in 0 until 12) { // Generate dates for 12 cycles (1 year)
+        // Calculate dates for multiple cycles (12 cycles for 1 year)
+        for (cycle in 0 until 12) {
             // Add dates for the current period
             for (i in 0 until periodLength) {
                 predictedDates.add(calendar.time)
-                calendar.add(Calendar.DATE, 1)
+                calendar.add(Calendar.DATE, 1) // Move to the next day in the same period
             }
-            // Move to the next cycle start date
+            // Move to the next cycle's start date
             calendar.add(Calendar.DATE, cycleLength - periodLength)
         }
 
         Log.d("Debug", "Predicted Period Dates: $predictedDates")
         return predictedDates
     }
+
 
     private fun updateLoveStatus(isLoved: Boolean) {
         val currentUserId = userId ?: return
@@ -617,18 +629,39 @@ class MainPage : Fragment() {
         Log.d("MainPage", "Period Dates: ${periodDates.map { normalizeDate(it) }}")
         Log.d("MainPage", "Predicted Dates: ${predictedDates.map { normalizeDate(it) }}")
 
+        // Find the day number based on the period dates
         val dayNumber = periodDates.map { normalizeDate(it) }.indexOfFirst { it == normalizedClickedDate } + 1 // Adjust index by adding 1
         Log.d("MainPage", "Day Number: $dayNumber")
 
         if (dayNumber > 0) {
-            tvPeriodStatusText.text = "Period Day $dayNumber"
+            tvPeriodStatusText.text = "Day $dayNumber"
             btnLove.setImageResource(R.drawable.redheart)
-        } else if (predictedDates.map { normalizeDate(it) }.contains(normalizedClickedDate)) {
-            tvPeriodStatusText.text = "Predicted Period Day"
-            btnLove.setImageResource(R.drawable.heartgif)
         } else {
-            tvPeriodStatusText.text = "Not a Period Day"
-            btnLove.setImageResource(R.drawable.heartgif)
+            val predictedDayNumber = predictedDates.map { normalizeDate(it) }.indexOfFirst { it == normalizedClickedDate } + 1 // Adjust index by adding 1
+            if (predictedDayNumber > 0) {
+                tvPeriodStatusText.text = "Prediction: Day $predictedDayNumber"
+                btnLove.setImageResource(R.drawable.heartgif)
+            } else {
+                tvPeriodStatusText.text = "Not Started"
+                btnLove.setImageResource(R.drawable.heartgif)
+            }
+        }
+
+        // Calculate and display the days until the next period
+        if (!periodDates.map { normalizeDate(it) }.contains(normalizedClickedDate) &&
+            !predictedDates.map { normalizeDate(it) }.contains(normalizedClickedDate)) {
+
+            // Calculate and display the days until the next period
+            val daysUntilNextPeriod = getDaysUntilNextPeriod(clickedDate, predictedDates)
+
+            if (daysUntilNextPeriod != null) {
+                tvNextPeriodStatus.text = "Period in $daysUntilNextPeriod Days"
+            } else {
+                tvNextPeriodStatus.text = "No upcoming periods"
+            }
+        } else {
+            // Hide or reset the status if the date is part of the current or predicted period
+            tvNextPeriodStatus.text = ""
         }
     }
 
@@ -642,4 +675,13 @@ class MainPage : Fragment() {
         return calendar.time
     }
 
+    private fun getDaysUntilNextPeriod(currentDate: Date, predictedDates: List<Date>): Int? {
+        val normalizedCurrentDate = normalizeDate(currentDate)
+        val normalizedPredictedDates = predictedDates.map { normalizeDate(it) }
+
+        return normalizedPredictedDates
+            .filter { it.after(normalizedCurrentDate) }
+            .minOrNull()
+            ?.let { ((it.time - normalizedCurrentDate.time) / (1000 * 60 * 60 * 24)).toInt() }
+    }
 }
