@@ -13,11 +13,13 @@ import java.util.Date
 import java.util.Locale
 
 class DayAdapter(
-    private var days: List<DayItem>, // List of DayItem
+    private var days: List<DayItem>,
     private var isLoved: Boolean,
-    private var predictedPeriodDates: List<Date> = listOf(),
     private var periodDates: List<Date> = listOf(),
-    private val onMoodEditClick: (DayItem) -> Unit // Callback for mood edit
+    private var predictedPeriodDates: List<Date> = listOf(),
+    private val onMoodEditClick: (DayItem) -> Unit,
+    private val onDateClick: (DayItem) -> Unit
+    private var periodDates: List<Date> = listOf(),
 ) : RecyclerView.Adapter<DayAdapter.DayViewHolder>() {
 
     // Rentang periode
@@ -28,6 +30,16 @@ class DayAdapter(
         val tvDate: TextView = itemView.findViewById(R.id.tvDate)
         val tvDay: TextView = itemView.findViewById(R.id.tvDay)
         val moodEditIcon: ImageView = itemView.findViewById(R.id.moodEditIcon)
+
+        init {
+            itemView.setOnClickListener {
+                val position = adapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    val dayItem = days[position]
+                    onDateClick(dayItem)
+                }
+            }
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DayViewHolder {
@@ -35,6 +47,7 @@ class DayAdapter(
             .inflate(R.layout.layout_main_date_item, parent, false)
         return DayViewHolder(view)
     }
+
     override fun onBindViewHolder(holder: DayViewHolder, position: Int) {
         val dayItem = days[position]
         holder.tvDate.text = dayItem.date
@@ -46,10 +59,17 @@ class DayAdapter(
 
         // Normalisasi Tanggal untuk memastikan waktu di-set ke 00:00:00
         val normalizedDayDate = normalizeDate(dayDate)
+
+        val normalizedPeriodDates = periodDates.map { normalizeDate(it) }
         val normalizedPredictedDates = predictedPeriodDates.map { normalizeDate(it) }
 
         // Logika untuk menentukan status berdasarkan isToday, isLoved, dan rentang periode
         when {
+            normalizedPeriodDates.contains(normalizedDayDate) -> {
+                holder.tvDate.setBackgroundResource(R.drawable.circle_period_now)
+                holder.tvDate.setTextColor(holder.itemView.context.getColor(R.color.white))
+            }
+
             normalizedPredictedDates.contains(normalizedDayDate) -> {
                 holder.tvDate.setBackgroundResource(R.drawable.circle_period_next)
                 holder.tvDate.setTextColor(holder.itemView.context.getColor(R.color.white))
@@ -95,7 +115,6 @@ class DayAdapter(
         }
     }
 
-
     override fun getItemCount(): Int = days.size
 
     // Perbarui daftar hari dan rentang periode
@@ -109,7 +128,7 @@ class DayAdapter(
         notifyDataSetChanged()
 
         // Debugging: Log untuk memeriksa predictedDates yang diperbarui
-        Log.d("DayAdapterUpd", "Updated Predicted Dates: $predictedPeriodDates")
+        Log.d("DayAdapter", "Updated Predicted Dates: $predictedPeriodDates")
     }
 
     // Fungsi untuk menormalkan waktu ke 00:00:00 agar perbandingan hanya pada tanggal
