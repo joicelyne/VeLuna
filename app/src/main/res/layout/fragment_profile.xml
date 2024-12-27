@@ -118,7 +118,7 @@
                         android:id="@+id/AvgPeriod"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="5 Days"
+                        android:text="6 Days"
                         android:textSize="15sp"
                         android:fontFamily="@font/worksans_bold" />
 

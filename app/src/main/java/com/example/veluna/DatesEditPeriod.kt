@@ -1,94 +1,133 @@
 package com.example.veluna
 
-import android.content.Context
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
+import android.content.Intent
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import android.widget.Button
-import android.widget.GridLayout
 import android.widget.ImageButton
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Date
-import java.util.Locale
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import java.util.*
 
 class DatesEditPeriod : AppCompatActivity() {
 
-    private lateinit var octoberCalendar: GridLayout
-    private lateinit var novemberCalendar: GridLayout
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var periodDates: List<Date>
+
+    // Fungsi untuk memuat tanggal dari Firebase
+    private fun loadPeriodDates() {
+        val db = FirebaseFirestore.getInstance()
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+
+        db.collection("users").document(userId).collection("period")
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                val dates = mutableListOf<Date>()
+                querySnapshot.forEach { document ->
+                    val periodDatesLong = document.get("periodDates") as? List<Long> ?: listOf()
+                    // Normalisasi semua tanggal agar hanya memperhatikan hari, bulan, dan tahun
+                    dates.addAll(periodDatesLong.map { normalizeDate(Date(it)) })
+                }
+
+                // Perbarui list tanggal di adapter
+                (recyclerView.adapter as CalendarAdapter).setSelectedDates(dates)
+            }
+            .addOnFailureListener { exception ->
+                exception.printStackTrace() // Log jika terjadi error
+            }
+    }
+
+    // Fungsi untuk menormalkan tanggal (menghapus waktu)
+    private fun normalizeDate(date: Date): Date {
+        val calendar = Calendar.getInstance()
+        calendar.time = date
+        calendar.set(Calendar.HOUR_OF_DAY, 0)
+        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
+        return calendar.time
+    }
+
+    // Fungsi untuk menyimpan tanggal yang dipilih ke Firebase
+    private fun savePeriodDates(dates: List<Date>) {
+        val db = FirebaseFirestore.getInstance()
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+
+        val datesToSave = dates.map { it.time } // Konversi ke format Long untuk Firebase
+
+        db.collection("users").document(userId).collection("period")
+            .add(mapOf("periodDates" to datesToSave))
+            .addOnSuccessListener {
+                // Kembali ke halaman utama
+                val intent = Intent(this, MainActivity::class.java)
+                startActivity(intent)
+                finish()
+            }
+            .addOnFailureListener { exception ->
+                exception.printStackTrace() // Log jika terjadi error
+            }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.calendar_edit_period)
 
-        octoberCalendar = findViewById(R.id.october_calendar)
-        novemberCalendar = findViewById(R.id.november_calendar)
+        recyclerView = findViewById(R.id.calendar_recycler_view)
 
         val calendar = Calendar.getInstance()
         val currentMonth = calendar.get(Calendar.MONTH)
         val currentYear = calendar.get(Calendar.YEAR)
 
-        setupCalendar(octoberCalendar, 31, currentMonth, currentYear) // October with 31 days
-        setupCalendar(novemberCalendar, 30, currentMonth + 1, currentYear) // November with 30 days
+        // Membuat daftar bulan dan tahun
+        val monthYearList = mutableListOf<Pair<Int, Int>>()
 
+        // Tambahkan semua bulan dari tahun-tahun sebelumnya
+        for (year in 2010..currentYear) { // Ganti `1900` dengan tahun awal yang diinginkan
+            for (month in 0..11) { // Semua bulan
+                if (year < currentYear || (year == currentYear && month <= currentMonth)) {
+                    monthYearList.add(Pair(month, year))
+                }
+            }
+        }
+
+        // Tambahkan 1 bulan setelah bulan dan tahun sekarang
+        val nextMonth = if (currentMonth == 11) 0 else currentMonth + 1 // Jika Desember, lompat ke Januari
+        val nextYear = if (currentMonth == 11) currentYear + 1 else currentYear // Jika Desember, tahun bertambah
+        monthYearList.add(Pair(nextMonth, nextYear))
+
+        // Menentukan posisi bulan saat ini
+        val currentIndex = monthYearList.indexOf(Pair(currentMonth, currentYear))
+
+        // Mengatur RecyclerView
+        val adapter = CalendarAdapter(monthYearList)
+        val layoutManager = GridLayoutManager(this, 1) // 1 bulan per baris
+        recyclerView.layoutManager = layoutManager
+        recyclerView.adapter = adapter
+
+        // **Scroll ke bulan dan tahun saat ini di tengah layar**
+        recyclerView.post {
+            val offsetPx = recyclerView.height / 2 // Offset agar bulan ini ada di tengah
+            if (currentIndex != -1) { // Pastikan indeks valid
+                (recyclerView.layoutManager as GridLayoutManager).scrollToPositionWithOffset(currentIndex, offsetPx)
+            }
+        }
+
+        // Load period dates from Firebase
+        loadPeriodDates()
+
+        // Handle tombol Apply
+        findViewById<Button>(R.id.applyButton).setOnClickListener {
+            val selectedDates = (recyclerView.adapter as CalendarAdapter).getSelectedDates()
+            savePeriodDates(selectedDates)
+        }
+
+        // Handle tombol Back
         findViewById<ImageButton>(R.id.back_button_edit_perioddate).setOnClickListener {
             finish()
         }
-
     }
 
-    private fun setupCalendar(gridLayout: GridLayout, daysInMonth: Int, month: Int, year: Int) {
-        gridLayout.removeAllViews()  // Clear previous views
-        val inflater = LayoutInflater.from(this)
 
-        val dayLabels = arrayOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
-        for (label in dayLabels) {
-            val dayView = inflater.inflate(R.layout.days_edit_period, gridLayout, false)
-            val textView = dayView.findViewById<TextView>(R.id.dayLabel)
-            textView.text = label
-            gridLayout.addView(dayView)
-        }
-
-        val firstDayOfMonth = getFirstDayOfMonth(month, year)
-
-        for (i in 1 until firstDayOfMonth) {
-            val emptyView = inflater.inflate(R.layout.dates_edit_period, gridLayout, false)
-            emptyView.visibility = View.INVISIBLE // Just placeholder views
-            gridLayout.addView(emptyView)
-        }
-
-        for (day in 1..daysInMonth) {
-            val dayView = inflater.inflate(R.layout.dates_edit_period, gridLayout, false)
-            val tvDate = dayView.findViewById<TextView>(R.id.tv_date)
-            val btnToggle = dayView.findViewById<Button>(R.id.btn_toggle)
-
-            tvDate.text = day.toString()
-
-            btnToggle.tag = "day_$day"
-
-            dayView.setOnClickListener {
-                toggleSelection(btnToggle)
-            }
-
-            gridLayout.addView(dayView)
-        }
-    }
-
-    private fun getFirstDayOfMonth(month: Int, year: Int): Int {
-        val calendar = Calendar.getInstance()
-        calendar.set(Calendar.MONTH, month)
-        calendar.set(Calendar.YEAR, year)
-        calendar.set(Calendar.DAY_OF_MONTH, 1)
-        return calendar.get(Calendar.DAY_OF_WEEK)
-    }
-
-    private fun toggleSelection(button: Button) {
-        button.isSelected = !button.isSelected
-    }
 }
