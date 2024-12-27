@@ -146,28 +146,55 @@ class MainPage : Fragment() {
                     val name = document.getString("name") ?: "User"
                     val periodLength = document.getLong("periodLength")?.toInt() ?: 5 // Default 5 hari
                     val cycleLength = document.getLong("cycleLength")?.toInt() ?: 28 // Default 28 hari
-                    updatePeriodDates(periodLength)
-                    updatePredictedDates(cycleLength, periodLength)
+                    val userStartDate = parseDate(document.getString("startDate") ?: "") // Ambil startDate dari dokumen `users`
+
                     tvName.text = name
                     cycleName.text = "$name's Cycle"
                     insightName.text = "$name's Insight"
                     prevCycleLenText.text = "$cycleLength Days"
                     prevPeriodLenText.text = "$periodLength Days"
 
-                    // Simpan periodLength untuk digunakan dalam logika lainnya
-                    updatePeriodDates(periodLength)
+                    // Periksa apakah ada period aktif di koleksi `period`
+                    db.collection("users")
+                        .document(currentUserId)
+                        .collection("period")
+                        .orderBy("periodStart", com.google.firebase.firestore.Query.Direction.DESCENDING)
+                        .limit(1) // Ambil period terbaru
+                        .get()
+                        .addOnSuccessListener { querySnapshot ->
+                            if (querySnapshot != null && !querySnapshot.isEmpty) {
+                                // Ambil periodStart dari period terbaru
+                                val latestPeriod = querySnapshot.documents.firstOrNull()
+                                val periodStartDate = latestPeriod?.getDate("periodStart") // Tanggal dari `periodStart`
+                                val periodLengthFromPeriod =
+                                    latestPeriod?.getLong("periodLength")?.toInt() ?: periodLength
+                                val cycleLengthFromPeriod =
+                                    latestPeriod?.getLong("cycleLength")?.toInt() ?: cycleLength
+
+                                // Prediksi berdasarkan periodStart jika ada
+                                updatePredictedDates(
+                                    cycleLengthFromPeriod,
+                                    periodLengthFromPeriod,
+                                    periodStartDate ?: userStartDate // Gunakan `startDate` jika `periodStart` null
+                                )
+                            } else {
+                                // Jika tidak ada `period`, gunakan `startDate` dari dokumen `users`
+                                updatePredictedDates(cycleLength, periodLength, userStartDate)
+                            }
+                        }
+                        .addOnFailureListener { e ->
+                            Log.e("MainPage", "Gagal memuat koleksi `period`: ${e.message}")
+                            // Jika gagal, fallback ke `startDate` dari dokumen `users`
+                            updatePredictedDates(cycleLength, periodLength, userStartDate)
+                        }
                 } else {
                     Log.e("MainPage", "Dokumen pengguna tidak ditemukan.")
-                    updatePeriodDates(5) // Gunakan default jika dokumen tidak ditemukan
-                    updatePredictedDates(28, 5)
-                    prevCycleLenText.text = "-" // Default jika tidak ada data
-                    prevPeriodLenText.text = "-" // Default jika tidak ada data
+                    prevCycleLenText.text = "-"
+                    prevPeriodLenText.text = "-"
                 }
             }
             .addOnFailureListener { exception ->
                 Log.e("MainPage", "Gagal mengambil data: ${exception.message}")
-                updatePeriodDates(5) // Gunakan default jika gagal mengambil data
-                updatePredictedDates(28, 5)
             }
     }
 
@@ -244,7 +271,7 @@ class MainPage : Fragment() {
 
                 // Jika `startDate` tidak ada, langsung perbarui UI tanpa prediksi
                 if (startDateString.isNullOrEmpty()) {
-                    Log.e("MainPage", "startDate tidak ditemukan pada dokumen pengguna.")
+                    Log.e("StartDateNull", "startDate tidak ditemukan pada dokumen pengguna.")
                     updateCalendarUI(listOf(), listOf()) // Tidak ada prediksi
                     return@addOnSuccessListener
                 }
@@ -258,7 +285,7 @@ class MainPage : Fragment() {
                 val predictedDates = getPredictedPeriodDates(startDate, cycleLength, periodLength)
 
                 // Log prediksi dari `startDate`
-                Log.d("Debug", "Predicted Dates from StartDate: $predictedDates")
+                Log.d("StartDatePredict", "Predicted Dates from StartDate: $predictedDates")
 
                 updateCalendarUI(listOf(), predictedDates)
             }
@@ -378,6 +405,8 @@ class MainPage : Fragment() {
                                         tvPeriodStatusText.text = "Started"
                                         tvPeriodStatusText.setTextColor(resources.getColor(R.color.white))
                                         tvPeriodText.setTextColor(resources.getColor(R.color.white))
+
+                                        loadLoveStatus()
                                     }
                                     .addOnFailureListener { e ->
                                         Log.e("MainPage", "Gagal menyimpan periode baru: ${e.message}")
@@ -417,6 +446,16 @@ class MainPage : Fragment() {
                                             tvPeriodStatusText.text = "Not Started"
                                             tvPeriodStatusText.setTextColor(resources.getColor(R.color.color4))
                                             tvPeriodText.setTextColor(resources.getColor(R.color.color4))
+
+                                            periodDates = listOf() // Kosongkan daftar
+                                            adapter.updateDays(
+                                                newDays = getWeeklyDates(),
+                                                newStartPeriod = null,
+                                                newEndPeriod = null,
+                                                isLoved = false,
+                                                predictedDates = predictedDates,
+                                                periodDates = periodDates
+                                            )
                                         }.addOnFailureListener { e ->
                                             Log.e("MainPage", "Gagal menghapus periode: ${e.message}")
                                         }
@@ -446,6 +485,7 @@ class MainPage : Fragment() {
                                         }
                                     }
                                 }
+                                loadLoveStatus()
                             }
                         }
                         .addOnFailureListener { e ->
@@ -610,8 +650,11 @@ class MainPage : Fragment() {
         )
     }
 
-    private fun updatePredictedDates(cycleLength: Int, periodLength: Int) {
-        val startDate = periodDates.firstOrNull() ?: Date()
+    private fun updatePredictedDates(cycleLength: Int, periodLength: Int, startDate: Date?) {
+        if (startDate == null) {
+            Log.e("MainPage", "StartDate tidak ditemukan untuk prediksi.")
+            return
+        }
 
         // Gunakan fungsi getPredictedPeriodDates
         val predicted = getPredictedPeriodDates(startDate, cycleLength, periodLength)
@@ -629,6 +672,7 @@ class MainPage : Fragment() {
             periodDates = periodDates
         )
     }
+
 
     private fun normalizeDate(date: Date): Date {
         val calendar = Calendar.getInstance()

@@ -60,6 +60,11 @@ class DayAdapter(
                 holder.tvDate.setTextColor(holder.itemView.context.getColor(R.color.white))
                 Log.d("DayAdapter", "In Other Period Dates: $normalizedDayDate")
             }
+            periodDates.contains(normalizedDayDate) && normalizedDayDate.after(normalizeDate(Date())) -> { // Tanggal dari `periodDates` lainnya
+                holder.tvDate.setBackgroundResource(R.drawable.circle_period_next)
+                holder.tvDate.setTextColor(holder.itemView.context.getColor(R.color.color3))
+                Log.d("DayAdapter", "In Current Period Range: $normalizedDayDate")
+            }
             dayItem.isToday && isLoved -> {
                 holder.tvDate.setBackgroundResource(R.drawable.circle_period_now)
                 holder.tvDate.setTextColor(holder.itemView.context.getColor(R.color.color3))
@@ -68,17 +73,6 @@ class DayAdapter(
             dayItem.isToday && !isLoved -> {
                 holder.tvDate.setBackgroundResource(R.drawable.circle_background)
                 holder.tvDate.setTextColor(holder.itemView.context.getColor(R.color.color3))
-            }
-            startPeriod != null && endPeriod != null && normalizedDayDate in normalizeDate(startPeriod!!)..normalizeDate(endPeriod!!) -> {
-                if (normalizedDayDate.before(normalizeDate(Date()))) {
-                    holder.tvDate.setBackgroundResource(R.drawable.circle_period_bef)
-                    holder.tvDate.setTextColor(holder.itemView.context.getColor(R.color.black))
-                    Log.d("DayAdapter", "Before Today in Period Range: $normalizedDayDate")
-                } else {
-                    holder.tvDate.setBackgroundResource(R.drawable.circle_period_next)
-                    holder.tvDate.setTextColor(holder.itemView.context.getColor(R.color.color3))
-                    Log.d("DayAdapter", "In Current Period Range: $normalizedDayDate")
-                }
             }
             else -> {
                 holder.tvDate.setBackgroundResource(R.drawable.circle_period_not)
