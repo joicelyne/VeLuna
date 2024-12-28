@@ -1,5 +1,7 @@
 package com.example.veluna
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.GestureDetector
@@ -39,8 +41,16 @@ class MainPage : Fragment() {
     private lateinit var tvPeriodText: TextView
     private lateinit var recyclerViewWeek: RecyclerView
     private lateinit var adapter: DayAdapter
+    private lateinit var imgInsight1: ImageView
+    private lateinit var txtInsight1: TextView
+    private lateinit var imgInsight2: ImageView
+    private lateinit var txtInsight2: TextView
+    private lateinit var imgInsight3: ImageView
+    private lateinit var txtInsight3: TextView
     private lateinit var prevCycleLenText: TextView
     private lateinit var prevPeriodLenText: TextView
+    private lateinit var tvNextPeriodStatus: TextView
+
 
     // Calendar instance to track the current week
     private val calendar = Calendar.getInstance()
@@ -78,6 +88,7 @@ class MainPage : Fragment() {
         recyclerViewWeek = view.findViewById(R.id.recyclerViewWeek)
         prevCycleLenText = view.findViewById(R.id.prevCycleLenDays)
         prevPeriodLenText = view.findViewById(R.id.prevPeriodLenDays)
+        tvNextPeriodStatus = view.findViewById(R.id.tvNextPeriodStatus)
 
         // Observasi perubahan data
         observeUserData()
@@ -104,6 +115,13 @@ class MainPage : Fragment() {
             findNavController().navigate(R.id.action_MainPage_to_cycleHistory)
         }
 
+        imgInsight1 = view.findViewById(R.id.imgInsight1)
+        txtInsight1 = view.findViewById(R.id.txtInsight1)
+        imgInsight2 = view.findViewById(R.id.imgInsight2)
+        txtInsight2 = view.findViewById(R.id.txtInsight2)
+        imgInsight3 = view.findViewById(R.id.imgInsight3)
+        txtInsight3 = view.findViewById(R.id.txtInsight3)
+
         // Heartbeat Animation
         btnLove = view.findViewById(R.id.imgHeart)
         val heartbeatAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.heartbeat)
@@ -113,6 +131,32 @@ class MainPage : Fragment() {
         btnLove.setOnClickListener {
             isLoved = !isLoved
             updateLoveStatus(isLoved)
+        }
+
+
+        // Handle Image & Text Insights
+        imgInsight1.setOnClickListener {
+            openLink("https://www.fertile-gut.com/blogs/news/unlocking-the-secrets-of-your-menstrual-cycle?srsltid=AfmBOopS0nHNuq1ps2EUBoX0t7pQBOJ15ICkec9d_DgYcFWPT9L947BQ")
+        }
+
+        txtInsight1.setOnClickListener {
+            openLink("https://www.fertile-gut.com/blogs/news/unlocking-the-secrets-of-your-menstrual-cycle?srsltid=AfmBOopS0nHNuq1ps2EUBoX0t7pQBOJ15ICkec9d_DgYcFWPT9L947BQ")
+        }
+
+        imgInsight2.setOnClickListener {
+            openLink("https://www.rainbowhospitals.in/blog/women-mental-health")
+        }
+
+        txtInsight2.setOnClickListener {
+            openLink("https://www.rainbowhospitals.in/blog/women-mental-health")
+        }
+
+        imgInsight3.setOnClickListener {
+            openLink("https://www.invitra.com/en/sperms-journey-to-the-egg/")
+        }
+
+        txtInsight3.setOnClickListener {
+            openLink("https://www.invitra.com/en/sperms-journey-to-the-egg/")
         }
 
         return view
@@ -299,12 +343,17 @@ class MainPage : Fragment() {
     // Fungsi untuk memperbarui UI kalender
     private fun updateCalendarUI(periodDates: List<Date>, predictedDates: List<Date>) {
         val currentDate = Date()
-        isLoved = periodDates.any { it >= currentDate } // Tentukan status isLoved
+        val normalizedCurrentDate = normalizeDate(currentDate)
+        val normalizedPeriodDates = periodDates.map { normalizeDate(it) }
 
-        // Update UI berdasarkan isLoved
+        isLoved = normalizedPeriodDates.any { it >= normalizedCurrentDate }
+
         if (isLoved) {
             btnLove.setImageResource(R.drawable.redheart)
-            tvPeriodStatusText.text = "Started"
+
+            // Find the normalized period day index
+            val periodDayIndex = normalizedPeriodDates.indexOfFirst { it == normalizedCurrentDate } + 1
+            tvPeriodStatusText.text = "Day $periodDayIndex"
             tvPeriodStatusText.setTextColor(resources.getColor(R.color.white))
             tvPeriodText.setTextColor(resources.getColor(R.color.white))
         } else {
@@ -388,9 +437,13 @@ class MainPage : Fragment() {
                                 val periodData = mapOf(
                                     "isStart" to true,
                                     "periodStart" to startPeriod,
-                                    "periodDates" to periodDates.map { it.time }
+                                    "periodDates" to periodDates.map { it.time },
+                                    "periodLength" to periodLength,
+                                    "cycleLength" to cycleLength,
+                                    "periodDates" to periodDates.map { it.time } // Store as Long
                                 )
 
+                                // Simpan periode baru
                                 db.collection("users")
                                     .document(currentUserId)
                                     .collection("period")
@@ -469,7 +522,8 @@ class MainPage : Fragment() {
                                         document.reference.update(
                                             mapOf(
                                                 "isStart" to false,
-                                                "periodDates" to updatedDates.map { it.time }
+                                                "periodDates" to updatedDates.map { it.time },
+                                                "periodEnd" to timestamp
                                             )
                                         ).addOnSuccessListener {
                                             Log.d("Debug", "Periode Dihentikan")
@@ -499,8 +553,6 @@ class MainPage : Fragment() {
             }
     }
 
-
-
     private fun generateDatesBetween(startDate: Date, periodLength: Int = 5): List<Date> {
         val dates = mutableListOf<Date>()
         val calendar = Calendar.getInstance().apply { time = startDate }
@@ -517,11 +569,13 @@ class MainPage : Fragment() {
     private fun setupRecyclerView() {
         adapter = DayAdapter(
             days = getWeeklyDates(),
-            isLoved = isLoved, // Pass isLoved to the adapter
+            isLoved = isLoved,
             periodDates = periodDates,
             onMoodEditClick = { dayItem ->
-                // Callback untuk edit
                 findNavController().navigate(R.id.action_MainPage_to_moodNotes)
+            },
+            onDateClick = { dayItem ->
+                onDateClick(dayItem)
             }
         )
 
@@ -631,6 +685,11 @@ class MainPage : Fragment() {
         tvMonthYear.text = monthYear
     }
 
+    private fun openLink(url: String) {
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+        startActivity(intent)
+    }
+
     private fun updatePeriodDates(periodLength: Int) {
         if (periodDates.isEmpty()) return
 
@@ -674,6 +733,50 @@ class MainPage : Fragment() {
         )
     }
 
+    private fun onDateClick(dayItem: DayItem) {
+        val dateFormat = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
+        val clickedDate = dateFormat.parse(dayItem.fullDate) ?: return
+        val normalizedClickedDate = normalizeDate(clickedDate)
+
+        Log.d("MainPage", "Clicked Date: $normalizedClickedDate")
+        Log.d("MainPage", "Period Dates: ${periodDates.map { normalizeDate(it) }}")
+        Log.d("MainPage", "Predicted Dates: ${predictedDates.map { normalizeDate(it) }}")
+
+        // Find the day number based on the period dates
+        val dayNumber = periodDates.map { normalizeDate(it) }.indexOfFirst { it == normalizedClickedDate } + 1 // Adjust index by adding 1
+        Log.d("MainPage", "Day Number: $dayNumber")
+
+        if (dayNumber > 0) {
+            tvPeriodStatusText.text = "Day $dayNumber"
+            btnLove.setImageResource(R.drawable.redheart)
+        } else {
+            val predictedDayNumber = predictedDates.map { normalizeDate(it) }.indexOfFirst { it == normalizedClickedDate } + 1 // Adjust index by adding 1
+            if (predictedDayNumber > 0) {
+                tvPeriodStatusText.text = "Prediction: Day $predictedDayNumber"
+                btnLove.setImageResource(R.drawable.heartgif)
+            } else {
+                tvPeriodStatusText.text = "Not Started"
+                btnLove.setImageResource(R.drawable.heartgif)
+            }
+        }
+
+        // Calculate and display the days until the next period
+        if (!periodDates.map { normalizeDate(it) }.contains(normalizedClickedDate) &&
+            !predictedDates.map { normalizeDate(it) }.contains(normalizedClickedDate)) {
+
+            // Calculate and display the days until the next period
+            val daysUntilNextPeriod = getDaysUntilNextPeriod(clickedDate, predictedDates)
+
+            if (daysUntilNextPeriod != null) {
+                tvNextPeriodStatus.text = "Period in $daysUntilNextPeriod Days"
+            } else {
+                tvNextPeriodStatus.text = "No upcoming periods"
+            }
+        } else {
+            // Hide or reset the status if the date is part of the current or predicted period
+            tvNextPeriodStatus.text = ""
+        }
+    }
 
     private fun normalizeDate(date: Date): Date {
         val calendar = Calendar.getInstance()
@@ -683,5 +786,15 @@ class MainPage : Fragment() {
         calendar.set(Calendar.SECOND, 0)
         calendar.set(Calendar.MILLISECOND, 0)
         return calendar.time
+    }
+
+    private fun getDaysUntilNextPeriod(currentDate: Date, predictedDates: List<Date>): Int? {
+        val normalizedCurrentDate = normalizeDate(currentDate)
+        val normalizedPredictedDates = predictedDates.map { normalizeDate(it) }
+
+        return normalizedPredictedDates
+            .filter { it.after(normalizedCurrentDate) }
+            .minOrNull()
+            ?.let { ((it.time - normalizedCurrentDate.time) / (1000 * 60 * 60 * 24)).toInt() }
     }
 }

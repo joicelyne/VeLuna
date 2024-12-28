@@ -50,6 +50,7 @@ class EditProfileFragment : Fragment() {
     companion object {
         private const val CAMERA_PERMISSION_REQUEST_CODE = 100
         private const val CAMERA_REQUEST_CODE = 1
+        private const val GALLERY_REQUEST_CODE = 2
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -74,7 +75,7 @@ class EditProfileFragment : Fragment() {
 
         // Button actions
         btnChangeProfilePicture.setOnClickListener {
-            openCamera()
+            openCameraOrGallery()
         }
         btnUpdateProfile.setOnClickListener {
             reauthenticateAndUpdatePassword()
@@ -209,6 +210,19 @@ class EditProfileFragment : Fragment() {
             }
     }
 
+    private fun openCameraOrGallery() {
+        val options = arrayOf("Take a Photo", "Choose from Gallery")
+        val builder = android.app.AlertDialog.Builder(requireContext())
+        builder.setTitle("Update Profile Picture")
+            .setItems(options) { dialog, which ->
+                when (which) {
+                    0 -> openCamera() // Pilih kamera
+                    1 -> openGallery() // Pilih galeri
+                }
+            }
+            .show()
+    }
+
     private fun openCamera() {
         if (ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             // Request the permission
@@ -222,6 +236,13 @@ class EditProfileFragment : Fragment() {
             launchCamera()
         }
     }
+
+    private fun openGallery() {
+        val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        intent.type = "image/*"
+        startActivityForResult(intent, GALLERY_REQUEST_CODE)
+    }
+
 
     private fun launchCamera() {
         val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
@@ -244,16 +265,36 @@ class EditProfileFragment : Fragment() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == CAMERA_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
-            val photo = data?.extras?.get("data") as? Bitmap
-            if (photo != null) {
-                imgProfile.setImageBitmap(photo)
-                uploadPhotoToFirebase(photo)
-            } else {
-                Toast.makeText(requireContext(), "Failed to capture photo", Toast.LENGTH_SHORT).show()
+        if (resultCode == Activity.RESULT_OK) {
+            when (requestCode) {
+                CAMERA_REQUEST_CODE -> {
+                    val photo = data?.extras?.get("data") as? Bitmap
+                    if (photo != null) {
+                        imgProfile.setImageBitmap(photo)
+                        uploadPhotoToFirebase(photo)
+                    } else {
+                        Toast.makeText(requireContext(), "Failed to capture photo", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                GALLERY_REQUEST_CODE -> {
+                    val imageUri = data?.data
+                    if (imageUri != null) {
+                        Glide.with(this)
+                            .load(imageUri)
+                            .placeholder(R.drawable.person)
+                            .error(R.drawable.person)
+                            .into(imgProfile)
+
+                        val bitmap = MediaStore.Images.Media.getBitmap(requireActivity().contentResolver, imageUri)
+                        uploadPhotoToFirebase(bitmap)
+                    } else {
+                        Toast.makeText(requireContext(), "Failed to select photo", Toast.LENGTH_SHORT).show()
+                    }
+                }
             }
         }
     }
+
 
     private fun uploadPhotoToFirebase(bitmap: Bitmap) {
         if (userId.isNullOrEmpty()) return
