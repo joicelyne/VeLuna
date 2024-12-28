@@ -261,6 +261,7 @@ class MainPage : Fragment() {
                 Log.e("MainPage", "Gagal memuat data `period`: ${e.message}")
                 updateCalendarUI(listOf(), listOf()) // Tidak ada prediksi jika gagal
             }
+        loadUserData()
     }
 
     // Fungsi untuk memuat data default jika koleksi `period` kosong
