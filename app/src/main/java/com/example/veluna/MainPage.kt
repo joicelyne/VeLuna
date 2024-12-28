@@ -100,10 +100,9 @@ class MainPage : Fragment() {
         loadUserData()
         loadLoveStatus()
 
-        // Setup RecyclerView for weekly calendar
-        setupRecyclerView()
+        calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY)
 
-        // Setup gesture detection
+        setupRecyclerView()
         setupGestureDetection()
 
         // Navigation
@@ -225,6 +224,9 @@ class MainPage : Fragment() {
                                 // Jika tidak ada `period`, gunakan `startDate` dari dokumen `users`
                                 updatePredictedDates(cycleLength, periodLength, userStartDate)
                             }
+                            val todayDate = SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(Date())
+                            val dayItem = DayItem(todayDate, "", isToday = true, fullDate = todayDate)
+                            onDateClick(dayItem)
                         }
                         .addOnFailureListener { e ->
                             Log.e("MainPage", "Gagal memuat koleksi `period`: ${e.message}")
@@ -296,6 +298,9 @@ class MainPage : Fragment() {
 
                     // Perbarui UI dengan semua tanggal periode dan tanggal prediksi
                     updateCalendarUI(uniquePeriodDates, predictedDates)
+                    val today = SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(Date())
+                    val dayItem = DayItem(today, "", isToday = true, fullDate = today)
+                    onDateClick(dayItem)
                 } else {
                     Log.e("MainPage", "Koleksi `period` kosong, memuat default data.")
                     loadDefaultPeriodData(userDocRef)
@@ -591,6 +596,7 @@ class MainPage : Fragment() {
             changeDuration = 300
         }
 
+        calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY)
         // Perbarui bulan dan tahun saat pertama kali RecyclerView dimuat
         updateMonthYear()
     }
@@ -627,45 +633,19 @@ class MainPage : Fragment() {
                 velocityX: Float,
                 velocityY: Float
             ): Boolean {
-                val diffX = e2.x - (e1?.x ?: 0f)
-                val diffY = e2.y - (e1?.y ?: 0f)
+                if (e1 == null || e2 == null) return false
+
+                val diffX = e2.x - e1.x
+                val diffY = e2.y - e1.y
 
                 if (Math.abs(diffX) > Math.abs(diffY)) {
                     if (Math.abs(diffX) > SWIPE_THRESHOLD && Math.abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
                         if (diffX > 0) {
-                            // Geser ke kanan (minggu sebelumnya)
-                            recyclerViewWeek.animate().translationX(recyclerViewWeek.width.toFloat())
-                                .setDuration(300).withEndAction {
-                                    recyclerViewWeek.translationX = -recyclerViewWeek.width.toFloat()
-                                    calendar.add(Calendar.DATE, -7)
-                                    adapter.updateDays(
-                                        newDays = getWeeklyDates(),
-                                        newStartPeriod = periodDates.firstOrNull(),
-                                        newEndPeriod = periodDates.lastOrNull(),
-                                        isLoved = isLoved,
-                                        predictedDates = predictedDates,
-                                        periodDates = periodDates
-                                    )
-                                    recyclerViewWeek.animate().translationX(0f).setDuration(300).start()
-                                    updateMonthYear()
-                                }.start()
+                            Log.d("Gesture", "Swiped Right: Loading Previous Week")
+                            loadPreviousWeek()
                         } else {
-                            // Geser ke kiri (minggu berikutnya)
-                            recyclerViewWeek.animate().translationX(-recyclerViewWeek.width.toFloat())
-                                .setDuration(300).withEndAction {
-                                    recyclerViewWeek.translationX = recyclerViewWeek.width.toFloat()
-                                    calendar.add(Calendar.DATE, 7)
-                                    adapter.updateDays(
-                                        newDays = getWeeklyDates(),
-                                        newStartPeriod = periodDates.firstOrNull(),
-                                        newEndPeriod = periodDates.lastOrNull(),
-                                        isLoved = isLoved,
-                                        predictedDates = predictedDates,
-                                        periodDates = periodDates
-                                    )
-                                    recyclerViewWeek.animate().translationX(0f).setDuration(300).start()
-                                    updateMonthYear()
-                                }.start()
+                            Log.d("Gesture", "Swiped Left: Loading Next Week")
+                            loadNextWeek()
                         }
                         return true
                     }
@@ -674,10 +654,48 @@ class MainPage : Fragment() {
             }
         })
 
+        // Pasang gesture detector ke RecyclerView
         recyclerViewWeek.setOnTouchListener { _, event ->
             gestureDetector.onTouchEvent(event)
         }
     }
+
+    private fun loadPreviousWeek() {
+        recyclerViewWeek.animate().translationX(recyclerViewWeek.width.toFloat())
+            .setDuration(300).withEndAction {
+                recyclerViewWeek.translationX = -recyclerViewWeek.width.toFloat()
+                calendar.add(Calendar.DATE, -7) // Mundur 7 hari
+                adapter.updateDays(
+                    newDays = getWeeklyDates(),
+                    newStartPeriod = periodDates.firstOrNull(),
+                    newEndPeriod = periodDates.lastOrNull(),
+                    isLoved = isLoved,
+                    predictedDates = predictedDates,
+                    periodDates = periodDates
+                )
+                recyclerViewWeek.animate().translationX(0f).setDuration(300).start()
+                updateMonthYear()
+            }.start()
+    }
+
+    private fun loadNextWeek() {
+        recyclerViewWeek.animate().translationX(-recyclerViewWeek.width.toFloat())
+            .setDuration(300).withEndAction {
+                recyclerViewWeek.translationX = recyclerViewWeek.width.toFloat()
+                calendar.add(Calendar.DATE, 7) // Maju 7 hari
+                adapter.updateDays(
+                    newDays = getWeeklyDates(),
+                    newStartPeriod = periodDates.firstOrNull(),
+                    newEndPeriod = periodDates.lastOrNull(),
+                    isLoved = isLoved,
+                    predictedDates = predictedDates,
+                    periodDates = periodDates
+                )
+                recyclerViewWeek.animate().translationX(0f).setDuration(300).start()
+                updateMonthYear()
+            }.start()
+    }
+
 
     private fun updateMonthYear() {
         val dateFormat = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
@@ -690,25 +708,25 @@ class MainPage : Fragment() {
         startActivity(intent)
     }
 
-    private fun updatePeriodDates(periodLength: Int) {
-        if (periodDates.isEmpty()) return
-
-        val startPeriod = periodDates.first()
-
-        // Generate dates langsung berdasarkan startPeriod dan periodLength
-        val updatedPeriodDates = generateDatesBetween(startPeriod, periodLength)
-        this.periodDates = updatedPeriodDates
-
-        // Update adapter dengan tanggal baru
-        adapter.updateDays(
-            newDays = getWeeklyDates(),
-            newStartPeriod = updatedPeriodDates.firstOrNull(),
-            newEndPeriod = updatedPeriodDates.lastOrNull(),
-            isLoved = isLoved,
-            predictedDates = predictedDates,
-            periodDates = periodDates
-        )
-    }
+//    private fun updatePeriodDates(periodLength: Int) {
+//        if (periodDates.isEmpty()) return
+//
+//        val startPeriod = periodDates.first()
+//
+//        // Generate dates langsung berdasarkan startPeriod dan periodLength
+//        val updatedPeriodDates = generateDatesBetween(startPeriod, periodLength)
+//        this.periodDates = updatedPeriodDates
+//
+//        // Update adapter dengan tanggal baru
+//        adapter.updateDays(
+//            newDays = getWeeklyDates(),
+//            newStartPeriod = updatedPeriodDates.firstOrNull(),
+//            newEndPeriod = updatedPeriodDates.lastOrNull(),
+//            isLoved = isLoved,
+//            predictedDates = predictedDates,
+//            periodDates = periodDates
+//        )
+//    }
 
     private fun updatePredictedDates(cycleLength: Int, periodLength: Int, startDate: Date?) {
         if (startDate == null) {

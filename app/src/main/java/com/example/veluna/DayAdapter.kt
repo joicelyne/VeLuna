@@ -59,16 +59,10 @@ class DayAdapter(
         // Normalisasi Tanggal untuk memastikan waktu di-set ke 00:00:00
         val normalizedDayDate = normalizeDate(dayDate)
 
-        val normalizedPeriodDates = periodDates.map { normalizeDate(it) }
         val normalizedPredictedDates = predictedPeriodDates.map { normalizeDate(it) }
 
         // Logika untuk menentukan status berdasarkan isToday, isLoved, dan rentang periode
         when {
-            normalizedPeriodDates.contains(normalizedDayDate) -> {
-                holder.tvDate.setBackgroundResource(R.drawable.circle_period_now)
-                holder.tvDate.setTextColor(holder.itemView.context.getColor(R.color.white))
-            }
-
             normalizedPredictedDates.contains(normalizedDayDate) -> {
                 holder.tvDate.setBackgroundResource(R.drawable.circle_period_next)
                 holder.tvDate.setTextColor(holder.itemView.context.getColor(R.color.white))
