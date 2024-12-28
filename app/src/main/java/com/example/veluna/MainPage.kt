@@ -784,22 +784,33 @@ class MainPage : Fragment() {
             tvPeriodStatusText.text = if (dayNumber > 0) "Day $dayNumber" else "Day $dayNumber (Before Cycle)"
             btnLove.setImageResource(R.drawable.redheart)
         } else {
-            // If not in a current cycle, check for predicted dates
-            val predictedDayNumber = predictedDates.map { normalizeDate(it) }.indexOfFirst { it == normalizedClickedDate } + 1
-            if (predictedDayNumber > 0) {
-                tvPeriodStatusText.text = "Prediction: Day $predictedDayNumber"
+            // Check if clicked date is before the first period cycle
+            val firstCycleStart = periodCycles.firstOrNull()?.firstOrNull()
+            if (firstCycleStart != null && normalizedClickedDate.before(firstCycleStart)) {
+                val daysBeforeFirstCycle = ((firstCycleStart.time - normalizedClickedDate.time) / (1000 * 60 * 60 * 24)).toInt()
+                tvPeriodStatusText.text = "Period in $daysBeforeFirstCycle Days"
                 btnLove.setImageResource(R.drawable.heartgif)
             } else {
-                tvPeriodStatusText.text = "Not Started"
-                btnLove.setImageResource(R.drawable.heartgif)
+                // Check for predicted dates if not part of a current cycle
+                val predictedDayNumber = predictedDates.map { normalizeDate(it) }.indexOfFirst { it == normalizedClickedDate } + 1
+                if (predictedDayNumber > 0) {
+                    tvPeriodStatusText.text = "Prediction: Day $predictedDayNumber"
+                    btnLove.setImageResource(R.drawable.heartgif)
+                } else {
+                    tvPeriodStatusText.text = "Not Started"
+                    btnLove.setImageResource(R.drawable.heartgif)
+                }
             }
         }
 
         // Calculate and display the days until the next period
         if (currentCycle == null &&
             !predictedDates.map { normalizeDate(it) }.contains(normalizedClickedDate)) {
-            val daysUntilNextPeriod = getDaysUntilNextPeriod(clickedDate, predictedDates)
-            if (daysUntilNextPeriod != null) {
+            val nextPeriodStart = getNextPeriodStartDate(normalizedClickedDate, periodCycles, predictedDates)
+            val daysUntilNextPeriod = nextPeriodStart?.let {
+                ((it.time - normalizedClickedDate.time) / (1000 * 60 * 60 * 24)).toInt()
+            }
+            if (daysUntilNextPeriod != null && daysUntilNextPeriod > 0) {
                 tvNextPeriodStatus.text = "Period in $daysUntilNextPeriod Days"
             } else {
                 tvNextPeriodStatus.text = "No upcoming periods"
@@ -836,6 +847,19 @@ class MainPage : Fragment() {
         return cycles
     }
 
+    // Helper function to get the next period start date
+    private fun getNextPeriodStartDate(clickedDate: Date, periodCycles: List<List<Date>>, predictedDates: List<Date>): Date? {
+        val normalizedPredictedDates = predictedDates.map { normalizeDate(it) }.sorted()
+        val normalizedClickedDate = normalizeDate(clickedDate)
+
+        // Find the closest period or predicted date after the clicked date
+        val upcomingDates = periodCycles.flatten().filter { it.after(normalizedClickedDate) } +
+                normalizedPredictedDates.filter { it.after(normalizedClickedDate) }
+
+        return upcomingDates.minOrNull()
+    }
+
+
     private fun normalizeDate(date: Date): Date {
         val calendar = Calendar.getInstance()
         calendar.time = date
@@ -846,13 +870,4 @@ class MainPage : Fragment() {
         return calendar.time
     }
 
-    private fun getDaysUntilNextPeriod(currentDate: Date, predictedDates: List<Date>): Int? {
-        val normalizedCurrentDate = normalizeDate(currentDate)
-        val normalizedPredictedDates = predictedDates.map { normalizeDate(it) }
-
-        return normalizedPredictedDates
-            .filter { it.after(normalizedCurrentDate) }
-            .minOrNull()
-            ?.let { ((it.time - normalizedCurrentDate.time) / (1000 * 60 * 60 * 24)).toInt() }
-    }
 }
