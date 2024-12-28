@@ -760,15 +760,32 @@ class MainPage : Fragment() {
         Log.d("MainPage", "Period Dates: ${periodDates.map { normalizeDate(it) }}")
         Log.d("MainPage", "Predicted Dates: ${predictedDates.map { normalizeDate(it) }}")
 
-        // Find the day number based on the period dates
-        val dayNumber = periodDates.map { normalizeDate(it) }.indexOfFirst { it == normalizedClickedDate } + 1 // Adjust index by adding 1
-        Log.d("MainPage", "Day Number: $dayNumber")
+        // Normalize and sort period dates
+        val normalizedPeriodDates = periodDates.map { normalizeDate(it) }.sorted()
 
-        if (dayNumber > 0) {
-            tvPeriodStatusText.text = "Day $dayNumber"
+        // Group period dates into cycles
+        val periodCycles = groupDatesIntoCycles(normalizedPeriodDates)
+
+        // Find the cycle that contains the clicked date
+        var currentCycle: List<Date>? = null
+        for (cycle in periodCycles) {
+            if (cycle.contains(normalizedClickedDate)) {
+                currentCycle = cycle
+                break
+            }
+        }
+
+        if (currentCycle != null) {
+            // Calculate the day number within the current cycle
+            val firstDate = currentCycle.first()
+            val dayOffset = ((normalizedClickedDate.time - firstDate.time) / (1000 * 60 * 60 * 24)).toInt()
+            val dayNumber = if (dayOffset >= 0) dayOffset + 1 else dayOffset
+
+            tvPeriodStatusText.text = if (dayNumber > 0) "Day $dayNumber" else "Day $dayNumber (Before Cycle)"
             btnLove.setImageResource(R.drawable.redheart)
         } else {
-            val predictedDayNumber = predictedDates.map { normalizeDate(it) }.indexOfFirst { it == normalizedClickedDate } + 1 // Adjust index by adding 1
+            // If not in a current cycle, check for predicted dates
+            val predictedDayNumber = predictedDates.map { normalizeDate(it) }.indexOfFirst { it == normalizedClickedDate } + 1
             if (predictedDayNumber > 0) {
                 tvPeriodStatusText.text = "Prediction: Day $predictedDayNumber"
                 btnLove.setImageResource(R.drawable.heartgif)
@@ -779,21 +796,44 @@ class MainPage : Fragment() {
         }
 
         // Calculate and display the days until the next period
-        if (!periodDates.map { normalizeDate(it) }.contains(normalizedClickedDate) &&
+        if (currentCycle == null &&
             !predictedDates.map { normalizeDate(it) }.contains(normalizedClickedDate)) {
-
-            // Calculate and display the days until the next period
             val daysUntilNextPeriod = getDaysUntilNextPeriod(clickedDate, predictedDates)
-
             if (daysUntilNextPeriod != null) {
                 tvNextPeriodStatus.text = "Period in $daysUntilNextPeriod Days"
             } else {
                 tvNextPeriodStatus.text = "No upcoming periods"
             }
         } else {
-            // Hide or reset the status if the date is part of the current or predicted period
             tvNextPeriodStatus.text = ""
         }
+    }
+
+    // Helper function to group dates into cycles
+    private fun groupDatesIntoCycles(dates: List<Date>): List<List<Date>> {
+        val cycles = mutableListOf<MutableList<Date>>()
+        if (dates.isEmpty()) return cycles
+
+        var currentCycle = mutableListOf<Date>()
+        currentCycle.add(dates[0])
+
+        for (i in 1 until dates.size) {
+            val previousDate = dates[i - 1]
+            val currentDate = dates[i]
+
+            // Check if the current date is contiguous with the previous date
+            val diffInDays = ((currentDate.time - previousDate.time) / (1000 * 60 * 60 * 24)).toInt()
+            if (diffInDays > 1) {
+                // Start a new cycle
+                cycles.add(currentCycle)
+                currentCycle = mutableListOf()
+            }
+            currentCycle.add(currentDate)
+        }
+        // Add the last cycle
+        cycles.add(currentCycle)
+
+        return cycles
     }
 
     private fun normalizeDate(date: Date): Date {
