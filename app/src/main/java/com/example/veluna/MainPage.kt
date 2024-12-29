@@ -529,8 +529,8 @@ class MainPage : Fragment() {
                                     } else {
                                         val periodDatesLong = document.get("periodDates") as? List<Long> ?: return@forEach
                                         val periodDates = periodDatesLong.map { Date(it) }
-                                        val periodEnd = querySnapshot.documents.lastOrNull()
                                         val updatedDates = periodDates.filter { it <= today.time }
+                                        val periodEnd = updatedDates.lastOrNull()
 
                                         document.reference.update(
                                             mapOf(
@@ -543,6 +543,16 @@ class MainPage : Fragment() {
 
                                             val predictedDates = getPredictedPeriodDates(updatedDates.lastOrNull() ?: today.time, cycleLength, periodLength)
                                             updateCalendarUI(updatedDates, predictedDates)
+
+                                            currentWeekOffset = 0
+                                            adapter.updateDays(
+                                                newDays = getWeeklyDates(weekOffset = currentWeekOffset),
+                                                newStartPeriod = updatedDates.firstOrNull(),
+                                                newEndPeriod = updatedDates.lastOrNull(),
+                                                isLoved = false,
+                                                predictedDates = predictedDates,
+                                                periodDates = updatedDates
+                                            )
 
                                             btnLove.setImageResource(R.drawable.heartgif)
                                             tvPeriodStatusText.text = "Not Started"
