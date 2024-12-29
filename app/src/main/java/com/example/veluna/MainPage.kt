@@ -22,6 +22,7 @@ import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -428,55 +429,77 @@ class MainPage : Fragment() {
                         .get()
                         .addOnSuccessListener { querySnapshot ->
                             if (querySnapshot.isEmpty) {
-                                val newPeriodId = db.collection("users")
-                                    .document(currentUserId)
-                                    .collection("period")
-                                    .document().id
-
-                                val startPeriod = today.time
-                                val periodDates = generateDatesBetween(startPeriod, periodLength)
-
-                                val periodData = mapOf(
-                                    "isStart" to true,
-                                    "periodStart" to startPeriod,
-                                    "periodDates" to periodDates.map { it.time },
-                                    "periodLength" to periodLength,
-                                    "cycleLength" to cycleLength
-                                )
-
-                                // Simpan periode baru
+                                // Perubahan dimulai di sini
                                 db.collection("users")
                                     .document(currentUserId)
                                     .collection("period")
-                                    .document(newPeriodId)
-                                    .set(periodData)
-                                    .addOnSuccessListener {
-                                        Log.d("Debug", "Period Baru Disimpan: $periodData")
+                                    .orderBy("periodStart", Query.Direction.DESCENDING)
+                                    .limit(1)
+                                    .get()
+                                    .addOnSuccessListener { lastPeriodSnapshot ->
+                                        val lastPeriod = lastPeriodSnapshot.documents.firstOrNull()
+                                        val lastPeriodStartDate = lastPeriod?.getTimestamp("periodStart")?.toDate()
 
-                                        val predictedDates = getPredictedPeriodDates(startPeriod, cycleLength, periodLength)
-                                        updateCalendarUI(periodDates, predictedDates)
+                                        val calculatedCycleLength = if (lastPeriodStartDate != null) {
+                                            val diff = (timestamp.toDate().time - lastPeriodStartDate.time) / (1000 * 60 * 60 * 24)
+                                            diff.toInt()
+                                        } else {
+                                            cycleLength
+                                        }
 
-                                        currentWeekOffset = 0
-                                        this.periodDates = periodDates
-                                        adapter.updateDays(
-                                            newDays = getWeeklyDates(weekOffset = currentWeekOffset),
-                                            newStartPeriod = periodDates.firstOrNull(),
-                                            newEndPeriod = periodDates.lastOrNull(),
-                                            isLoved = true,
-                                            predictedDates = predictedDates,
-                                            periodDates = periodDates
+                                        val newPeriodId = db.collection("users")
+                                            .document(currentUserId)
+                                            .collection("period")
+                                            .document().id
+
+                                        val startPeriod = today.time
+                                        val periodDates = generateDatesBetween(startPeriod, periodLength)
+
+                                        val periodData = mapOf(
+                                            "isStart" to true,
+                                            "periodStart" to startPeriod,
+                                            "periodDates" to periodDates.map { it.time },
+                                            "periodLength" to periodLength,
+                                            "cycleLength" to calculatedCycleLength
                                         )
 
-                                        btnLove.setImageResource(R.drawable.redheart)
-                                        tvPeriodStatusText.text = "Started"
-                                        tvPeriodStatusText.setTextColor(resources.getColor(R.color.white))
-                                        tvPeriodText.setTextColor(resources.getColor(R.color.white))
+                                        db.collection("users")
+                                            .document(currentUserId)
+                                            .collection("period")
+                                            .document(newPeriodId)
+                                            .set(periodData)
+                                            .addOnSuccessListener {
+                                                Log.d("Debug", "Period Baru Disimpan: $periodData")
 
-                                        loadLoveStatus()
+                                                val predictedDates = getPredictedPeriodDates(startPeriod, calculatedCycleLength, periodLength)
+                                                updateCalendarUI(periodDates, predictedDates)
+
+                                                currentWeekOffset = 0
+                                                this.periodDates = periodDates
+                                                adapter.updateDays(
+                                                    newDays = getWeeklyDates(weekOffset = currentWeekOffset),
+                                                    newStartPeriod = periodDates.firstOrNull(),
+                                                    newEndPeriod = periodDates.lastOrNull(),
+                                                    isLoved = true,
+                                                    predictedDates = predictedDates,
+                                                    periodDates = periodDates
+                                                )
+
+                                                btnLove.setImageResource(R.drawable.redheart)
+                                                tvPeriodStatusText.text = "Started"
+                                                tvPeriodStatusText.setTextColor(resources.getColor(R.color.white))
+                                                tvPeriodText.setTextColor(resources.getColor(R.color.white))
+
+                                                loadLoveStatus()
+                                            }
+                                            .addOnFailureListener { e ->
+                                                Log.e("MainPage", "Gagal menyimpan periode baru: ${e.message}")
+                                            }
                                     }
                                     .addOnFailureListener { e ->
-                                        Log.e("MainPage", "Gagal menyimpan periode baru: ${e.message}")
+                                        Log.e("MainPage", "Gagal menghitung cycleLength: ${e.message}")
                                     }
+                                // Perubahan berakhir di sini
                             }
                         }
                         .addOnFailureListener { e ->
@@ -529,20 +552,35 @@ class MainPage : Fragment() {
                                     } else {
                                         val periodDatesLong = document.get("periodDates") as? List<Long> ?: return@forEach
                                         val periodDates = periodDatesLong.map { Date(it) }
-                                        val periodEnd = querySnapshot.documents.lastOrNull()
                                         val updatedDates = periodDates.filter { it <= today.time }
+                                        val periodEnd = updatedDates.lastOrNull()
+
+                                        // Perubahan dimulai di sini
+                                        val calculatedPeriodLength = updatedDates.size
+                                        // Perubahan berakhir di sini
 
                                         document.reference.update(
                                             mapOf(
                                                 "isStart" to false,
                                                 "periodDates" to updatedDates.map { it.time },
-                                                "periodEnd" to periodEnd
+                                                "periodEnd" to periodEnd,
+                                                "periodLength" to calculatedPeriodLength // Simpan periodLength yang dihitung
                                             )
                                         ).addOnSuccessListener {
-                                            Log.d("Debug", "Periode Dihentikan")
+                                            Log.d("Debug", "Periode Dihentikan dengan periodLength: $calculatedPeriodLength")
 
-                                            val predictedDates = getPredictedPeriodDates(updatedDates.lastOrNull() ?: today.time, cycleLength, periodLength)
+                                            val predictedDates = getPredictedPeriodDates(updatedDates.lastOrNull() ?: today.time, cycleLength, calculatedPeriodLength)
                                             updateCalendarUI(updatedDates, predictedDates)
+
+                                            currentWeekOffset = 0
+                                            adapter.updateDays(
+                                                newDays = getWeeklyDates(weekOffset = currentWeekOffset),
+                                                newStartPeriod = updatedDates.firstOrNull(),
+                                                newEndPeriod = updatedDates.lastOrNull(),
+                                                isLoved = false,
+                                                predictedDates = predictedDates,
+                                                periodDates = updatedDates
+                                            )
 
                                             btnLove.setImageResource(R.drawable.heartgif)
                                             tvPeriodStatusText.text = "Not Started"
@@ -565,6 +603,7 @@ class MainPage : Fragment() {
                 Log.e("MainPage", "Gagal mengambil periodLength: ${exception.message}")
             }
     }
+
 
     private fun generateDatesBetween(startDate: Date, periodLength: Int = 5): List<Date> {
         val dates = mutableListOf<Date>()
