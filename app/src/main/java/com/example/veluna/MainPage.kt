@@ -529,14 +529,14 @@ class MainPage : Fragment() {
                                     } else {
                                         val periodDatesLong = document.get("periodDates") as? List<Long> ?: return@forEach
                                         val periodDates = periodDatesLong.map { Date(it) }
-
+                                        val periodEnd = querySnapshot.documents.lastOrNull()
                                         val updatedDates = periodDates.filter { it <= today.time }
 
                                         document.reference.update(
                                             mapOf(
                                                 "isStart" to false,
                                                 "periodDates" to updatedDates.map { it.time },
-                                                "periodEnd" to timestamp
+                                                "periodEnd" to periodEnd
                                             )
                                         ).addOnSuccessListener {
                                             Log.d("Debug", "Periode Dihentikan")

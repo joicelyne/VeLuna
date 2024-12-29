@@ -9,12 +9,14 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import java.util.*
 
 class DatesEditPeriod : AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var periodDates: List<Date>
+    private val dateToPeriodIdMap = mutableMapOf<Date, String>()
 
     // Fungsi untuk memuat tanggal dari Firebase
     private fun loadPeriodDates() {
@@ -27,15 +29,21 @@ class DatesEditPeriod : AppCompatActivity() {
                 val dates = mutableListOf<Date>()
                 querySnapshot.forEach { document ->
                     val periodDatesLong = document.get("periodDates") as? List<Long> ?: listOf()
-                    // Normalisasi semua tanggal agar hanya memperhatikan hari, bulan, dan tahun
-                    dates.addAll(periodDatesLong.map { normalizeDate(Date(it)) })
+                    val periodId = document.id
+                    val periodDates = periodDatesLong.map { normalizeDate(Date(it)) }
+
+                    periodDates.forEach { date ->
+                        dateToPeriodIdMap[date] = periodId
+                    }
+
+                    dates.addAll(periodDates)
                 }
 
-                // Perbarui list tanggal di adapter
+                // Perbarui adapter dengan semua tanggal
                 (recyclerView.adapter as CalendarAdapter).setSelectedDates(dates)
             }
             .addOnFailureListener { exception ->
-                exception.printStackTrace() // Log jika terjadi error
+                exception.printStackTrace()
             }
     }
 
@@ -55,19 +63,53 @@ class DatesEditPeriod : AppCompatActivity() {
         val db = FirebaseFirestore.getInstance()
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
 
-        val datesToSave = dates.map { it.time } // Konversi ke format Long untuk Firebase
+        val periodIdToDates = mutableMapOf<String, MutableList<Long>>()
+        val newDates = mutableListOf<Date>()
 
-        db.collection("users").document(userId).collection("period")
-            .add(mapOf("periodDates" to datesToSave))
-            .addOnSuccessListener {
-                // Kembali ke halaman utama
-                val intent = Intent(this, MainActivity::class.java)
-                startActivity(intent)
-                finish()
+        // Kelompokkan tanggal berdasarkan period ID
+        dates.forEach { date ->
+            val periodId = dateToPeriodIdMap[date]
+            if (periodId != null) {
+                // Tambahkan tanggal ke period ID yang ada
+                periodIdToDates.getOrPut(periodId) { mutableListOf() }.add(date.time)
+            } else {
+                // Tanggal tanpa period ID dianggap baru
+                newDates.add(date)
             }
-            .addOnFailureListener { exception ->
-                exception.printStackTrace() // Log jika terjadi error
+        }
+
+        // Tangani tanggal baru (tanpa period ID)
+        newDates.forEach { newDate ->
+            val nearestPeriodId = findNearestPeriodId(newDate)
+            if (nearestPeriodId != null) {
+                // Tambahkan tanggal baru ke period ID terdekat
+                periodIdToDates.getOrPut(nearestPeriodId) { mutableListOf() }.add(newDate.time)
+            } else {
+                // Tidak ada period ID terdekat, tambahkan sebagai period baru
+                val newPeriodId = UUID.randomUUID().toString()
+                periodIdToDates[newPeriodId] = mutableListOf(newDate.time)
             }
+        }
+
+        // Update dokumen untuk setiap period ID
+        periodIdToDates.forEach { (periodId, periodDates) ->
+            db.collection("users")
+                .document(userId)
+                .collection("period")
+                .document(periodId)
+                .update("periodDates", periodDates)
+                .addOnSuccessListener {
+                    println("Successfully updated periodDates for periodId: $periodId")
+                }
+                .addOnFailureListener { exception ->
+                    println("Failed to update periodDates for periodId: $periodId - ${exception.message}")
+                }
+        }
+
+        // Setelah selesai, kembali ke halaman utama
+        val intent = Intent(this, MainActivity::class.java)
+        startActivity(intent)
+        finish()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -129,5 +171,20 @@ class DatesEditPeriod : AppCompatActivity() {
         }
     }
 
+    private fun findNearestPeriodId(newDate: Date): String? {
+        val threshold = 1 // Batas maksimum hari untuk dianggap "bersebelahan"
+        var nearestPeriodId: String? = null
+        var minDiff = Int.MAX_VALUE
+
+        dateToPeriodIdMap.forEach { (date, periodId) ->
+            val diff = ((normalizeDate(newDate).time - normalizeDate(date).time) / (1000 * 60 * 60 * 24)).toInt()
+            if (diff in -threshold..threshold && diff < minDiff) {
+                nearestPeriodId = periodId
+                minDiff = diff
+            }
+        }
+
+        return nearestPeriodId
+    }
 
 }
