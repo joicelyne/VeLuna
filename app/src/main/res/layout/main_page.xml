@@ -91,19 +91,6 @@
                         android:textColor="@color/white"
                         android:textSize="22sp" />
 
-                    <TextView
-                        android:id="@+id/tvNextPeriodStatus"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:fontFamily="@font/worksans_semi"
-                        android:textColor="@color/white"
-                        android:textSize="16sp"
-                        android:gravity="center"
-                        android:layout_centerHorizontal="true"
-                        android:layout_alignParentTop="true" />
-
-
                 </LinearLayout>
 
                 <!-- Small Edit Icon -->

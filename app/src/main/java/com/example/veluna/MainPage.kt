@@ -49,8 +49,6 @@ class MainPage : Fragment() {
     private lateinit var txtInsight3: TextView
     private lateinit var prevCycleLenText: TextView
     private lateinit var prevPeriodLenText: TextView
-    private lateinit var tvNextPeriodStatus: TextView
-
 
     // Calendar instance to track the current week
     private val calendar = Calendar.getInstance()
@@ -88,7 +86,6 @@ class MainPage : Fragment() {
         recyclerViewWeek = view.findViewById(R.id.recyclerViewWeek)
         prevCycleLenText = view.findViewById(R.id.prevCycleLenDays)
         prevPeriodLenText = view.findViewById(R.id.prevPeriodLenDays)
-        tvNextPeriodStatus = view.findViewById(R.id.tvNextPeriodStatus)
 
         // Observasi perubahan data
         observeUserData()
@@ -444,8 +441,7 @@ class MainPage : Fragment() {
                                     "periodStart" to startPeriod,
                                     "periodDates" to periodDates.map { it.time },
                                     "periodLength" to periodLength,
-                                    "cycleLength" to cycleLength,
-                                    "periodDates" to periodDates.map { it.time } // Store as Long
+                                    "cycleLength" to cycleLength
                                 )
 
                                 // Simpan periode baru
@@ -459,6 +455,17 @@ class MainPage : Fragment() {
 
                                         val predictedDates = getPredictedPeriodDates(startPeriod, cycleLength, periodLength)
                                         updateCalendarUI(periodDates, predictedDates)
+
+                                        currentWeekOffset = 0
+                                        this.periodDates = periodDates
+                                        adapter.updateDays(
+                                            newDays = getWeeklyDates(weekOffset = currentWeekOffset),
+                                            newStartPeriod = periodDates.firstOrNull(),
+                                            newEndPeriod = periodDates.lastOrNull(),
+                                            isLoved = true,
+                                            predictedDates = predictedDates,
+                                            periodDates = periodDates
+                                        )
 
                                         btnLove.setImageResource(R.drawable.redheart)
                                         tvPeriodStatusText.text = "Started"
@@ -506,9 +513,10 @@ class MainPage : Fragment() {
                                             tvPeriodStatusText.setTextColor(resources.getColor(R.color.color4))
                                             tvPeriodText.setTextColor(resources.getColor(R.color.color4))
 
+                                            currentWeekOffset = 0
                                             periodDates = listOf() // Kosongkan daftar
                                             adapter.updateDays(
-                                                newDays = getWeeklyDates(),
+                                                newDays = getWeeklyDates(weekOffset = currentWeekOffset),
                                                 newStartPeriod = null,
                                                 newEndPeriod = null,
                                                 isLoved = false,
@@ -571,162 +579,24 @@ class MainPage : Fragment() {
         return dates
     }
 
-    private fun setupRecyclerView() {
-        adapter = DayAdapter(
-            days = getWeeklyDates(),
-            isLoved = isLoved,
-            periodDates = periodDates,
-            onMoodEditClick = { dayItem ->
-                findNavController().navigate(R.id.action_MainPage_to_moodNotes)
-            },
-            onDateClick = { dayItem ->
-                onDateClick(dayItem)
-            }
-        )
-
-
-        recyclerViewWeek.layoutManager = GridLayoutManager(requireContext(), 7) // 7 items per row
-        recyclerViewWeek.adapter = adapter
-
-        // Pastikan animasi
-        recyclerViewWeek.itemAnimator?.apply {
-            addDuration = 300
-            removeDuration = 300
-            moveDuration = 300
-            changeDuration = 300
-        }
-
-        calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY)
-        // Perbarui bulan dan tahun saat pertama kali RecyclerView dimuat
-        updateMonthYear()
-    }
-
-    private fun getWeeklyDates(): List<DayItem> {
-        val today = Calendar.getInstance()
-        val weekDates = mutableListOf<DayItem>()
-        calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY) // Start week on Sunday
-
-        val fullDateFormat = SimpleDateFormat("dd MMM yyyy", Locale.getDefault()) // Format untuk fullDate
-
-        for (i in 0 until 7) { // Generate 7 days
-            val date = SimpleDateFormat("dd", Locale.getDefault()).format(calendar.time)
-            val dayName = SimpleDateFormat("E", Locale.getDefault()).format(calendar.time)[0].toString()
-            val isToday = calendar.get(Calendar.DAY_OF_YEAR) == today.get(Calendar.DAY_OF_YEAR)
-            val fullDate = fullDateFormat.format(calendar.time) // Generate fullDate
-
-            weekDates.add(DayItem(date, dayName, isToday, fullDate)) // Tambahkan fullDate di sini
-            calendar.add(Calendar.DATE, 1)
-        }
-        calendar.add(Calendar.DATE, -7) // Reset calendar to start of week
-        return weekDates
-    }
-
-    private fun setupGestureDetection() {
-        gestureDetector = GestureDetectorCompat(requireContext(), object :
-            GestureDetector.SimpleOnGestureListener() {
-            private val SWIPE_THRESHOLD = 100
-            private val SWIPE_VELOCITY_THRESHOLD = 100
-
-            override fun onFling(
-                e1: MotionEvent?,
-                e2: MotionEvent,
-                velocityX: Float,
-                velocityY: Float
-            ): Boolean {
-                if (e1 == null || e2 == null) return false
-
-                val diffX = e2.x - e1.x
-                val diffY = e2.y - e1.y
-
-                if (Math.abs(diffX) > Math.abs(diffY)) {
-                    if (Math.abs(diffX) > SWIPE_THRESHOLD && Math.abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
-                        if (diffX > 0) {
-                            Log.d("Gesture", "Swiped Right: Loading Previous Week")
-                            loadPreviousWeek()
-                        } else {
-                            Log.d("Gesture", "Swiped Left: Loading Next Week")
-                            loadNextWeek()
-                        }
-                        return true
-                    }
-                }
-                return false
-            }
-        })
-
-        // Pasang gesture detector ke RecyclerView
-        recyclerViewWeek.setOnTouchListener { _, event ->
-            gestureDetector.onTouchEvent(event)
-        }
-    }
-
-    private fun loadPreviousWeek() {
-        recyclerViewWeek.animate().translationX(recyclerViewWeek.width.toFloat())
-            .setDuration(300).withEndAction {
-                recyclerViewWeek.translationX = -recyclerViewWeek.width.toFloat()
-                calendar.add(Calendar.DATE, -7) // Mundur 7 hari
-                adapter.updateDays(
-                    newDays = getWeeklyDates(),
-                    newStartPeriod = periodDates.firstOrNull(),
-                    newEndPeriod = periodDates.lastOrNull(),
-                    isLoved = isLoved,
-                    predictedDates = predictedDates,
-                    periodDates = periodDates
-                )
-                recyclerViewWeek.animate().translationX(0f).setDuration(300).start()
-                updateMonthYear()
-            }.start()
-    }
-
-    private fun loadNextWeek() {
-        recyclerViewWeek.animate().translationX(-recyclerViewWeek.width.toFloat())
-            .setDuration(300).withEndAction {
-                recyclerViewWeek.translationX = recyclerViewWeek.width.toFloat()
-                calendar.add(Calendar.DATE, 7) // Maju 7 hari
-                adapter.updateDays(
-                    newDays = getWeeklyDates(),
-                    newStartPeriod = periodDates.firstOrNull(),
-                    newEndPeriod = periodDates.lastOrNull(),
-                    isLoved = isLoved,
-                    predictedDates = predictedDates,
-                    periodDates = periodDates
-                )
-                recyclerViewWeek.animate().translationX(0f).setDuration(300).start()
-                updateMonthYear()
-            }.start()
-    }
-
-
     private fun updateMonthYear() {
+        // Gunakan currentWeekOffset untuk menghitung tanggal pertama minggu
+        val calendarForWeek = Calendar.getInstance()
+        calendarForWeek.time = Date() // Mulai dari tanggal hari ini
+        calendarForWeek.add(Calendar.WEEK_OF_YEAR, currentWeekOffset) // Terapkan offset minggu
+        calendarForWeek.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY) // Set ke awal minggu
+
+        // Format bulan dan tahun
         val dateFormat = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
-        val monthYear = dateFormat.format(calendar.time)
+        val monthYear = dateFormat.format(calendarForWeek.time)
         tvMonthYear.text = monthYear
     }
+
 
     private fun openLink(url: String) {
         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
         startActivity(intent)
     }
-
-//    private fun updatePeriodDates(periodLength: Int) {
-//        if (periodDates.isEmpty()) return
-//
-//        val startPeriod = periodDates.first()
-//
-//        // Generate dates langsung berdasarkan startPeriod dan periodLength
-//        val updatedPeriodDates = generateDatesBetween(startPeriod, periodLength)
-//        this.periodDates = updatedPeriodDates
-//
-//        // Update adapter dengan tanggal baru
-//        adapter.updateDays(
-//            newDays = getWeeklyDates(),
-//            newStartPeriod = updatedPeriodDates.firstOrNull(),
-//            newEndPeriod = updatedPeriodDates.lastOrNull(),
-//            isLoved = isLoved,
-//            predictedDates = predictedDates,
-//            periodDates = periodDates
-//        )
-//    }
 
     private fun updatePredictedDates(cycleLength: Int, periodLength: Int, startDate: Date?) {
         if (startDate == null) {
@@ -763,6 +633,10 @@ class MainPage : Fragment() {
         // Normalize and sort period dates
         val normalizedPeriodDates = periodDates.map { normalizeDate(it) }.sorted()
 
+        // Ambil periodStart dari period id terakhir
+        val latestPeriodStart = periodDates.lastOrNull()?.let { normalizeDate(it) }
+        val normalizedPredictedDates = predictedDates.map { normalizeDate(it) }
+
         // Group period dates into cycles
         val periodCycles = groupDatesIntoCycles(normalizedPeriodDates)
 
@@ -776,47 +650,55 @@ class MainPage : Fragment() {
         }
 
         if (currentCycle != null) {
-            // Calculate the day number within the current cycle
+            // Tanggal dalam `periodDates`
             val firstDate = currentCycle.first()
             val dayOffset = ((normalizedClickedDate.time - firstDate.time) / (1000 * 60 * 60 * 24)).toInt()
             val dayNumber = if (dayOffset >= 0) dayOffset + 1 else dayOffset
 
             tvPeriodStatusText.text = if (dayNumber > 0) "Day $dayNumber" else "Day $dayNumber (Before Cycle)"
             btnLove.setImageResource(R.drawable.redheart)
-        } else {
-            // Check if clicked date is before the first period cycle
-            val firstCycleStart = periodCycles.firstOrNull()?.firstOrNull()
-            if (firstCycleStart != null && normalizedClickedDate.before(firstCycleStart)) {
-                val daysBeforeFirstCycle = ((firstCycleStart.time - normalizedClickedDate.time) / (1000 * 60 * 60 * 24)).toInt()
-                tvPeriodStatusText.text = "Period in $daysBeforeFirstCycle Days"
+            tvPeriodText.text = "Period"
+            tvPeriodStatusText.setTextColor(requireContext().getColor(R.color.white))
+            tvPeriodText.setTextColor(requireContext().getColor(R.color.white))
+        } else if (normalizedPredictedDates.contains(normalizedClickedDate)) {
+            // Tanggal dalam predictedDates
+            val dayNumber = normalizedPredictedDates.indexOf(normalizedClickedDate) + 1
+            tvPeriodStatusText.text = "Day $dayNumber"
+            tvPeriodText.text = "Prediction: Period"
+            btnLove.setImageResource(R.drawable.heartgif)
+            tvPeriodStatusText.setTextColor(requireContext().getColor(R.color.color3))
+            tvPeriodText.setTextColor(requireContext().getColor(R.color.color3))
+        } else if (latestPeriodStart != null && normalizedClickedDate.after(latestPeriodStart)) {
+            // Tanggal setelah predictedDates terakhir
+            val nextPredictionDate = normalizedPredictedDates.firstOrNull { it.after(latestPeriodStart) }
+            if (nextPredictionDate != null && normalizedClickedDate.before(nextPredictionDate)) {
+                val daysBeforePrediction = ((nextPredictionDate.time - normalizedClickedDate.time) / (1000 * 60 * 60 * 24)).toInt()
+                tvPeriodStatusText.text = "$daysBeforePrediction Days"
+                tvPeriodText.text = "Period in"
                 btnLove.setImageResource(R.drawable.heartgif)
+                tvPeriodStatusText.setTextColor(requireContext().getColor(R.color.color3))
+                tvPeriodText.setTextColor(requireContext().getColor(R.color.color3))
             } else {
-                // Check for predicted dates if not part of a current cycle
-                val predictedDayNumber = predictedDates.map { normalizeDate(it) }.indexOfFirst { it == normalizedClickedDate } + 1
-                if (predictedDayNumber > 0) {
-                    tvPeriodStatusText.text = "Prediction: Day $predictedDayNumber"
-                    btnLove.setImageResource(R.drawable.heartgif)
-                } else {
-                    tvPeriodStatusText.text = "Not Started"
-                    btnLove.setImageResource(R.drawable.heartgif)
-                }
+                // Tanggal setelah predictedDates terakhir
+                tvPeriodStatusText.text = "Not Started"
+                tvPeriodText.text = "Period"
+                btnLove.setImageResource(R.drawable.heartgif)
+                tvPeriodStatusText.setTextColor(requireContext().getColor(R.color.white))
+                tvPeriodText.setTextColor(requireContext().getColor(R.color.white))
             }
-        }
-
-        // Calculate and display the days until the next period
-        if (currentCycle == null &&
-            !predictedDates.map { normalizeDate(it) }.contains(normalizedClickedDate)) {
-            val nextPeriodStart = getNextPeriodStartDate(normalizedClickedDate, periodCycles, predictedDates)
-            val daysUntilNextPeriod = nextPeriodStart?.let {
-                ((it.time - normalizedClickedDate.time) / (1000 * 60 * 60 * 24)).toInt()
-            }
-            if (daysUntilNextPeriod != null && daysUntilNextPeriod > 0) {
-                tvNextPeriodStatus.text = "Period in $daysUntilNextPeriod Days"
-            } else {
-                tvNextPeriodStatus.text = "No upcoming periods"
-            }
-        } else {
-            tvNextPeriodStatus.text = ""
+        } else if (latestPeriodStart != null && normalizedClickedDate.before(latestPeriodStart)) {
+            // Tanggal sebelum periodStart dari periode terakhir
+            val daysBeforeFirstCycle = ((latestPeriodStart.time - normalizedClickedDate.time) / (1000 * 60 * 60 * 24)).toInt()
+            tvPeriodStatusText.text = "Period in $daysBeforeFirstCycle Days"
+            tvPeriodText.text = "Past Cycle"
+            tvPeriodStatusText.setTextColor(requireContext().getColor(R.color.color3))
+            tvPeriodText.setTextColor(requireContext().getColor(R.color.color3))
+            btnLove.setImageResource(R.drawable.heartgif)
+        }else {
+            // Tanggal tidak teridentifikasi
+            tvPeriodStatusText.text = "Not Started"
+            tvPeriodText.text = "Period"
+            btnLove.setImageResource(R.drawable.heartgif)
         }
     }
 
@@ -847,19 +729,6 @@ class MainPage : Fragment() {
         return cycles
     }
 
-    // Helper function to get the next period start date
-    private fun getNextPeriodStartDate(clickedDate: Date, periodCycles: List<List<Date>>, predictedDates: List<Date>): Date? {
-        val normalizedPredictedDates = predictedDates.map { normalizeDate(it) }.sorted()
-        val normalizedClickedDate = normalizeDate(clickedDate)
-
-        // Find the closest period or predicted date after the clicked date
-        val upcomingDates = periodCycles.flatten().filter { it.after(normalizedClickedDate) } +
-                normalizedPredictedDates.filter { it.after(normalizedClickedDate) }
-
-        return upcomingDates.minOrNull()
-    }
-
-
     private fun normalizeDate(date: Date): Date {
         val calendar = Calendar.getInstance()
         calendar.time = date
@@ -870,4 +739,161 @@ class MainPage : Fragment() {
         return calendar.time
     }
 
+    private fun setupRecyclerView() {
+        adapter = DayAdapter(
+            days = getWeeklyDates(),
+            isLoved = isLoved,
+            periodDates = periodDates,
+            onMoodEditClick = { dayItem ->
+                findNavController().navigate(R.id.action_MainPage_to_moodNotes)
+            },
+            onDateClick = { dayItem ->
+                onDateClick(dayItem)
+            }
+        )
+
+
+        recyclerViewWeek.layoutManager = GridLayoutManager(requireContext(), 7) // 7 items per row
+        recyclerViewWeek.adapter = adapter
+
+        // Pastikan animasi
+        recyclerViewWeek.itemAnimator?.apply {
+            addDuration = 300
+            removeDuration = 300
+            moveDuration = 300
+            changeDuration = 300
+        }
+
+        calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY)
+        // Perbarui bulan dan tahun saat pertama kali RecyclerView dimuat
+        updateMonthYear()
+    }
+
+    private fun getWeeklyDates(targetDate: Date? = null, weekOffset: Int = 0): List<DayItem> {
+        val calendar = Calendar.getInstance()
+        if (targetDate != null) calendar.time = targetDate
+
+        // Tambahkan offset minggu sebelum reset ke hari Minggu
+        calendar.add(Calendar.WEEK_OF_YEAR, weekOffset)
+        calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY)
+
+        val weekDates = mutableListOf<DayItem>()
+        val today = Calendar.getInstance() // Untuk menandai `isToday`
+
+        val fullDateFormat = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
+
+        for (i in 0 until 7) { // Generate 7 hari dalam seminggu
+            val date = SimpleDateFormat("dd", Locale.getDefault()).format(calendar.time)
+            val dayName = SimpleDateFormat("E", Locale.getDefault()).format(calendar.time)[0].toString()
+            val isToday = calendar.get(Calendar.DAY_OF_YEAR) == today.get(Calendar.DAY_OF_YEAR)
+            val fullDate = fullDateFormat.format(calendar.time)
+
+            weekDates.add(
+                DayItem(
+                    date = date,
+                    day = dayName,
+                    isToday = isToday,
+                    fullDate = fullDate
+                )
+            )
+            calendar.add(Calendar.DATE, 1)
+        }
+        return weekDates
+    }
+
+
+    private fun setupGestureDetection() {
+        gestureDetector = GestureDetectorCompat(requireContext(), object :
+            GestureDetector.SimpleOnGestureListener() {
+            private val SWIPE_THRESHOLD = 50
+            private val SWIPE_VELOCITY_THRESHOLD = 50
+
+            override fun onFling(
+                e1: MotionEvent?,
+                e2: MotionEvent,
+                velocityX: Float,
+                velocityY: Float
+            ): Boolean {
+                if (e1 == null || e2 == null) return false
+
+                val diffX = e2.x - e1.x
+                val diffY = e2.y - e1.y
+
+                if (Math.abs(diffX) > Math.abs(diffY)) {
+                    if (Math.abs(diffX) > SWIPE_THRESHOLD && Math.abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
+                        if (diffX > 0) {
+                            Log.d("Gesture", "Swiped Right: Loading Previous Week")
+                            loadPreviousWeek()
+                        } else {
+                            Log.d("Gesture", "Swiped Left: Loading Next Week")
+                            loadNextWeek()
+                        }
+                        return true
+                    }
+                }
+                return false
+            }
+        })
+
+        recyclerViewWeek.setOnTouchListener { _, event ->
+            gestureDetector.onTouchEvent(event)
+        }
+    }
+    private var currentWeekOffset = 0
+    private fun loadPreviousWeek() {
+        currentWeekOffset -= 1 // Mundur ke minggu sebelumnya
+        recyclerViewWeek.animate().translationX(recyclerViewWeek.width.toFloat())
+            .setDuration(300).withEndAction {
+                recyclerViewWeek.translationX = -recyclerViewWeek.width.toFloat()
+                adapter.updateDays(
+                    newDays = getWeeklyDates(weekOffset = currentWeekOffset),
+                    newStartPeriod = periodDates.firstOrNull(),
+                    newEndPeriod = periodDates.lastOrNull(),
+                    isLoved = isLoved,
+                    predictedDates = predictedDates,
+                    periodDates = periodDates
+                )
+                recyclerViewWeek.animate().translationX(0f).setDuration(300).start()
+                updateMonthYear()
+            }.start()
+    }
+
+    private fun loadNextWeek() {
+        currentWeekOffset += 1 // Maju ke minggu berikutnya
+        recyclerViewWeek.animate().translationX(-recyclerViewWeek.width.toFloat())
+            .setDuration(300).withEndAction {
+                recyclerViewWeek.translationX = recyclerViewWeek.width.toFloat()
+                adapter.updateDays(
+                    newDays = getWeeklyDates(weekOffset = currentWeekOffset),
+                    newStartPeriod = periodDates.firstOrNull(),
+                    newEndPeriod = periodDates.lastOrNull(),
+                    isLoved = isLoved,
+                    predictedDates = predictedDates,
+                    periodDates = periodDates
+                )
+                recyclerViewWeek.animate().translationX(0f).setDuration(300).start()
+                updateMonthYear()
+            }.start()
+    }
+
+
+//    private fun updatePeriodDates(periodLength: Int) {
+//        if (periodDates.isEmpty()) return
+//
+//        val startPeriod = periodDates.first()
+//
+//        // Generate dates langsung berdasarkan startPeriod dan periodLength
+//        val updatedPeriodDates = generateDatesBetween(startPeriod, periodLength)
+//        this.periodDates = updatedPeriodDates
+//
+//        // Update adapter dengan tanggal baru
+//        adapter.updateDays(
+//            newDays = getWeeklyDates(),
+//            newStartPeriod = updatedPeriodDates.firstOrNull(),
+//            newEndPeriod = updatedPeriodDates.lastOrNull(),
+//            isLoved = isLoved,
+//            predictedDates = predictedDates,
+//            periodDates = periodDates
+//        )
+//    }
 }
