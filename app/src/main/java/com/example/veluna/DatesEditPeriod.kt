@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.ImageButton
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -58,7 +59,6 @@ class DatesEditPeriod : AppCompatActivity() {
         return calendar.time
     }
 
-    // Fungsi untuk menyimpan tanggal yang dipilih ke Firebase
     private fun savePeriodDates(dates: List<Date>) {
         val db = FirebaseFirestore.getInstance()
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
@@ -70,10 +70,8 @@ class DatesEditPeriod : AppCompatActivity() {
         dates.forEach { date ->
             val periodId = dateToPeriodIdMap[date]
             if (periodId != null) {
-                // Tambahkan tanggal ke period ID yang ada
                 periodIdToDates.getOrPut(periodId) { mutableListOf() }.add(date.time)
             } else {
-                // Tanggal tanpa period ID dianggap baru
                 newDates.add(date)
             }
         }
@@ -82,12 +80,61 @@ class DatesEditPeriod : AppCompatActivity() {
         newDates.forEach { newDate ->
             val nearestPeriodId = findNearestPeriodId(newDate)
             if (nearestPeriodId != null) {
-                // Tambahkan tanggal baru ke period ID terdekat
                 periodIdToDates.getOrPut(nearestPeriodId) { mutableListOf() }.add(newDate.time)
             } else {
-                // Tidak ada period ID terdekat, tambahkan sebagai period baru
                 val newPeriodId = UUID.randomUUID().toString()
                 periodIdToDates[newPeriodId] = mutableListOf(newDate.time)
+            }
+        }
+
+        // Validasi kontinuitas tanggal setelah penghapusan
+        val originalDates = dateToPeriodIdMap.keys.map { normalizeDate(it) }
+        val removedDates = originalDates - dates.map { normalizeDate(it) }
+
+        val invalidRemoval = removedDates.any { removedDate ->
+            val periodId = dateToPeriodIdMap[removedDate]
+            val periodDates = periodIdToDates[periodId]?.map { normalizeDate(Date(it)) }?.sorted() ?: emptyList()
+
+            // Jika daftar tanggal lebih dari 1, validasi kontinuitas
+            if (periodDates.size > 1) {
+                val sortedDates = periodDates.sorted()
+                for (i in 0 until sortedDates.size - 1) {
+                    val current = sortedDates[i]
+                    val next = sortedDates[i + 1]
+
+                    // Jika ada celah lebih dari 1 hari, penghapusan tidak valid
+                    if (((next.time - current.time) / (1000 * 60 * 60 * 24)) > 1) {
+                        return@any true
+                    }
+                }
+            }
+            false
+        }
+
+        if (invalidRemoval) {
+            Toast.makeText(this, "Cannot remove dates as it will break the range.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // Hapus tanggal yang sah (hanya di awal atau akhir)
+        removedDates.forEach { removedDate ->
+            val periodId = dateToPeriodIdMap[removedDate]
+            if (periodId != null) {
+                val periodDates = periodIdToDates[periodId]
+                periodDates?.remove(removedDate.time)
+                if (periodDates.isNullOrEmpty()) {
+                    db.collection("users")
+                        .document(userId)
+                        .collection("period")
+                        .document(periodId)
+                        .delete()
+                        .addOnSuccessListener {
+                            Toast.makeText(this, "Period ID $periodId deleted successfully.", Toast.LENGTH_SHORT).show()
+                        }
+                        .addOnFailureListener { exception ->
+                            Toast.makeText(this, "Failed to delete period ID: ${exception.message}", Toast.LENGTH_SHORT).show()
+                        }
+                }
             }
         }
 
@@ -97,12 +144,12 @@ class DatesEditPeriod : AppCompatActivity() {
                 .document(userId)
                 .collection("period")
                 .document(periodId)
-                .update("periodDates", periodDates)
+                .set(mapOf("periodDates" to periodDates), SetOptions.merge())
                 .addOnSuccessListener {
-                    println("Successfully updated periodDates for periodId: $periodId")
+                    Toast.makeText(this, "Successfully updated", Toast.LENGTH_SHORT).show()
                 }
                 .addOnFailureListener { exception ->
-                    println("Failed to update periodDates for periodId: $periodId - ${exception.message}")
+                    Toast.makeText(this, "Failed to update periodDates for periodId: ${exception.message}", Toast.LENGTH_SHORT).show()
                 }
         }
 
@@ -172,7 +219,7 @@ class DatesEditPeriod : AppCompatActivity() {
     }
 
     private fun findNearestPeriodId(newDate: Date): String? {
-        val threshold = 1 // Batas maksimum hari untuk dianggap "bersebelahan"
+        val threshold = 3 // Batas maksimum hari untuk dianggap "bersebelahan"
         var nearestPeriodId: String? = null
         var minDiff = Int.MAX_VALUE
 

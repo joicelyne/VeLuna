@@ -57,6 +57,8 @@ class MainPage : Fragment() {
     private lateinit var gestureDetector: GestureDetectorCompat // Gesture detector
     private var periodDates: List<Date> = listOf()
     private var predictedDates: List<Date> = listOf()
+    private val dateToPeriodIdMap = mutableMapOf<Date, String>()
+
 
     // ViewModel untuk sinkronisasi data
     private lateinit var userViewModel: UserViewModel
@@ -64,6 +66,9 @@ class MainPage : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         (activity as MainActivity).showBottomNavigation()
+        loadPeriodData()
+        loadUserData()
+        loadLoveStatus()
     }
 
     override fun onCreateView(
@@ -192,8 +197,6 @@ class MainPage : Fragment() {
                     tvName.text = name
                     cycleName.text = "$name's Cycle"
                     insightName.text = "$name's Insight"
-                    prevCycleLenText.text = "$cycleLength Days"
-                    prevPeriodLenText.text = "$periodLength Days"
 
                     // Periksa apakah ada period aktif di koleksi `period`
                     db.collection("users")
@@ -203,14 +206,22 @@ class MainPage : Fragment() {
                         .limit(1) // Ambil period terbaru
                         .get()
                         .addOnSuccessListener { querySnapshot ->
-                            if (querySnapshot != null && !querySnapshot.isEmpty) {
-                                // Ambil periodStart dari period terbaru
+                            if (querySnapshot != null && querySnapshot.documents.isNotEmpty()) {
+                                // Ambil period ID terbaru
                                 val latestPeriod = querySnapshot.documents.firstOrNull()
                                 val periodStartDate = latestPeriod?.getDate("periodStart") // Tanggal dari `periodStart`
                                 val periodLengthFromPeriod =
                                     latestPeriod?.getLong("periodLength")?.toInt() ?: periodLength
                                 val cycleLengthFromPeriod =
                                     latestPeriod?.getLong("cycleLength")?.toInt() ?: cycleLength
+
+                                // Set text berdasarkan period ID
+                                prevCycleLenText.text = "$cycleLengthFromPeriod Days"
+                                prevPeriodLenText.text = "$periodLengthFromPeriod Days"
+
+                                Log.d("MainPage", "Menggunakan data dari period ID terbaru.")
+                                Log.d("MainPage", "Period Start: $periodStartDate")
+                                Log.d("MainPage", "Cycle Length: $cycleLengthFromPeriod, Period Length: $periodLengthFromPeriod")
 
                                 // Prediksi berdasarkan periodStart jika ada
                                 updatePredictedDates(
@@ -219,17 +230,28 @@ class MainPage : Fragment() {
                                     periodStartDate ?: userStartDate // Gunakan `startDate` jika `periodStart` null
                                 )
                             } else {
-                                // Jika tidak ada `period`, gunakan `startDate` dari dokumen `users`
-                                updatePredictedDates(cycleLength, periodLength, userStartDate)
+                                // Jika tidak ada period ID, fallback ke user data
+                                prevCycleLenText.text = "$cycleLength Days"
+                                prevPeriodLenText.text = "$periodLength Days"
+
+                                Log.w("MainPage", "Tidak ada period ID ditemukan, menggunakan data pengguna.")
+                                if (userStartDate != null) {
+                                    updatePredictedDates(cycleLength, periodLength, userStartDate)
+                                } else {
+                                    Log.e("MainPage", "StartDate tidak ditemukan di dokumen pengguna.")
+                                }
                             }
-                            val todayDate = SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(Date())
-                            val dayItem = DayItem(todayDate, "", isToday = true, fullDate = todayDate)
-                            onDateClick(dayItem)
                         }
                         .addOnFailureListener { e ->
                             Log.e("MainPage", "Gagal memuat koleksi `period`: ${e.message}")
-                            // Jika gagal, fallback ke `startDate` dari dokumen `users`
-                            updatePredictedDates(cycleLength, periodLength, userStartDate)
+                            // Jika gagal, fallback ke user data
+                            prevCycleLenText.text = "$cycleLength Days"
+                            prevPeriodLenText.text = "$periodLength Days"
+                            if (userStartDate != null) {
+                                updatePredictedDates(cycleLength, periodLength, userStartDate)
+                            } else {
+                                Log.e("MainPage", "StartDate tidak ditemukan di dokumen pengguna.")
+                            }
                         }
                 } else {
                     Log.e("MainPage", "Dokumen pengguna tidak ditemukan.")
@@ -278,6 +300,10 @@ class MainPage : Fragment() {
                         }
                     }
 
+                    val today = SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(Date())
+                    val dayItem = DayItem(today, "", isToday = true, fullDate = today)
+                    onDateClick(dayItem)
+
                     // Hapus duplikat tanggal dari `allPeriodDates`
                     val uniquePeriodDates = allPeriodDates.distinct()
 
@@ -296,9 +322,6 @@ class MainPage : Fragment() {
 
                     // Perbarui UI dengan semua tanggal periode dan tanggal prediksi
                     updateCalendarUI(uniquePeriodDates, predictedDates)
-                    val today = SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(Date())
-                    val dayItem = DayItem(today, "", isToday = true, fullDate = today)
-                    onDateClick(dayItem)
                 } else {
                     Log.e("MainPage", "Koleksi `period` kosong, memuat default data.")
                     loadDefaultPeriodData(userDocRef)
@@ -350,21 +373,6 @@ class MainPage : Fragment() {
         val normalizedPeriodDates = periodDates.map { normalizeDate(it) }
 
         isLoved = normalizedPeriodDates.any { it >= normalizedCurrentDate }
-
-        if (isLoved) {
-            btnLove.setImageResource(R.drawable.redheart)
-
-            // Find the normalized period day index
-            val periodDayIndex = normalizedPeriodDates.indexOfFirst { it == normalizedCurrentDate } + 1
-            tvPeriodStatusText.text = "Day $periodDayIndex"
-            tvPeriodStatusText.setTextColor(resources.getColor(R.color.white))
-            tvPeriodText.setTextColor(resources.getColor(R.color.white))
-        } else {
-            btnLove.setImageResource(R.drawable.heartgif)
-            tvPeriodStatusText.text = "Not Started"
-            tvPeriodStatusText.setTextColor(resources.getColor(R.color.color4))
-            tvPeriodText.setTextColor(resources.getColor(R.color.color4))
-        }
 
         // Kombinasikan tanggal dari periode sebelumnya dengan periode baru
         val allPeriodDates = (this.periodDates + periodDates).distinctBy { normalizeDate(it) }
@@ -429,7 +437,6 @@ class MainPage : Fragment() {
                         .get()
                         .addOnSuccessListener { querySnapshot ->
                             if (querySnapshot.isEmpty) {
-                                // Perubahan dimulai di sini
                                 db.collection("users")
                                     .document(currentUserId)
                                     .collection("period")
@@ -485,11 +492,6 @@ class MainPage : Fragment() {
                                                     periodDates = periodDates
                                                 )
 
-                                                btnLove.setImageResource(R.drawable.redheart)
-                                                tvPeriodStatusText.text = "Started"
-                                                tvPeriodStatusText.setTextColor(resources.getColor(R.color.white))
-                                                tvPeriodText.setTextColor(resources.getColor(R.color.white))
-
                                                 loadLoveStatus()
                                             }
                                             .addOnFailureListener { e ->
@@ -499,7 +501,6 @@ class MainPage : Fragment() {
                                     .addOnFailureListener { e ->
                                         Log.e("MainPage", "Gagal menghitung cycleLength: ${e.message}")
                                     }
-                                // Perubahan berakhir di sini
                             }
                         }
                         .addOnFailureListener { e ->
@@ -521,21 +522,17 @@ class MainPage : Fragment() {
                                             today.get(Calendar.DAY_OF_YEAR) == periodStartCal.get(Calendar.DAY_OF_YEAR)
 
                                     if (isSameDay) {
-                                        // Hapus data periode dan set isStart ke false
+                                        // Hapus dokumen periode berdasarkan periodId
                                         document.reference.update(
                                             mapOf(
                                                 "isStart" to false,
-                                                "periodDates" to emptyList<Long>(), // Hapus semua tanggal
-                                                "periodStart" to null // Set periodStart ke null
+                                                "periodDates" to emptyList<Long>(),
+                                                "periodStart" to null,
+                                                "periodLength" to null,
+                                                "cycleLength" to null
                                             )
                                         ).addOnSuccessListener {
                                             Log.d("Debug", "Period dihapus karena klik ulang pada hari yang sama")
-
-                                            btnLove.setImageResource(R.drawable.heartgif)
-                                            tvPeriodStatusText.text = "Not Started"
-                                            tvPeriodStatusText.setTextColor(resources.getColor(R.color.color4))
-                                            tvPeriodText.setTextColor(resources.getColor(R.color.color4))
-
                                             currentWeekOffset = 0
                                             periodDates = listOf() // Kosongkan daftar
                                             adapter.updateDays(
@@ -546,50 +543,65 @@ class MainPage : Fragment() {
                                                 predictedDates = predictedDates,
                                                 periodDates = periodDates
                                             )
+                                            loadLoveStatus()
                                         }.addOnFailureListener { e ->
                                             Log.e("MainPage", "Gagal menghapus periode: ${e.message}")
                                         }
                                     } else {
                                         val periodDatesLong = document.get("periodDates") as? List<Long> ?: return@forEach
                                         val periodDates = periodDatesLong.map { Date(it) }
-                                        val updatedDates = periodDates.filter { it <= today.time }
-                                        val periodEnd = updatedDates.lastOrNull()
 
-                                        val calculatedPeriodLength = updatedDates.size
+                                        // Pastikan today dalam bentuk Date
+                                        val todayDate = Calendar.getInstance().time
 
+                                        // Filter periodDates untuk hanya menyertakan tanggal yang lebih kecil dari hari ini
+                                        val updatedDates = periodDates.filter { it.before(todayDate) }
+
+                                        // Hapus tanggal yang dihentikan (misalnya tanggal 1)
+                                        val normalizedClickedDate = normalizeDate(todayDate)  // Misalnya, tanggal yang dihentikan adalah today
+                                        val updatedDatesWithoutUnlovedDate = updatedDates.filter { normalizeDate(it) != normalizedClickedDate }
+
+                                        // Hitung panjang periode berdasarkan updatedDates tanpa tanggal yang dihentikan
+                                        val calculatedPeriodLength = updatedDatesWithoutUnlovedDate.size
+
+                                        // Ambil periodEnd dari tanggal terakhir yang valid
+                                        val periodEnd = updatedDatesWithoutUnlovedDate.lastOrNull()
+
+                                        // Update Firestore untuk menghapus tanggal yang dihentikan
                                         document.reference.update(
                                             mapOf(
                                                 "isStart" to false,
-                                                "periodDates" to updatedDates.map { it.time },
-                                                "periodEnd" to periodEnd,
-                                                "periodLength" to calculatedPeriodLength // Simpan periodLength yang dihitung
+                                                "periodDates" to updatedDatesWithoutUnlovedDate.map { it.time },
+                                                "periodEnd" to periodEnd?.time,
+                                                "periodLength" to calculatedPeriodLength
                                             )
                                         ).addOnSuccessListener {
-                                            Log.d("Debug", "Periode Dihentikan dengan periodLength: $calculatedPeriodLength")
+                                            Log.d("Debug", "Periode Dihentikan dengan periodLength yang valid: $calculatedPeriodLength")
 
-                                            val predictedDates = getPredictedPeriodDates(updatedDates.lastOrNull() ?: today.time, cycleLength, calculatedPeriodLength)
-                                            updateCalendarUI(updatedDates, predictedDates)
+                                            // Mendapatkan predictedDates berdasarkan periodEnd yang valid
+                                            val predictedDates = getPredictedPeriodDates(
+                                                updatedDatesWithoutUnlovedDate.lastOrNull() ?: todayDate,
+                                                cycleLength,
+                                                calculatedPeriodLength
+                                            )
+                                            updateCalendarUI(periodDates, predictedDates)
 
                                             currentWeekOffset = 0
                                             adapter.updateDays(
                                                 newDays = getWeeklyDates(weekOffset = currentWeekOffset),
-                                                newStartPeriod = updatedDates.firstOrNull(),
-                                                newEndPeriod = updatedDates.lastOrNull(),
+                                                newStartPeriod = periodDates.firstOrNull(),
+                                                newEndPeriod = periodDates.lastOrNull(),
                                                 isLoved = false,
                                                 predictedDates = predictedDates,
-                                                periodDates = updatedDates
+                                                periodDates = periodDates
                                             )
+                                            loadLoveStatus()
 
-                                            btnLove.setImageResource(R.drawable.heartgif)
-                                            tvPeriodStatusText.text = "Not Started"
-                                            tvPeriodStatusText.setTextColor(resources.getColor(R.color.color4))
-                                            tvPeriodText.setTextColor(resources.getColor(R.color.color4))
                                         }.addOnFailureListener { e ->
                                             Log.e("MainPage", "Gagal menghentikan periode berjalan: ${e.message}")
                                         }
                                     }
                                 }
-                                loadLoveStatus()
                             }
                         }
                         .addOnFailureListener { e ->
@@ -662,81 +674,185 @@ class MainPage : Fragment() {
         val clickedDate = dateFormat.parse(dayItem.fullDate) ?: return
         val normalizedClickedDate = normalizeDate(clickedDate)
 
+        // Log debug untuk memantau klik
         Log.d("MainPage", "Clicked Date: $normalizedClickedDate")
         Log.d("MainPage", "Period Dates: ${periodDates.map { normalizeDate(it) }}")
         Log.d("MainPage", "Predicted Dates: ${predictedDates.map { normalizeDate(it) }}")
 
-        // Normalize and sort period dates
-        val normalizedPeriodDates = periodDates.map { normalizeDate(it) }.sorted()
+        // Ambil semua period ID yang terurut berdasarkan periodStart
+        val periodData = mutableListOf<Pair<String, List<Date>>>()
+        dateToPeriodIdMap.keys.sorted().forEach { date ->
+            val periodId = dateToPeriodIdMap[date]
+            if (periodId != null) {
+                val datesForId = dateToPeriodIdMap.filterValues { it == periodId }.keys.toList()
+                periodData.add(Pair(periodId, datesForId.sorted()))
+            }
+        }
 
-        // Ambil periodStart dari period id terakhir
-        val latestPeriodStart = periodDates.lastOrNull()?.let { normalizeDate(it) }
+        if (periodData.isEmpty()) {
+            // Ambil startDate dari Firebase user
+            val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+            FirebaseFirestore.getInstance().collection("users").document(currentUserId)
+                .get()
+                .addOnSuccessListener { document ->
+                    val startDateString = document.getString("startDate")
+                    if (startDateString != null) {
+                        val dateFormatFirebase = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                        val startDate = dateFormatFirebase.parse(startDateString)?.let { normalizeDate(it) }
+
+                        if (startDate != null && normalizedClickedDate.before(startDate)) {
+                            // Tanggal sebelum startDate
+                            val daysToStartDate = ((startDate.time - normalizedClickedDate.time) / (1000 * 60 * 60 * 24)).toInt()
+                            tvPeriodStatusText.text = "Period in $daysToStartDate Days"
+                            tvPeriodText.text = "Prediction"
+                            tvPeriodStatusText.setTextColor(requireContext().getColor(R.color.color3))
+                            tvPeriodText.setTextColor(requireContext().getColor(R.color.color3))
+                            btnLove.setImageResource(R.drawable.heartgif)
+                        } else if (startDate != null && normalizedClickedDate.after(startDate)) {
+                            // Tanggal setelah startDate menuju prediction date
+                            if (predictedDates.isNotEmpty() && normalizedClickedDate.before(predictedDates.first())) {
+                                val daysToPrediction = ((predictedDates.first().time - normalizedClickedDate.time) /
+                                        (1000 * 60 * 60 * 24)).toInt()
+                                tvPeriodStatusText.text = "Prediction in $daysToPrediction Days"
+                                tvPeriodText.text = "Prediction"
+                                tvPeriodStatusText.setTextColor(requireContext().getColor(R.color.color3))
+                                tvPeriodText.setTextColor(requireContext().getColor(R.color.color3))
+                                btnLove.setImageResource(R.drawable.heartgif)
+                            } else if (predictedDates.isNotEmpty() && normalizedClickedDate.after(predictedDates.last())) {
+                                // Setelah prediction date
+                                tvPeriodStatusText.text = "Period Not Started"
+                                tvPeriodText.text = "Not Started"
+                                tvPeriodStatusText.setTextColor(requireContext().getColor(R.color.white))
+                                tvPeriodText.setTextColor(requireContext().getColor(R.color.white))
+                                btnLove.setImageResource(R.drawable.heartgif)
+                            }
+                        }
+                    } else {
+                        // Jika tidak ada startDate di Firebase
+                        tvPeriodStatusText.text = "Start Date Not Set"
+                        tvPeriodText.text = "Error"
+                        tvPeriodStatusText.setTextColor(requireContext().getColor(R.color.color4))
+                        tvPeriodText.setTextColor(requireContext().getColor(R.color.color4))
+                        btnLove.setImageResource(R.drawable.heartgif)
+                    }
+                }
+                .addOnFailureListener { e ->
+                    Log.e("MainPage", "Error fetching user startDate: ${e.message}")
+                }
+            return
+        }
+
+        // Cari period ID terbaru (yang memiliki periodDates terakhir)
+        val latestPeriod = periodData.lastOrNull()
+        val latestPeriodStart = latestPeriod?.second?.firstOrNull()
+        val latestPeriodEnd = latestPeriod?.second?.lastOrNull()
+
+        // Tanggal prediksi
         val normalizedPredictedDates = predictedDates.map { normalizeDate(it) }
 
-        // Group period dates into cycles
-        val periodCycles = groupDatesIntoCycles(normalizedPeriodDates)
+        // Cek apakah tanggal diklik berada di dalam periodDates
+        for ((periodId, periodDates) in periodData) {
+            if (periodDates.contains(normalizedClickedDate)) {
+                // Tanggal ada dalam periodDates -> Hitung "Period: Day N"
+                val dayNumber = periodDates.indexOf(normalizedClickedDate) + 1
+                tvPeriodStatusText.text = "Day $dayNumber"
+                tvPeriodText.text = "Period:"
+                tvPeriodStatusText.setTextColor(requireContext().getColor(R.color.white))
+                tvPeriodText.setTextColor(requireContext().getColor(R.color.white))
+                btnLove.setImageResource(R.drawable.redheart)
+                return
+            }
+        }
 
-        // Find the cycle that contains the clicked date
-        var currentCycle: List<Date>? = null
-        for (cycle in periodCycles) {
-            if (cycle.contains(normalizedClickedDate)) {
-                currentCycle = cycle
+        // Cek apakah tanggal diklik ada di antara dua period ID
+        var isPastCycle = false
+        for (i in 1 until periodData.size) {
+            val currentPeriod = periodData[i]
+            val previousPeriod = periodData[i - 1]
+
+            val currentStart = currentPeriod.second.first()
+            val previousEnd = previousPeriod.second.last()
+
+            if (normalizedClickedDate.after(previousEnd) && normalizedClickedDate.before(currentStart)) {
+                // Tanggal berada di antara dua period ID
+                val dayNumber = ((normalizedClickedDate.time - previousEnd.time) / (1000 * 60 * 60 * 24)).toInt() +
+                        previousPeriod.second.size
+                tvPeriodStatusText.text = "Past Cycle: Day $dayNumber"
+                tvPeriodText.text = "Past Cycle"
+                tvPeriodStatusText.setTextColor(requireContext().getColor(R.color.color3))
+                tvPeriodText.setTextColor(requireContext().getColor(R.color.color3))
+                btnLove.setImageResource(R.drawable.heartgif)
+                isPastCycle = true
                 break
             }
         }
 
-        if (currentCycle != null) {
-            // Tanggal dalam `periodDates`
-            val firstDate = currentCycle.first()
-            val dayOffset = ((normalizedClickedDate.time - firstDate.time) / (1000 * 60 * 60 * 24)).toInt()
-            val dayNumber = if (dayOffset >= 0) dayOffset + 1 else dayOffset
+        if (isPastCycle) return
 
-            tvPeriodStatusText.text = if (dayNumber > 0) "Day $dayNumber" else "Day $dayNumber (Before Cycle)"
-            btnLove.setImageResource(R.drawable.redheart)
-            tvPeriodText.text = "Period"
-            tvPeriodStatusText.setTextColor(requireContext().getColor(R.color.white))
-            tvPeriodText.setTextColor(requireContext().getColor(R.color.white))
-        } else if (normalizedPredictedDates.contains(normalizedClickedDate)) {
-            // Tanggal dalam predictedDates
-            val dayNumber = normalizedPredictedDates.indexOf(normalizedClickedDate) + 1
-            tvPeriodStatusText.text = "Day $dayNumber"
-            tvPeriodText.text = "Prediction: Period"
-            btnLove.setImageResource(R.drawable.heartgif)
-            tvPeriodStatusText.setTextColor(requireContext().getColor(R.color.color3))
-            tvPeriodText.setTextColor(requireContext().getColor(R.color.color3))
-        } else if (latestPeriodStart != null && normalizedClickedDate.after(latestPeriodStart)) {
-            // Tanggal setelah predictedDates terakhir
-            val nextPredictionDate = normalizedPredictedDates.firstOrNull { it.after(latestPeriodStart) }
-            if (nextPredictionDate != null && normalizedClickedDate.before(nextPredictionDate)) {
-                val daysBeforePrediction = ((nextPredictionDate.time - normalizedClickedDate.time) / (1000 * 60 * 60 * 24)).toInt()
-                tvPeriodStatusText.text = "$daysBeforePrediction Days"
-                tvPeriodText.text = "Period in"
-                btnLove.setImageResource(R.drawable.heartgif)
+        // Cek apakah tanggal setelah period ID terbaru menuju prediction date
+        if (latestPeriodEnd != null && normalizedClickedDate.after(latestPeriodEnd)) {
+            if (normalizedPredictedDates.contains(normalizedClickedDate)) {
+                // Tanggal adalah bagian dari predicted dates
+                val dayNumber = normalizedPredictedDates.indexOf(normalizedClickedDate) + 1
+                tvPeriodStatusText.text = "Day $dayNumber"
+                tvPeriodText.text = "Prediction:"
                 tvPeriodStatusText.setTextColor(requireContext().getColor(R.color.color3))
                 tvPeriodText.setTextColor(requireContext().getColor(R.color.color3))
-            } else {
-                // Tanggal setelah predictedDates terakhir
-                tvPeriodStatusText.text = "Not Started"
-                tvPeriodText.text = "Period"
                 btnLove.setImageResource(R.drawable.heartgif)
+            } else if (normalizedClickedDate.before(normalizedPredictedDates.first())){
+                // Tanggal menuju prediction date
+                val daysToPrediction = ((normalizedPredictedDates.first().time - normalizedClickedDate.time) /
+                        (1000 * 60 * 60 * 24)).toInt()
+                tvPeriodStatusText.text = "Prediction in $daysToPrediction Days"
+                tvPeriodText.text = "Prediction"
+                tvPeriodStatusText.setTextColor(requireContext().getColor(R.color.color3))
+                tvPeriodText.setTextColor(requireContext().getColor(R.color.color3))
+                btnLove.setImageResource(R.drawable.heartgif)
+            } else {
+                // Setelah prediction date
+                tvPeriodStatusText.text = "Period Not Started"
+                tvPeriodText.text = "Not Started"
                 tvPeriodStatusText.setTextColor(requireContext().getColor(R.color.white))
                 tvPeriodText.setTextColor(requireContext().getColor(R.color.white))
+                btnLove.setImageResource(R.drawable.heartgif)
             }
-        } else if (latestPeriodStart != null && normalizedClickedDate.before(latestPeriodStart)) {
-            // Tanggal sebelum periodStart dari periode terakhir
-            val daysBeforeFirstCycle = ((latestPeriodStart.time - normalizedClickedDate.time) / (1000 * 60 * 60 * 24)).toInt()
-            tvPeriodStatusText.text = "Period in $daysBeforeFirstCycle Days"
-            tvPeriodText.text = "Past Cycle"
-            tvPeriodStatusText.setTextColor(requireContext().getColor(R.color.color3))
-            tvPeriodText.setTextColor(requireContext().getColor(R.color.color3))
-            btnLove.setImageResource(R.drawable.heartgif)
-        }else {
-            // Tanggal tidak teridentifikasi
-            tvPeriodStatusText.text = "Not Started"
-            tvPeriodText.text = "Period"
-            btnLove.setImageResource(R.drawable.heartgif)
+            return
         }
+
+        // Jika tidak ada kecocokan
+        tvPeriodStatusText.text = "Not Started"
+        tvPeriodText.text = "Period"
+        tvPeriodStatusText.setTextColor(requireContext().getColor(R.color.white))
+        tvPeriodText.setTextColor(requireContext().getColor(R.color.white))
+        btnLove.setImageResource(R.drawable.heartgif)
     }
+
+    private fun loadPeriodData() {
+        val db = FirebaseFirestore.getInstance()
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+
+        db.collection("users").document(userId).collection("period")
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                querySnapshot.forEach { document ->
+                    val periodId = document.id
+                    val periodDatesLong = document.get("periodDates") as? List<Long> ?: listOf()
+
+                    // Konversi Long ke Date dan simpan dalam map
+                    periodDatesLong.forEach { dateLong ->
+                        val date = normalizeDate(Date(dateLong))
+                        dateToPeriodIdMap[date] = periodId
+                    }
+                }
+
+                Log.d("MainPage", "dateToPeriodIdMap: $dateToPeriodIdMap")
+            }
+            .addOnFailureListener { exception ->
+                Log.e("MainPage", "Failed to load period data: ${exception.message}")
+            }
+    }
+
+
 
     // Helper function to group dates into cycles
     private fun groupDatesIntoCycles(dates: List<Date>): List<List<Date>> {
