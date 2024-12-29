@@ -81,6 +81,17 @@
             android:layout_marginTop="10dp"
             android:fontFamily="@font/worksans_semi" />
 
+        <!-- Apply Change Profile Picture Button -->
+        <Button
+            android:id="@+id/btnApplyProfilePicture"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Apply Changes"
+            android:textColor="@color/white"
+            style="@style/button"
+            android:fontFamily="@font/worksans_semi" />
+
+
         <!-- Username Input -->
 
         <TextView

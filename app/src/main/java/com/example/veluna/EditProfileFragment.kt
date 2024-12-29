@@ -43,6 +43,7 @@ class EditProfileFragment : Fragment() {
 
     // Current photo URL
     private var updatedPhotoUrl: String = ""
+    private lateinit var btnApplyProfilePicture: Button
 
     // ViewModel
     private lateinit var userViewModel: UserViewModel
@@ -69,6 +70,7 @@ class EditProfileFragment : Fragment() {
         btnChangeProfilePicture = view.findViewById(R.id.btnChangeProfilePicture)
         btnUpdateProfile = view.findViewById(R.id.btnUpdateProfile)
         btnBackEditProfile = view.findViewById(R.id.back_button_edit_profile)
+        btnApplyProfilePicture = view.findViewById(R.id.btnApplyProfilePicture)
 
         // Load user data from Firestore
         loadUserData()
@@ -84,7 +86,33 @@ class EditProfileFragment : Fragment() {
             findNavController().navigateUp()
         }
 
+        btnApplyProfilePicture.setOnClickListener {
+            if (updatedPhotoUrl.isNotEmpty()) {
+                updateProfilePictureOnly()
+            }
+        }
+
+
         return view
+    }
+
+    private fun updateProfilePictureOnly() {
+        if (userId.isNullOrEmpty()) return
+
+        val updates = mapOf("photoUrl" to updatedPhotoUrl)
+
+        db.collection("users").document(userId!!)
+            .update(updates)
+            .addOnSuccessListener {
+                Toast.makeText(requireContext(), "Profile picture updated successfully!", Toast.LENGTH_SHORT).show()
+
+                // Sinkronisasi ke ViewModel
+                userViewModel.updatePhotoUrl(updatedPhotoUrl)
+            }
+            .addOnFailureListener { e ->
+                Log.e("EditProfileFragment", "Failed to update profile picture: ${e.message}")
+                Toast.makeText(requireContext(), "Failed to update profile picture.", Toast.LENGTH_SHORT).show()
+            }
     }
 
     private fun loadUserData() {
