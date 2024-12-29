@@ -38,7 +38,6 @@ class CycleHistory : AppCompatActivity() {
         cycleAdapter = CycleHistoryAdapter()
         recyclerView.adapter = cycleAdapter
 
-
         // Load data from Firestore
         loadCycleData()
     }
@@ -54,7 +53,8 @@ class CycleHistory : AppCompatActivity() {
             .addOnSuccessListener { querySnapshot ->
                 val cycleData = querySnapshot.documents.mapNotNull { document ->
                     val periodStart = document.getTimestamp("periodStart")?.toDate()
-                    val periodLength = document.get("maxDays") as? Int ?: 0
+                    val periodLength = document.getLong("periodLength")?.toInt() ?: 0
+                    val cycleLength = document.getLong("cycleLength")?.toInt() ?: 0
                     val periodEnd = periodStart?.let { start ->
                         Calendar.getInstance().apply {
                             time = start
@@ -65,7 +65,7 @@ class CycleHistory : AppCompatActivity() {
                     if (periodStart != null && periodEnd != null) {
                         Cycle(
                             dateRange = "${formatDate(periodStart)} - ${formatDate(periodEnd)}",
-                            cycleLength = calculateCycleLength(periodStart, periodEnd),
+                            cycleLength = cycleLength,
                             periodLength = periodLength
                         )
                     } else null
@@ -82,14 +82,8 @@ class CycleHistory : AppCompatActivity() {
             }
     }
 
-
-    private fun calculateCycleLength(startDate: Date, endDate: Date): Int {
-        val diff = endDate.time - startDate.time
-        return (diff / (1000 * 60 * 60 * 24)).toInt() + 1 // Tambahkan 1 untuk menyertakan hari mulai
-    }
-
     private fun formatDate(date: Date): String {
-        val dateFormat = SimpleDateFormat("MMM dd", Locale.getDefault())
+        val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
         return dateFormat.format(date)
     }
 }

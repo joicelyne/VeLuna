@@ -14,8 +14,8 @@ class CycleHistoryAdapter :
     ListAdapter<Cycle, CycleHistoryAdapter.CycleViewHolder>(CycleDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CycleViewHolder {
-        val view =
-            LayoutInflater.from(parent.context).inflate(R.layout.cycle_history_item, parent, false)
+        val view = LayoutInflater.from(parent.context)
+            .inflate(R.layout.cycle_history_item, parent, false)
         return CycleViewHolder(view)
     }
 
@@ -31,12 +31,12 @@ class CycleHistoryAdapter :
 
         fun bind(cycle: Cycle) {
             tvDateRange.text = cycle.dateRange
-            tvCycleLength.text = "${cycle.cycleLength} Days"
+            tvCycleLength.text = "${cycle.cycleLength} days"
             pbPeriodLength.progress = calculateProgress(cycle.periodLength, cycle.cycleLength)
         }
 
         private fun calculateProgress(periodLength: Int, cycleLength: Int): Int {
-            return if (cycleLength != 0) {
+            return if (cycleLength > 0) {
                 (periodLength.toFloat() / cycleLength * 100).toInt()
             } else 0
         }
@@ -44,12 +44,10 @@ class CycleHistoryAdapter :
 
     class CycleDiffCallback : DiffUtil.ItemCallback<Cycle>() {
         override fun areItemsTheSame(oldItem: Cycle, newItem: Cycle): Boolean {
-            // Compare by unique properties
             return oldItem.dateRange == newItem.dateRange
         }
 
         override fun areContentsTheSame(oldItem: Cycle, newItem: Cycle): Boolean {
-            // Compare all contents
             return oldItem == newItem
         }
     }
