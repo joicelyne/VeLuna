@@ -50,6 +50,15 @@ class MainPage : Fragment() {
     private lateinit var txtInsight3: TextView
     private lateinit var prevCycleLenText: TextView
     private lateinit var prevPeriodLenText: TextView
+    private lateinit var imgStatusCycle: ImageView
+    private lateinit var statusCycle: TextView
+    private lateinit var imgStatusPeriod: ImageView
+    private lateinit var statusPeriod: TextView
+    private lateinit var currentCycleHis: TextView
+    private lateinit var currentPeriodHis: TextView
+    private lateinit var perStartDate: TextView
+    private lateinit var cycStartDate: TextView
+
 
     // Calendar instance to track the current week
     private val calendar = Calendar.getInstance()
@@ -66,9 +75,11 @@ class MainPage : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         (activity as MainActivity).showBottomNavigation()
-        loadPeriodData()
         loadUserData()
         loadLoveStatus()
+        val today = SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(Date())
+        val dayItem = DayItem(today, "", isToday = true, fullDate = today)
+        onDateClick(dayItem)
     }
 
     override fun onCreateView(
@@ -92,6 +103,14 @@ class MainPage : Fragment() {
         recyclerViewWeek = view.findViewById(R.id.recyclerViewWeek)
         prevCycleLenText = view.findViewById(R.id.prevCycleLenDays)
         prevPeriodLenText = view.findViewById(R.id.prevPeriodLenDays)
+        imgStatusCycle = view.findViewById(R.id.ImgStatusCycle)
+        statusCycle = view.findViewById(R.id.StatusCycle)
+        imgStatusPeriod = view.findViewById(R.id.ImgStatusPeriod)
+        statusPeriod = view.findViewById(R.id.StatusPeriod)
+        currentCycleHis = view.findViewById(R.id.CurrentCycleHis)
+        currentPeriodHis = view.findViewById(R.id.CurrentPeriodHis)
+        perStartDate = view.findViewById(R.id.PerStartDate)
+        cycStartDate = view.findViewById(R.id.CycStartDate)
 
         // Observasi perubahan data
         observeUserData()
@@ -198,12 +217,78 @@ class MainPage : Fragment() {
                     cycleName.text = "$name's Cycle"
                     insightName.text = "$name's Insight"
 
+                    db.collection("users")
+                        .document(currentUserId)
+                        .collection("period")
+                        .orderBy("periodStart", com.google.firebase.firestore.Query.Direction.DESCENDING)
+                        .limit(2) // Ambil dua dokumen teratas
+                        .get()
+                        .addOnSuccessListener { previousQuerySnapshot ->
+                            if (previousQuerySnapshot != null && previousQuerySnapshot.documents.size > 1) {
+                                // Ambil dokumen kedua untuk period ID sebelumnya
+                                val previousPeriod = previousQuerySnapshot.documents[1]
+                                val previousPeriodStartDate = previousPeriod.getDate("periodStart")
+                                val periodLengthFromPrevious = previousPeriod.getLong("periodLength")?.toInt() ?: periodLength
+                                val cycleLengthFromPrevious = previousPeriod.getLong("cycleLength")?.toInt() ?: cycleLength
+
+                                // Log dan gunakan data dari period sebelumnya
+                                Log.d("MainPage", "Data dari period ID sebelumnya digunakan.")
+                                Log.d("MainPage", "Previous Period Start: $previousPeriodStartDate")
+                                Log.d("MainPage", "Cycle Length: $cycleLengthFromPrevious, Period Length: $periodLengthFromPrevious")
+
+                                prevCycleLenText.text = "$cycleLengthFromPrevious Days"
+                                prevPeriodLenText.text = "$periodLengthFromPrevious Days"
+
+                                // Atur status Cycle berdasarkan panjang siklus
+                                if (cycleLengthFromPrevious > 30 || cycleLengthFromPrevious < 20) {
+                                    imgStatusCycle.setImageResource(R.drawable.period_abnormal)
+                                    statusCycle.text = "Abnormal"
+                                } else {
+                                    imgStatusCycle.setImageResource(R.drawable.period_normal)
+                                    statusCycle.text = "Normal"
+                                }
+
+                                // Atur status Period berdasarkan panjang periode
+                                if (periodLengthFromPrevious > 8 || periodLengthFromPrevious < 3) {
+                                    imgStatusPeriod.setImageResource(R.drawable.period_abnormal)
+                                    statusPeriod.text = "Abnormal"
+                                } else {
+                                    imgStatusPeriod.setImageResource(R.drawable.period_normal)
+                                    statusPeriod.text = "Normal"
+                                }
+
+
+                            } else {
+                                // Jika tidak ada period ID, fallback ke user data
+                                prevCycleLenText.text = "$cycleLength Days"
+                                prevPeriodLenText.text = "$periodLength Days"
+
+                                // Status default untuk user-level data
+                                if (cycleLength > 30 || cycleLength < 20) {
+                                    imgStatusCycle.setImageResource(R.drawable.period_abnormal)
+                                    statusCycle.text = "Abnormal"
+                                } else {
+                                    imgStatusCycle.setImageResource(R.drawable.period_normal)
+                                    statusCycle.text = "Normal"
+                                }
+
+                                if (periodLength > 8 || periodLength < 3) {
+                                    imgStatusPeriod.setImageResource(R.drawable.period_abnormal)
+                                    statusPeriod.text = "Abnormal"
+                                } else {
+                                    imgStatusPeriod.setImageResource(R.drawable.period_normal)
+                                    statusPeriod.text = "Normal"
+                                }
+                                Log.d("MainPage", "Tidak ada period ID sebelumnya ditemukan.")
+                            }
+                        }
+
                     // Periksa apakah ada period aktif di koleksi `period`
                     db.collection("users")
                         .document(currentUserId)
                         .collection("period")
                         .orderBy("periodStart", com.google.firebase.firestore.Query.Direction.DESCENDING)
-                        .limit(1) // Ambil period terbaru
+                        .limit(1)
                         .get()
                         .addOnSuccessListener { querySnapshot ->
                             if (querySnapshot != null && querySnapshot.documents.isNotEmpty()) {
@@ -214,10 +299,15 @@ class MainPage : Fragment() {
                                     latestPeriod?.getLong("periodLength")?.toInt() ?: periodLength
                                 val cycleLengthFromPeriod =
                                     latestPeriod?.getLong("cycleLength")?.toInt() ?: cycleLength
+                                val formattedPeriodStartDate = periodStartDate?.let {
+                                    SimpleDateFormat("MMM dd", Locale.getDefault()).format(it)
+                                }
 
                                 // Set text berdasarkan period ID
-                                prevCycleLenText.text = "$cycleLengthFromPeriod Days"
-                                prevPeriodLenText.text = "$periodLengthFromPeriod Days"
+                                currentCycleHis.text = "Current Cycle: $cycleLengthFromPeriod Days"
+                                currentPeriodHis.text = "Last Period Length: $periodLengthFromPeriod Days"
+                                perStartDate.text = "Started $formattedPeriodStartDate"
+                                cycStartDate.text = "Started $formattedPeriodStartDate"
 
                                 Log.d("MainPage", "Menggunakan data dari period ID terbaru.")
                                 Log.d("MainPage", "Period Start: $periodStartDate")
@@ -230,9 +320,14 @@ class MainPage : Fragment() {
                                     periodStartDate ?: userStartDate // Gunakan `startDate` jika `periodStart` null
                                 )
                             } else {
+                                val formattedUserStartDate = userStartDate?.let {
+                                    SimpleDateFormat("MMM dd", Locale.getDefault()).format(it)
+                                }
                                 // Jika tidak ada period ID, fallback ke user data
-                                prevCycleLenText.text = "$cycleLength Days"
-                                prevPeriodLenText.text = "$periodLength Days"
+                                currentCycleHis.text = "Current Cycle: $cycleLength Days"
+                                currentPeriodHis.text = "Last Period Length: $periodLength Days"
+                                perStartDate.text = "Started $formattedUserStartDate"
+                                cycStartDate.text = "Started $formattedUserStartDate"
 
                                 Log.w("MainPage", "Tidak ada period ID ditemukan, menggunakan data pengguna.")
                                 if (userStartDate != null) {
@@ -257,6 +352,10 @@ class MainPage : Fragment() {
                     Log.e("MainPage", "Dokumen pengguna tidak ditemukan.")
                     prevCycleLenText.text = "-"
                     prevPeriodLenText.text = "-"
+                    imgStatusCycle.setImageResource(R.drawable.period_abnormal)
+                    statusCycle.text = "Abnormal"
+                    imgStatusPeriod.setImageResource(R.drawable.period_abnormal)
+                    statusPeriod.text = "Abnormal"
                 }
             }
             .addOnFailureListener { exception ->
@@ -332,6 +431,7 @@ class MainPage : Fragment() {
                 updateCalendarUI(listOf(), listOf()) // Tidak ada prediksi jika gagal
             }
         loadUserData()
+        loadPeriodData()
     }
 
     // Fungsi untuk memuat data default jika koleksi `period` kosong
@@ -460,12 +560,12 @@ class MainPage : Fragment() {
                                             .document().id
 
                                         val startPeriod = today.time
-                                        val periodDates = generateDatesBetween(startPeriod, periodLength)
+                                        val periodDatesL = generateDatesBetween(startPeriod, periodLength)
 
                                         val periodData = mapOf(
                                             "isStart" to true,
                                             "periodStart" to startPeriod,
-                                            "periodDates" to periodDates.map { it.time },
+                                            "periodDates" to periodDatesL.map { it.time },
                                             "periodLength" to periodLength,
                                             "cycleLength" to calculatedCycleLength
                                         )
@@ -479,17 +579,16 @@ class MainPage : Fragment() {
                                                 Log.d("Debug", "Period Baru Disimpan: $periodData")
 
                                                 val predictedDates = getPredictedPeriodDates(startPeriod, calculatedCycleLength, periodLength)
-                                                updateCalendarUI(periodDates, predictedDates)
+                                                updateCalendarUI(periodDatesL, predictedDates)
 
                                                 currentWeekOffset = 0
-                                                this.periodDates = periodDates
                                                 adapter.updateDays(
                                                     newDays = getWeeklyDates(weekOffset = currentWeekOffset),
-                                                    newStartPeriod = periodDates.firstOrNull(),
-                                                    newEndPeriod = periodDates.lastOrNull(),
+                                                    newStartPeriod = periodDatesL.firstOrNull(),
+                                                    newEndPeriod = periodDatesL.lastOrNull(),
                                                     isLoved = true,
                                                     predictedDates = predictedDates,
-                                                    periodDates = periodDates
+                                                    periodDates = periodDatesL
                                                 )
 
                                                 loadLoveStatus()
@@ -549,13 +648,13 @@ class MainPage : Fragment() {
                                         }
                                     } else {
                                         val periodDatesLong = document.get("periodDates") as? List<Long> ?: return@forEach
-                                        val periodDates = periodDatesLong.map { Date(it) }
+                                        val periodDatesUnL = periodDatesLong.map { Date(it) }
 
                                         // Pastikan today dalam bentuk Date
                                         val todayDate = Calendar.getInstance().time
 
                                         // Filter periodDates untuk hanya menyertakan tanggal yang lebih kecil dari hari ini
-                                        val updatedDates = periodDates.filter { it.before(todayDate) }
+                                        val updatedDates = periodDatesUnL.filter { it.before(todayDate) }
 
                                         // Hapus tanggal yang dihentikan (misalnya tanggal 1)
                                         val normalizedClickedDate = normalizeDate(todayDate)  // Misalnya, tanggal yang dihentikan adalah today
@@ -584,16 +683,16 @@ class MainPage : Fragment() {
                                                 cycleLength,
                                                 calculatedPeriodLength
                                             )
-                                            updateCalendarUI(periodDates, predictedDates)
+                                            updateCalendarUI(periodDatesUnL, predictedDates)
 
                                             currentWeekOffset = 0
                                             adapter.updateDays(
                                                 newDays = getWeeklyDates(weekOffset = currentWeekOffset),
-                                                newStartPeriod = periodDates.firstOrNull(),
-                                                newEndPeriod = periodDates.lastOrNull(),
+                                                newStartPeriod = updatedDatesWithoutUnlovedDate.firstOrNull(),
+                                                newEndPeriod = updatedDatesWithoutUnlovedDate.lastOrNull(),
                                                 isLoved = false,
                                                 predictedDates = predictedDates,
-                                                periodDates = periodDates
+                                                periodDates = updatedDatesWithoutUnlovedDate
                                             )
                                             loadLoveStatus()
 
@@ -818,7 +917,7 @@ class MainPage : Fragment() {
             }
             return
         }
-
+        loadLoveStatus()
         // Jika tidak ada kecocokan
         tvPeriodStatusText.text = "Not Started"
         tvPeriodText.text = "Period"
@@ -850,35 +949,6 @@ class MainPage : Fragment() {
             .addOnFailureListener { exception ->
                 Log.e("MainPage", "Failed to load period data: ${exception.message}")
             }
-    }
-
-
-
-    // Helper function to group dates into cycles
-    private fun groupDatesIntoCycles(dates: List<Date>): List<List<Date>> {
-        val cycles = mutableListOf<MutableList<Date>>()
-        if (dates.isEmpty()) return cycles
-
-        var currentCycle = mutableListOf<Date>()
-        currentCycle.add(dates[0])
-
-        for (i in 1 until dates.size) {
-            val previousDate = dates[i - 1]
-            val currentDate = dates[i]
-
-            // Check if the current date is contiguous with the previous date
-            val diffInDays = ((currentDate.time - previousDate.time) / (1000 * 60 * 60 * 24)).toInt()
-            if (diffInDays > 1) {
-                // Start a new cycle
-                cycles.add(currentCycle)
-                currentCycle = mutableListOf()
-            }
-            currentCycle.add(currentDate)
-        }
-        // Add the last cycle
-        cycles.add(currentCycle)
-
-        return cycles
     }
 
     private fun normalizeDate(date: Date): Date {
@@ -919,6 +989,7 @@ class MainPage : Fragment() {
         calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY)
         // Perbarui bulan dan tahun saat pertama kali RecyclerView dimuat
         updateMonthYear()
+        loadLoveStatus()
     }
 
     private fun getWeeklyDates(targetDate: Date? = null, weekOffset: Int = 0): List<DayItem> {
@@ -1028,24 +1099,4 @@ class MainPage : Fragment() {
             }.start()
     }
 
-
-//    private fun updatePeriodDates(periodLength: Int) {
-//        if (periodDates.isEmpty()) return
-//
-//        val startPeriod = periodDates.first()
-//
-//        // Generate dates langsung berdasarkan startPeriod dan periodLength
-//        val updatedPeriodDates = generateDatesBetween(startPeriod, periodLength)
-//        this.periodDates = updatedPeriodDates
-//
-//        // Update adapter dengan tanggal baru
-//        adapter.updateDays(
-//            newDays = getWeeklyDates(),
-//            newStartPeriod = updatedPeriodDates.firstOrNull(),
-//            newEndPeriod = updatedPeriodDates.lastOrNull(),
-//            isLoved = isLoved,
-//            predictedDates = predictedDates,
-//            periodDates = periodDates
-//        )
-//    }
 }

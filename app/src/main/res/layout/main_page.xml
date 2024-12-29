@@ -215,7 +215,6 @@
                     </LinearLayout>
 
                     <LinearLayout
-                        android:id="@+id/StatusCycle"
                         android:layout_alignParentEnd="true"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
@@ -224,14 +223,16 @@
                         android:orientation="horizontal">
 
                         <ImageView
+                            android:id="@+id/ImgStatusCycle"
                             android:layout_width="40dp"
                             android:layout_height="40dp"
                             android:src="@drawable/period_abnormal"/>
 
                         <TextView
+                            android:id="@+id/StatusCycle"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Abnormal"
+                            android:text=""
                             android:textStyle="bold"
                             android:textColor="@color/color4" />
 
@@ -280,7 +281,6 @@
                     </LinearLayout>
 
                     <LinearLayout
-                        android:id="@+id/StatusPeriod"
                         android:layout_alignParentEnd="true"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
@@ -288,14 +288,16 @@
                         android:orientation="horizontal">
 
                         <ImageView
+                            android:id="@+id/ImgStatusPeriod"
                             android:layout_width="40dp"
                             android:layout_height="40dp"
                             android:src="@drawable/period_normal"/>
 
                         <TextView
+                            android:id="@+id/StatusPeriod"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Normal"
+                            android:text=""
                             android:textStyle="bold"
                             android:textColor="@color/color4"
                             />
@@ -345,6 +347,7 @@
                         android:layout_marginRight="80dp">
 
                         <TextView
+                            android:id="@+id/CurrentCycleHis"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="Current Cycle: 29 Days"
@@ -353,6 +356,7 @@
                             android:paddingBottom="4dp"/>
 
                         <TextView
+                            android:id="@+id/CycStartDate"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="Started May 22"
@@ -394,6 +398,7 @@
                         android:layout_marginRight="80dp">
 
                         <TextView
+                            android:id="@+id/CurrentPeriodHis"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="Last Period Length: 5 Days"
@@ -402,6 +407,7 @@
                             android:paddingBottom="4dp"/>
 
                         <TextView
+                            android:id="@+id/PerStartDate"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="Started May 22"

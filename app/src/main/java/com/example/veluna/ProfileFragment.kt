@@ -80,13 +80,12 @@ class ProfileFragment : Fragment() {
 
         // Muat data pengguna dari Firestore (jika pertama kali dibuka)
         loadUserData()
-
+        calculateAverages()
         return view
     }
 
     override fun onResume() {
         super.onResume()
-        // Tidak perlu memuat ulang karena ViewModel sudah memegang data yang disinkronkan
     }
 
     private fun observeUserData() {
@@ -186,6 +185,53 @@ class ProfileFragment : Fragment() {
             }
     }
 
+    private fun calculateAverages() {
+        val currentUserId = userId
+        if (currentUserId.isNullOrEmpty()) {
+            Log.e("ProfileFragment", "User ID is null or empty.")
+            return
+        }
+
+        // Fetch semua period dari Firestore
+        db.collection("users").document(currentUserId).collection("period")
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                var totalCycleLength = 0
+                var totalPeriodLength = 0
+                var validPeriodCount = 0
+
+                querySnapshot.forEach { document ->
+                    val cycleLength = document.getLong("cycleLength")?.toInt()
+                    val periodLength = document.getLong("periodLength")?.toInt()
+
+                    if (cycleLength != null && periodLength != null) {
+                        totalCycleLength += cycleLength
+                        totalPeriodLength += periodLength
+                        validPeriodCount++
+                    }
+                }
+
+                if (validPeriodCount > 0) {
+                    val averageCycleLength = (totalCycleLength.toDouble() / validPeriodCount).toInt()
+                    val averagePeriodLength = (totalPeriodLength.toDouble() / validPeriodCount).toInt()
+
+                    Log.d("ProfileFragment", "Average Cycle Length: $averageCycleLength")
+                    Log.d("ProfileFragment", "Average Period Length: $averagePeriodLength")
+
+                    // Update UI dengan rata-rata sebagai integer
+                    view?.findViewById<TextView>(R.id.AvgCycle)?.text = "$averageCycleLength Days"
+                    view?.findViewById<TextView>(R.id.AvgPeriod)?.text = "$averagePeriodLength Days"
+                } else {
+                    Log.d("ProfileFragment", "Tidak ada data valid untuk menghitung rata-rata.")
+                    view?.findViewById<TextView>(R.id.AvgCycle)?.text = "- Days"
+                    view?.findViewById<TextView>(R.id.AvgPeriod)?.text = "- Days"
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e("ProfileFragment", "Gagal mengambil data period: ${e.message}")
+                Toast.makeText(requireContext(), "Gagal memuat rata-rata: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+    }
 
 
 
