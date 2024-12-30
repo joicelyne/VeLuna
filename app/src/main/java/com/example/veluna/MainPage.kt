@@ -58,7 +58,7 @@ class MainPage : Fragment() {
     private lateinit var currentPeriodHis: TextView
     private lateinit var perStartDate: TextView
     private lateinit var cycStartDate: TextView
-
+    var isPeriodIdFound = false
 
     // Calendar instance to track the current week
     private val calendar = Calendar.getInstance()
@@ -789,7 +789,7 @@ class MainPage : Fragment() {
                 periodData.add(Pair(periodId, datesForId.sorted()))
             }
         }
-
+        var isPeriodIdFound = false
         // Ambil startDate dari Firebase user
         val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return
         FirebaseFirestore.getInstance()
@@ -807,10 +807,15 @@ class MainPage : Fragment() {
                     val periodDatesLong = document.get("periodDates") as? List<Long> ?: return@forEach
                     val periodDates = periodDatesLong.map { normalizeDate(Date(it)) }
                     periodData.add(Pair(periodId, periodDates))
+                    isPeriodIdFound = true
                 }
 
                 // Lakukan pengecekan periodData
                 handlePeriodData(normalizedClickedDate, periodData, currentUserId)
+                if (!isPeriodIdFound) {
+                    // Jika tidak ditemukan di periodData, cek prediksi atau startDate
+                    handlePredictionOrStartDate(normalizedClickedDate, currentUserId)
+                }
             }
             .addOnFailureListener { e ->
                 Log.e("MainPage", "Error fetching period data: ${e.message}")
@@ -877,10 +882,10 @@ class MainPage : Fragment() {
                 // Tanggal menuju prediction date
                 val daysToPrediction = ((normalizedPredictedDates.first().time - normalizedClickedDate.time) /
                         (1000 * 60 * 60 * 24)).toInt()
-                tvPeriodStatusText.text = "Prediction in $daysToPrediction Days"
-                tvPeriodText.text = "Prediction"
-                tvPeriodStatusText.setTextColor(requireContext().getColor(R.color.white))
-                tvPeriodText.setTextColor(requireContext().getColor(R.color.white))
+                tvPeriodStatusText.text = "$daysToPrediction Days"
+                tvPeriodText.text = "Prediction in"
+                tvPeriodStatusText.setTextColor(requireContext().getColor(R.color.color3))
+                tvPeriodText.setTextColor(requireContext().getColor(R.color.color3))
                 btnLove.setImageResource(R.drawable.heartgif)
             } else {
                 // Setelah prediction date
@@ -906,7 +911,6 @@ class MainPage : Fragment() {
         periodData: List<Pair<String, List<Date>>>,
         currentUserId: String
     ) {
-        var foundInPeriod = false
 
         for ((periodId, periodDates) in periodData) {
             if (periodDates.contains(normalizedClickedDate)) {
@@ -917,14 +921,8 @@ class MainPage : Fragment() {
                 tvPeriodStatusText.setTextColor(requireContext().getColor(R.color.white))
                 tvPeriodText.setTextColor(requireContext().getColor(R.color.white))
                 btnLove.setImageResource(R.drawable.redheart)
-                foundInPeriod = true
                 break
             }
-        }
-
-        if (!foundInPeriod) {
-            // Jika tidak ditemukan di periodData, cek prediksi atau startDate
-            handlePredictionOrStartDate(normalizedClickedDate, currentUserId)
         }
     }
 
@@ -939,33 +937,35 @@ class MainPage : Fragment() {
                     val dateFormatFirebase = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
                     val startDate = dateFormatFirebase.parse(startDateString)?.let { normalizeDate(it) }
 
-                    if (startDate != null && normalizedClickedDate.before(startDate)) {
-                        // Tanggal sebelum startDate
-                        val daysToStartDate = ((startDate.time - normalizedClickedDate.time) / (1000 * 60 * 60 * 24)).toInt()
-                        tvPeriodStatusText.text = "Period in $daysToStartDate Days"
-                        tvPeriodText.text = "Prediction"
-                        tvPeriodStatusText.setTextColor(requireContext().getColor(R.color.color3))
-                        tvPeriodText.setTextColor(requireContext().getColor(R.color.color3))
-                        btnLove.setImageResource(R.drawable.heartgif)
-                    } else if (startDate != null && normalizedClickedDate.after(startDate)) {
-                        // Tanggal setelah startDate menuju prediction date
-                        if (predictedDates.isNotEmpty() && normalizedClickedDate.before(predictedDates.first())) {
-                            val daysToPrediction = ((predictedDates.first().time - normalizedClickedDate.time) /
-                                    (1000 * 60 * 60 * 24)).toInt()
-                            tvPeriodStatusText.text = "Prediction in $daysToPrediction Days"
+                    if (!isPeriodIdFound) {
+                        if (startDate != null && normalizedClickedDate.before(startDate)) {
+                            // Tanggal sebelum startDate
+                            val daysToStartDate = ((startDate.time - normalizedClickedDate.time) / (1000 * 60 * 60 * 24)).toInt()
+                            tvPeriodStatusText.text = "Period in $daysToStartDate Days"
                             tvPeriodText.text = "Prediction"
                             tvPeriodStatusText.setTextColor(requireContext().getColor(R.color.color3))
                             tvPeriodText.setTextColor(requireContext().getColor(R.color.color3))
                             btnLove.setImageResource(R.drawable.heartgif)
-                        } else if (predictedDates.isNotEmpty() && normalizedClickedDate.after(predictedDates.last())) {
-                            // Setelah prediction date
-                            tvPeriodStatusText.text = "Period Not Started"
-                            tvPeriodText.text = "Not Started"
-                            tvPeriodStatusText.setTextColor(requireContext().getColor(R.color.white))
-                            tvPeriodText.setTextColor(requireContext().getColor(R.color.white))
-                            btnLove.setImageResource(R.drawable.heartgif)
+                        } else if (startDate != null && normalizedClickedDate.after(startDate)) {
+                            // Tanggal setelah startDate menuju prediction date
+                            if (predictedDates.isNotEmpty() && normalizedClickedDate.before(predictedDates.first())) {
+                                val daysToPrediction = ((predictedDates.first().time - normalizedClickedDate.time) /
+                                        (1000 * 60 * 60 * 24)).toInt()
+                                tvPeriodStatusText.text = "Prediction in $daysToPrediction Days"
+                                tvPeriodText.text = "Prediction"
+                                tvPeriodStatusText.setTextColor(requireContext().getColor(R.color.color3))
+                                tvPeriodText.setTextColor(requireContext().getColor(R.color.color3))
+                                btnLove.setImageResource(R.drawable.heartgif)
+                            } else if (predictedDates.isNotEmpty() && normalizedClickedDate.after(predictedDates.last())) {
+                                // Setelah prediction date
+                                tvPeriodStatusText.text = "Period Not Started"
+                                tvPeriodText.text = "Not Started"
+                                tvPeriodStatusText.setTextColor(requireContext().getColor(R.color.white))
+                                tvPeriodText.setTextColor(requireContext().getColor(R.color.white))
+                                btnLove.setImageResource(R.drawable.heartgif)
+                            }
                         }
-                    }
+                        }
                 } else {
                     // Jika tidak ada startDate di Firebase
                     tvPeriodStatusText.text = "Start Date Not Set"
