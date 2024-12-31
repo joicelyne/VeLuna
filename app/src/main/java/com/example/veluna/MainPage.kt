@@ -67,6 +67,7 @@ class MainPage : Fragment() {
     private var periodDates: List<Date> = listOf()
     private var predictedDates: List<Date> = listOf()
     private val dateToPeriodIdMap = mutableMapOf<Date, String>()
+    private var currentReferenceDate: Date = Date() // Default ke hari ini
 
 
     // ViewModel untuk sinkronisasi data
@@ -77,6 +78,7 @@ class MainPage : Fragment() {
         (activity as MainActivity).showBottomNavigation()
         loadUserData()
         loadLoveStatus()
+
         val today = SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(Date())
         val dayItem = DayItem(today, "", isToday = true, fullDate = today)
         onDateClick(dayItem)
@@ -536,6 +538,7 @@ class MainPage : Fragment() {
                                 db.collection("users")
                                     .document(currentUserId)
                                     .collection("period")
+                                    .whereGreaterThanOrEqualTo("periodStart", Timestamp(0, 0))
                                     .orderBy("periodStart", Query.Direction.DESCENDING)
                                     .limit(1)
                                     .get()
@@ -556,12 +559,12 @@ class MainPage : Fragment() {
                                             .document().id
 
                                         val startPeriod = today.time
-                                        val periodDatesL = generateDatesBetween(startPeriod, periodLength)
+                                        val periodDates = generateDatesBetween(startPeriod, periodLength)
 
                                         val periodData = mapOf(
                                             "isStart" to true,
                                             "periodStart" to startPeriod,
-                                            "periodDates" to periodDatesL.map { it.time },
+                                            "periodDates" to periodDates.map { it.time },
                                             "periodLength" to periodLength,
                                             "cycleLength" to calculatedCycleLength
                                         )
@@ -575,16 +578,16 @@ class MainPage : Fragment() {
                                                 Log.d("Debug", "Period Baru Disimpan: $periodData")
 
                                                 val predictedDates = getPredictedPeriodDates(startPeriod, calculatedCycleLength, periodLength)
-                                                updateCalendarUI(periodDatesL, predictedDates)
-
-                                                currentWeekOffset = 0
+                                                updateCalendarUI(periodDates, predictedDates)
+                                                refreshPeriodData(currentUserId)
+                                                loadPeriodData()
                                                 adapter.updateDays(
-                                                    newDays = getWeeklyDates(weekOffset = currentWeekOffset),
-                                                    newStartPeriod = periodDatesL.firstOrNull(),
-                                                    newEndPeriod = periodDatesL.lastOrNull(),
+                                                    newDays = getWeeklyDates(),
+                                                    newStartPeriod = periodDates.firstOrNull(),
+                                                    newEndPeriod = periodDates.lastOrNull(),
                                                     isLoved = true,
                                                     predictedDates = predictedDates,
-                                                    periodDates = periodDatesL
+                                                    periodDates = periodDates
                                                 )
 
                                                 val today = SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(Date())
@@ -607,8 +610,7 @@ class MainPage : Fragment() {
                     db.collection("users")
                         .document(currentUserId)
                         .collection("period")
-                        .whereEqualTo("isStart", true)
-                        .get()
+                        .whereEqualTo("isStart", true).get()
                         .addOnSuccessListener { querySnapshot ->
                             querySnapshot.documents.forEach { document ->
                                 val periodStart = document.getTimestamp("periodStart")?.toDate()
@@ -630,16 +632,10 @@ class MainPage : Fragment() {
                                             )
                                         ).addOnSuccessListener {
                                             Log.d("Debug", "Period dihapus karena klik ulang pada hari yang sama")
-                                            currentWeekOffset = 0
-                                            periodDates = listOf()
-                                            adapter.updateDays(
-                                                newDays = getWeeklyDates(weekOffset = currentWeekOffset),
-                                                newStartPeriod = null,
-                                                newEndPeriod = null,
-                                                isLoved = false,
-                                                predictedDates = predictedDates,
-                                                periodDates = periodDates
-                                            )
+                                            refreshPeriodData(currentUserId)
+                                            loadPeriodData()
+                                            // Perbarui UI
+                                            this.isLoved = false
                                             btnLove.setImageResource(R.drawable.heartgif)
                                             tvPeriodStatusText.text = "Not Started"
                                             tvPeriodStatusText.setTextColor(resources.getColor(R.color.color4))
@@ -649,13 +645,13 @@ class MainPage : Fragment() {
                                         }
                                     } else {
                                         val periodDatesLong = document.get("periodDates") as? List<Long> ?: return@forEach
-                                        val periodDatesUnL = periodDatesLong.map { Date(it) }
+                                        val periodDates = periodDatesLong.map { Date(it) }
 
                                         // Pastikan today dalam bentuk Date
                                         val todayDate = Calendar.getInstance().time
 
                                         // Filter periodDates untuk hanya menyertakan tanggal yang lebih kecil dari hari ini
-                                        val updatedDates = periodDatesUnL.filter { it.before(todayDate) }
+                                        val updatedDates = periodDates.filter { it.before(todayDate) }
 
                                         // Hapus tanggal yang dihentikan (misalnya tanggal 1)
                                         val normalizedClickedDate = normalizeDate(todayDate)  // Misalnya, tanggal yang dihentikan adalah today
@@ -684,11 +680,10 @@ class MainPage : Fragment() {
                                                 cycleLength,
                                                 calculatedPeriodLength
                                             )
-                                            updateCalendarUI(periodDatesUnL, predictedDates)
-
-                                            currentWeekOffset = 0
+                                            updateCalendarUI(periodDates, predictedDates)
+                                            refreshPeriodData(currentUserId)
                                             adapter.updateDays(
-                                                newDays = getWeeklyDates(weekOffset = currentWeekOffset),
+                                                newDays = getWeeklyDates(),
                                                 newStartPeriod = updatedDatesWithoutUnlovedDate.firstOrNull(),
                                                 newEndPeriod = updatedDatesWithoutUnlovedDate.lastOrNull(),
                                                 isLoved = false,
@@ -699,9 +694,6 @@ class MainPage : Fragment() {
                                             Log.e("MainPage", "Gagal menghentikan periode berjalan: ${e.message}")
                                         }
                                     }
-                                    val today = SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(Date())
-                                    val dayItem = DayItem(today, "", isToday = true, fullDate = today)
-                                    onDateClick(dayItem)
                                 }
                             }
                         }
@@ -714,6 +706,38 @@ class MainPage : Fragment() {
                 Log.e("MainPage", "Gagal mengambil periodLength: ${exception.message}")
             }
     }
+
+    private fun refreshPeriodData(userId: String) {
+        db.collection("users")
+            .document(userId)
+            .collection("period")
+            .orderBy("periodStart", Query.Direction.DESCENDING)
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                val refreshedPeriodDates = mutableListOf<Date>()
+                querySnapshot.documents.forEach { document ->
+                    val periodDatesLong = document.get("periodDates") as? List<Long> ?: listOf()
+                    refreshedPeriodDates.addAll(periodDatesLong.map { Date(it) })
+                }
+
+                periodDates = refreshedPeriodDates.distinct()
+                Log.d("MainPage", "Period dates refreshed: $periodDates")
+
+                // Refresh RecyclerView dan tampilan
+                adapter.updateDays(
+                    newDays = getWeeklyDates(),
+                    newStartPeriod = periodDates.firstOrNull(),
+                    newEndPeriod = periodDates.lastOrNull(),
+                    isLoved = isLoved,
+                    predictedDates = predictedDates,
+                    periodDates = periodDates
+                )
+            }
+            .addOnFailureListener { e ->
+                Log.e("MainPage", "Failed to refresh period data: ${e.message}")
+            }
+    }
+
 
     private fun generateDatesBetween(startDate: Date, periodLength: Int = 5): List<Date> {
         val dates = mutableListOf<Date>()
@@ -729,18 +753,16 @@ class MainPage : Fragment() {
     }
 
     private fun updateMonthYear() {
-        // Gunakan currentWeekOffset untuk menghitung tanggal pertama minggu
         val calendarForWeek = Calendar.getInstance()
-        calendarForWeek.time = Date() // Mulai dari tanggal hari ini
-        calendarForWeek.add(Calendar.WEEK_OF_YEAR, currentWeekOffset) // Terapkan offset minggu
-        calendarForWeek.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY) // Set ke awal minggu
+        calendarForWeek.time = currentReferenceDate // Gunakan tanggal referensi
 
-        // Format bulan dan tahun
+        // Set ke awal minggu
+        calendarForWeek.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY)
+
         val dateFormat = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
         val monthYear = dateFormat.format(calendarForWeek.time)
         tvMonthYear.text = monthYear
     }
-
 
     private fun openLink(url: String) {
         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
@@ -774,6 +796,8 @@ class MainPage : Fragment() {
         val dateFormat = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
         val clickedDate = dateFormat.parse(dayItem.fullDate) ?: return
         val normalizedClickedDate = normalizeDate(clickedDate)
+
+        loadPeriodData()
 
         // Log debug untuk memantau klik
         Log.d("MainPage", "Clicked Date: $normalizedClickedDate")
@@ -897,13 +921,6 @@ class MainPage : Fragment() {
             }
             return
         }
-
-// Jika tidak ada kecocokan
-        tvPeriodStatusText.text = "Not Started"
-        tvPeriodText.text = "Period"
-        tvPeriodStatusText.setTextColor(requireContext().getColor(R.color.white))
-        tvPeriodText.setTextColor(requireContext().getColor(R.color.white))
-        btnLove.setImageResource(R.drawable.heartgif)
     }
 
     private fun handlePeriodData(
@@ -982,29 +999,43 @@ class MainPage : Fragment() {
 
 
     private fun loadPeriodData() {
-        val db = FirebaseFirestore.getInstance()
-        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
-
-        db.collection("users").document(userId).collection("period")
+        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        FirebaseFirestore.getInstance()
+            .collection("users")
+            .document(currentUserId)
+            .collection("period")
             .get()
             .addOnSuccessListener { querySnapshot ->
+                val newPeriodDates = mutableListOf<Date>()
+                val newDateToPeriodIdMap = mutableMapOf<Date, String>()
+
                 querySnapshot.forEach { document ->
                     val periodId = document.id
                     val periodDatesLong = document.get("periodDates") as? List<Long> ?: listOf()
 
-                    // Konversi Long ke Date dan simpan dalam map
+                    // Perbarui periodDates dan dateToPeriodIdMap
                     periodDatesLong.forEach { dateLong ->
                         val date = normalizeDate(Date(dateLong))
-                        dateToPeriodIdMap[date] = periodId
+                        newPeriodDates.add(date)
+                        newDateToPeriodIdMap[date] = periodId
                     }
                 }
 
-                Log.d("MainPage", "dateToPeriodIdMap: $dateToPeriodIdMap")
+                // Perbarui data global
+                periodDates = newPeriodDates
+                dateToPeriodIdMap.clear()
+                dateToPeriodIdMap.putAll(newDateToPeriodIdMap)
+
+                // Update UI setelah data diperbarui
+                updateCalendarUI(periodDates, predictedDates)
+
+                Log.d("MainPage", "Period data updated: $periodDates")
             }
-            .addOnFailureListener { exception ->
-                Log.e("MainPage", "Failed to load period data: ${exception.message}")
+            .addOnFailureListener { e ->
+                Log.e("MainPage", "Failed to load period data: ${e.message}")
             }
     }
+
 
     private fun normalizeDate(date: Date): Date {
         val calendar = Calendar.getInstance()
@@ -1047,17 +1078,15 @@ class MainPage : Fragment() {
         loadLoveStatus()
     }
 
-    private fun getWeeklyDates(targetDate: Date? = null, weekOffset: Int = 0): List<DayItem> {
+    private fun getWeeklyDates(targetDate: Date? = null): List<DayItem> {
         val calendar = Calendar.getInstance()
-        if (targetDate != null) calendar.time = targetDate
+        calendar.time = targetDate ?: currentReferenceDate // Gunakan targetDate atau tanggal referensi
 
-        // Tambahkan offset minggu sebelum reset ke hari Minggu
-        calendar.add(Calendar.WEEK_OF_YEAR, weekOffset)
+        // Set ke awal minggu (Minggu)
         calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY)
 
         val weekDates = mutableListOf<DayItem>()
-        val today = Calendar.getInstance() // Untuk menandai `isToday`
-
+        val today = Calendar.getInstance() // Untuk menandai tanggal hari ini
         val fullDateFormat = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
 
         for (i in 0 until 7) { // Generate 7 hari dalam seminggu
@@ -1074,11 +1103,11 @@ class MainPage : Fragment() {
                     fullDate = fullDate
                 )
             )
-            calendar.add(Calendar.DATE, 1)
+            calendar.add(Calendar.DATE, 1) // Tambah 1 hari
         }
+
         return weekDates
     }
-
 
     private fun setupGestureDetection() {
         gestureDetector = GestureDetectorCompat(requireContext(), object :
@@ -1117,14 +1146,20 @@ class MainPage : Fragment() {
             gestureDetector.onTouchEvent(event)
         }
     }
-    private var currentWeekOffset = 0
+
     private fun loadPreviousWeek() {
-        currentWeekOffset -= 1 // Mundur ke minggu sebelumnya
         recyclerViewWeek.animate().translationX(recyclerViewWeek.width.toFloat())
             .setDuration(300).withEndAction {
                 recyclerViewWeek.translationX = -recyclerViewWeek.width.toFloat()
+
+                // Perbarui tanggal referensi untuk minggu sebelumnya
+                val calendar = Calendar.getInstance()
+                calendar.time = currentReferenceDate
+                calendar.add(Calendar.DATE, -7) // Mundur 7 hari
+                currentReferenceDate = calendar.time // Simpan tanggal referensi baru
+
                 adapter.updateDays(
-                    newDays = getWeeklyDates(weekOffset = currentWeekOffset),
+                    newDays = getWeeklyDates(targetDate = currentReferenceDate),
                     newStartPeriod = periodDates.firstOrNull(),
                     newEndPeriod = periodDates.lastOrNull(),
                     isLoved = isLoved,
@@ -1132,17 +1167,23 @@ class MainPage : Fragment() {
                     periodDates = periodDates
                 )
                 recyclerViewWeek.animate().translationX(0f).setDuration(300).start()
-                updateMonthYear()
+                updateMonthYear() // Perbarui bulan dan tahun
             }.start()
     }
 
     private fun loadNextWeek() {
-        currentWeekOffset += 1 // Maju ke minggu berikutnya
         recyclerViewWeek.animate().translationX(-recyclerViewWeek.width.toFloat())
             .setDuration(300).withEndAction {
                 recyclerViewWeek.translationX = recyclerViewWeek.width.toFloat()
+
+                // Perbarui tanggal referensi untuk minggu berikutnya
+                val calendar = Calendar.getInstance()
+                calendar.time = currentReferenceDate
+                calendar.add(Calendar.DATE, 7) // Maju 7 hari
+                currentReferenceDate = calendar.time // Simpan tanggal referensi baru
+
                 adapter.updateDays(
-                    newDays = getWeeklyDates(weekOffset = currentWeekOffset),
+                    newDays = getWeeklyDates(targetDate = currentReferenceDate),
                     newStartPeriod = periodDates.firstOrNull(),
                     newEndPeriod = periodDates.lastOrNull(),
                     isLoved = isLoved,
@@ -1150,7 +1191,7 @@ class MainPage : Fragment() {
                     periodDates = periodDates
                 )
                 recyclerViewWeek.animate().translationX(0f).setDuration(300).start()
-                updateMonthYear()
+                updateMonthYear() // Perbarui bulan dan tahun
             }.start()
     }
 
